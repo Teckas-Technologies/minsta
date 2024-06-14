@@ -39,6 +39,7 @@ const Header = () => {
           <button onClick={handleSignIn}> Login</button>
         )}
         <button onClick={() => push("/leaderboard")}>Leaderboard</button>
+        <button onClick={() => push("/admin")}>Admin</button>
       </div>
     </div>
   );
@@ -64,12 +65,15 @@ const Header = () => {
                 <button onClick={handleSignIn}> Login</button>
               )}
               <button onClick={() => push("/leaderboard")}>Leaderboard</button>
+              <button onClick={() => push("/admin")}>Admin</button>
             </div>
           </div>
         );
       case "/leaderboard":
         return headerButtonsNotHome(() => push("/"));
       case "/camera":
+        return headerButtonsNotHome(() => push("/"));
+      case "/admin":
         return headerButtonsNotHome(() => push("/"));
       default:
         return headerButtonsNotHome(() => push("/"));
