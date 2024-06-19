@@ -69,8 +69,8 @@ const Header = () => {
               )}
               <button onClick={() => push("/leaderboard")}>Leaderboard</button>
               <button onClick={() => push("/admin")}>Admin</button>
-              <button className="bg-gray-500 h-8 w-8 rounded-md flex items-center justify-center">
-                <div className="h-3 w-3 bg-green-400 rounded-full"> </div>
+              <button className=" h-8 w-8 rounded-md flex items-center justify-center">
+                <div className="h-5 w-5 bg-green-400 rounded-full"> </div>
               </button>
             </div>
           </div>
