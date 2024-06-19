@@ -2,7 +2,7 @@
 import { useApp } from "@/providers/app";
 import { useMbWallet } from "@mintbase-js/react";
 import { usePathname, useRouter } from "next/navigation";
-import { ReactEventHandler } from "react";
+import { ReactEventHandler, useState } from "react";
 import InlineSVG from "react-inlinesvg";
 
 const Header = () => {
@@ -10,6 +10,8 @@ const Header = () => {
   const { isConnected, selector, connect } = useMbWallet();
   const { push } = useRouter();
   const { openModal } = useApp();
+  const[pop,setPop] = useState(false);
+  const[color,SetColor] = useState('green')
 
   const handleSignout = async () => {
     const wallet = await selector.wallet();
@@ -19,6 +21,23 @@ const Header = () => {
   const handleSignIn = async () => {
     return connect();
   };
+
+  const handlePopUp = ()=>{
+    setPop(true);
+  }
+
+  
+  const handleCloseMain = ()=>{
+    setPop(false);
+    SetColor('green')
+  }
+
+  const handleCloseTest = ()=>{
+    setPop(false);
+    SetColor('yellow')
+  }
+
+
 
   const headerButtonsNotHome = (onClick: ReactEventHandler) => (
     <div className="flex w-full justify-between px-4 lg:px-12 items-center">
@@ -63,15 +82,43 @@ const Header = () => {
               ) : null}
 
               {isConnected ? (
-                <button onClick={handleSignout}> Logout</button>
+                <button onClick={handleSignout} > Logout</button>
               ) : (
                 <button onClick={handleSignIn}> Login</button>
               )}
               <button onClick={() => push("/leaderboard")}>Leaderboard</button>
               <button onClick={() => push("/admin")}>Admin</button>
-              <button className=" h-8 w-8 rounded-md flex items-center justify-center">
-                <div className="h-5 w-5 bg-green-400 rounded-full"> </div>
-              </button>
+              <div className="relative inline-block">
+      <button
+        onClick={handlePopUp}
+        className="h-8 w-8 rounded-md flex items-center justify-center pointer"
+      >
+        <div className={`h-5 w-5 ${color=='green'?`bg-green-400`:`bg-yellow-400`} rounded-full`}></div>
+      </button>
+
+      {pop && (
+        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+          <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+            <button
+              onClick={handleCloseMain} 
+              className="block px-4  text-sm text-gray-700 w-full text-left"
+              role="menuitem"
+            >
+              <div className="h-5 w-5 bg-green-400 rounded-full inline-block mr-2"></div>
+             Mainnet
+            </button>
+            <button
+              onClick={handleCloseTest}
+              className="block px-4 py-2 text-sm text-gray-700 w-full text-left"
+              role="menuitem"
+            >
+              <div className="h-5 w-5 bg-yellow-400 rounded-full inline-block mr-2"></div>
+            Testnet
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
             </div>
           </div>
         );
