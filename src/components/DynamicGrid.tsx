@@ -46,6 +46,7 @@ export const DynamicGrid = ({
     <ul
       className={`grid ${cols} ${colsMd} ${colsLg} ${colsXl} ${colsXXl} ${colsXXXL} ${gapSizeMobile} md:${gapSize} ${margin} `}
     >
+   
       {children}
     </ul>
   );
