@@ -28,6 +28,8 @@ export const HomePage = () => {
     }
   };
 
+  
+
   return !totalLoading && !totalNfts ? (
     <main className="flex flex-col items-center justify-center h-screen">
       <p className="text-mainText">Nothing here yet 👀</p>
@@ -56,14 +58,17 @@ export const HomePage = () => {
                     <button type="submit" className="text-slate-800 absolute end-2.5 bottom-2.5 bg-slate-200 hover:bg-slate-50 focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-lg text-sm px-4 py-2">Search</button>
                 </div>
             </form>
-            <button className="flex items-center px-4 py-2 text-sm font-medium text-slate-800 bg-slate-200 rounded-lg focus:ring-4 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-300">
-                <span className="mr-2">Sort</span>
-                <span className="sort-symbol">▲</span>
-            </button>
-        </div>
+            <div className="relative inline-block text-left">
+    <div>
+        <select className="flex items-center px-4 py-2 text-sm font-medium text-slate-800 bg-slate-200 rounded-lg focus:ring-4 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-300">
+            <option >Old to new <span className="sort-symbol">▲</span></option>
+            <option >New to Old <span className="sort-symbol">▲</span></option>
+        </select>
     </div>
-
-
+    
+            </div>
+</div>
+</div>
       <DynamicGrid mdCols={2} nColsXl={4} nColsXXl={6}>
    
 
