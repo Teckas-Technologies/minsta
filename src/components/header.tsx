@@ -1,8 +1,8 @@
 "use client";
 import { useApp } from "@/providers/app";
 import { useMbWallet } from "@mintbase-js/react";
-import { usePathname, useRouter } from "next/navigation";
-import { ReactEventHandler, useState } from "react";
+import { usePathname, useRouter} from "next/navigation";
+import { ReactEventHandler, useState ,useEffect,useRef } from "react";
 import InlineSVG from "react-inlinesvg";
 
 const Header = () => {
@@ -11,8 +11,42 @@ const Header = () => {
   const { push } = useRouter();
   const { openModal } = useApp();
   const[pop,setPop] = useState(false);
-  const[color,SetColor] = useState('green')
+  const[color,SetColor] = useState('');
+  const[net,SetNet] = useState('');
+  const popRef = useRef<HTMLDivElement | null>(null);
+  const handleNet = ()=>{
+    if(process.env.NEXT_PUBLIC_NETWORK=='mainnet'){
+      console.log(process.env.NEXT_PUBLIC_NETWORK);
+      SetColor("green");
+      SetNet("mainnet");
+    }else{
+      SetColor("yellow");
+      SetNet("testnet");
+    }
+  }
 
+ 
+
+  useEffect(() => {
+    handleNet();
+  }, []);
+
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popRef.current && !popRef.current.contains(event.target as Node)) {
+        setPop(false);
+      }
+    };
+  
+    document.addEventListener("mousedown", handleClickOutside);
+  
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+ 
   const handleSignout = async () => {
     const wallet = await selector.wallet();
     return wallet.signOut();
@@ -25,8 +59,6 @@ const Header = () => {
   const handlePopUp = ()=>{
     setPop(true);
   }
-
-  
   const handleCloseMain = ()=>{
     setPop(false);
     SetColor('green')
@@ -93,21 +125,22 @@ const Header = () => {
         onClick={handlePopUp}
         className="h-8 w-8 rounded-md flex items-center justify-center pointer"
       >
-        <div className={`h-5 w-5 ${color=='green'?`bg-green-400`:`bg-yellow-400`} rounded-full`}></div>
+        <div className={`h-5 w-5 ${color=='green'?`bg-green-600`:`bg-yellow-400`} rounded-full`}></div>
       </button>
 
       {pop && (
-        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+        <div ref={popRef} className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
           <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-            <button
-              onClick={handleCloseMain} 
-              className="block px-4  text-sm text-gray-700 w-full text-left"
+         <a href={net==`mainnet`?undefined:`https://www.mintbase.xyz/`}>  <button
+              onClick={handleCloseMain}
+              className="block px-4 py-2 text-sm text-gray-700 w-full text-left"
               role="menuitem"
             >
-              <div className="h-5 w-5 bg-green-400 rounded-full inline-block mr-2"></div>
-             Mainnet
+              <div className="h-5 w-5 bg-green-600 rounded-full inline-block mr-2"></div>
+            Mainnet
             </button>
-            <button
+            </a> 
+          <a href={net==`testnet`?undefined:`https://testnet.mintbase.xyz/`}>  <button
               onClick={handleCloseTest}
               className="block px-4 py-2 text-sm text-gray-700 w-full text-left"
               role="menuitem"
@@ -115,6 +148,7 @@ const Header = () => {
               <div className="h-5 w-5 bg-yellow-400 rounded-full inline-block mr-2"></div>
             Testnet
             </button>
+            </a>
           </div>
         </div>
       )}
