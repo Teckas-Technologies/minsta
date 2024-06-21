@@ -21,6 +21,10 @@ export default function CameraPage() {
     return <Mint currentPhoto={picture} backStep={tryAgain} />;
   }
 
+  const onGalleryClick = async () => {
+    console.log("Gallery Clicked!!")
+  }
+
   return (
     <>
       <main className="h-camera overflow-hidden	 w-screen flex items-center justify-center">
@@ -63,7 +67,7 @@ export default function CameraPage() {
       </main>
       {!picture && (
         <footer className="fixed bottom-0 left-0 flex w-full items-end justify-center bg-primary h-16">
-          <FooterButton onClick={capture} />
+          <FooterButton onClick={capture} onGalleryClick={onGalleryClick} />
         </footer>
       )}
     </>
