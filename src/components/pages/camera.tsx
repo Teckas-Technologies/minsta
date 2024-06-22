@@ -67,7 +67,7 @@ export default function CameraPage() {
       </main>
       {!picture && (
         <footer className="fixed bottom-0 left-0 flex w-full items-end justify-center bg-primary h-16">
-          <FooterButton onClick={capture} onGalleryClick={onGalleryClick} />
+          <FooterButton onClick={capture} />
         </footer>
       )}
     </>

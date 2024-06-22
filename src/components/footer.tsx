@@ -5,12 +5,23 @@ import { useApp } from "@/providers/app";
 import { useMbWallet } from "@mintbase-js/react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { ReactEventHandler } from "react";
+import { ReactEventHandler, useRef, useState } from "react";
 import InlineSVG from "react-inlinesvg";
 
-export const FooterButton = ({ onClick, onGalleryClick }: { onClick: ReactEventHandler, onGalleryClick: any }) => (
+export const FooterButton = ({ onClick }: { onClick: ReactEventHandler }) => {
+
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const fileInputRef = useRef<any>(null);
+
+  const handleFileUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  return (
   <>
-    <div className="footer-actions w-full flex gap-2 justify-center relative">
+    <div className="footer-actions w-full flex gap-2 justify-center">
         <button
           className="rounded-full h-24 w-24 bg-primary -top-24 left-12 flex items-center justify-center"
           onClick={onClick}
@@ -23,7 +34,7 @@ export const FooterButton = ({ onClick, onGalleryClick }: { onClick: ReactEventH
           </div>
         </button>
         <button className="rounded-full h-24 w-24 bg-primary -top-24 right-12 flex items-center justify-center"
-          onClick={()=>onGalleryClick()}
+          onClick={()=>setGalleryOpen(!galleryOpen)}
         >
           <div className="rounded-full h-20 w-20 gradientButton flex items-center justify-center">
             <InlineSVG
@@ -33,9 +44,32 @@ export const FooterButton = ({ onClick, onGalleryClick }: { onClick: ReactEventH
           </div>
         </button>
     </div>
+    {galleryOpen &&
+      <div className="gallery-model-page">
+        <div className="gallery-model">
+          <div className="file-upload" onClick={handleFileUploadClick}>
+            <InlineSVG
+              src="/images/cloud_upload.svg"
+              className="icon fill-current text-camera"
+              color="#000"
+            />
+            <p className="allow">* Allows only png, jpg, jpeg</p>
+          </div>
+          <div className="gallery-upload-btns">
+            <button className="btn btn-cancel" onClick={()=> setGalleryOpen(!galleryOpen)}>Cancel</button>
+            <button className="btn btn-upload">Upload</button>
+          </div>
+        </div>
+        <div className="file-upload-input hidden">
+          <form action="/">
+            <input type="file" ref={fileInputRef} />
+          </form>
+        </div>
+      </div>
+    }
   </>
-  
-);
+  )
+};
 
 const Footer = () => {
   const pathname = usePathname();
