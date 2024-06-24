@@ -1,5 +1,6 @@
 import { useApp } from "@/providers/app";
 import { Spinner } from "./Spinner";
+import Image from "next/image";
 
 export function Mint({
   backStep,
@@ -22,7 +23,7 @@ export function Mint({
         </>
       ) : (
         <div className="h-full w-64 md:h-96 md:w-96 flex flex-col gap-4">
-          <img src={currentPhoto} />
+          <Image src={currentPhoto} alt="image"/>
 
           <div className="flex gap-4 w-full">
             <button
