@@ -17,6 +17,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+      </head>
       <body
         className={`${inter.className} flex min-h-screen flex-col items-center justify-between overflow-x-hidden`}
       >
