@@ -5,6 +5,7 @@ import { usePathname, useRouter} from "next/navigation";
 import { ReactEventHandler, useState ,useEffect,useRef } from "react";
 import InlineSVG from "react-inlinesvg";
 import '../app/style.css'
+import { AdminSideMenu } from "./AdminSideMenu";
 
 const Header = () => {
   const pathname = usePathname();
@@ -15,6 +16,7 @@ const Header = () => {
   const[color,SetColor] = useState('');
   const[net,SetNet] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [adminPage, setAdminPage] = useState("Leaderboard");
   const popRef = useRef<HTMLDivElement | null>(null);
   const handleNet = ()=>{
     if(process.env.NEXT_PUBLIC_NETWORK=='mainnet'){
@@ -266,6 +268,8 @@ const Header = () => {
               </li>
               
             ) : null}
+
+            {/* {pathname === "/admin" ? <AdminSideMenu setAdminPage={setAdminPage}/> : "User"} */}
 
             <li className="side-menu" onClick={() => push("/leaderboard")}>
               <h4>Leaderboard</h4> 
