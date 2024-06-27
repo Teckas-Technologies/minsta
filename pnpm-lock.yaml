@@ -74,6 +74,9 @@ importers:
       react:
         specifier: 18.2.0
         version: 18.2.0
+      react-collapse:
+        specifier: ^5.1.1
+        version: 5.1.1(react@18.2.0)
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
@@ -102,6 +105,9 @@ importers:
       '@types/lodash':
         specifier: ^4.14.197
         version: 4.14.197
+      '@types/react-collapse':
+        specifier: ^5.0.4
+        version: 5.0.4
 
 packages:
 
@@ -521,6 +527,9 @@ packages:
 
   '@types/prop-types@15.7.5':
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
+
+  '@types/react-collapse@5.0.4':
+    resolution: {integrity: sha512-tM5cVB6skGLneNYnRK2E3R56VOHguSeJQHslGPTIMC58ytL3oelT8L/l1onkwHGn5vSEs2BEq2Olzrur+YdliA==}
 
   '@types/react-dom@18.2.7':
     resolution: {integrity: sha512-GRaAEriuT4zp9N4p1i8BDBYmEyfo+xQ3yHjJU4eiK5NDa1RmUZG+unZABUTK4/Ox/M+GaHwb6Ow8rUITrtjszA==}
@@ -1885,6 +1894,11 @@ packages:
   quick-format-unescaped@4.0.4:
     resolution: {integrity: sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg==}
 
+  react-collapse@5.1.1:
+    resolution: {integrity: sha512-k6cd7csF1o9LBhQ4AGBIdxB60SUEUMQDAnL2z1YvYNr9KoKr+nDkhN6FK7uGaBd/rYrYfrMpzpmJEIeHRYogBw==}
+    peerDependencies:
+      react: '>=16.3.0'
+
   react-dom@18.2.0:
     resolution: {integrity: sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==}
     peerDependencies:
@@ -2981,6 +2995,10 @@ snapshots:
   '@types/node@20.4.9': {}
 
   '@types/prop-types@15.7.5': {}
+
+  '@types/react-collapse@5.0.4':
+    dependencies:
+      '@types/react': 18.2.20
 
   '@types/react-dom@18.2.7':
     dependencies:
@@ -4651,6 +4669,10 @@ snapshots:
   queue-microtask@1.2.3: {}
 
   quick-format-unescaped@4.0.4: {}
+
+  react-collapse@5.1.1(react@18.2.0):
+    dependencies:
+      react: 18.2.0
 
   react-dom@18.2.0(react@18.2.0):
     dependencies:
