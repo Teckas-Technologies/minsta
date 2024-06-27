@@ -13,7 +13,7 @@ import useMintImage from "@/utils/useMint";
 export const FooterButton = ({ onClick }: { onClick: ReactEventHandler }) => {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const fileInputRef = useRef<any>(null);
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
 
   const handleFileUploadClick = () => {
     if (fileInputRef.current) {
@@ -23,11 +23,11 @@ export const FooterButton = ({ onClick }: { onClick: ReactEventHandler }) => {
 
   const {mintGif, loading, error} = useMintImage();
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        console.log("File Type: ",file.type);
-        setFile(file);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+      console.log("File Type: ",file.type);
+      setFile(file);
     } else {
         alert("Only png, jpg, and jpeg files are allowed.");
     }
