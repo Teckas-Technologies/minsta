@@ -6,17 +6,18 @@ import { ReactEventHandler, useState ,useEffect,useRef } from "react";
 import InlineSVG from "react-inlinesvg";
 import '../app/style.css'
 import { AdminSideMenu } from "./AdminSideMenu";
+import { constants } from "@/constants";
 
 const Header = () => {
   const pathname = usePathname();
-  const { isConnected, selector, connect } = useMbWallet();
+  const { activeAccountId, isConnected, selector, connect } = useMbWallet();
   const { push } = useRouter();
   const { openModal } = useApp();
   const[pop,setPop] = useState(false);
   const[color,SetColor] = useState('');
   const[net,SetNet] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [adminPage, setAdminPage] = useState("Leaderboard");
+  const [isAdminModal, setIsAdminModal] = useState(false);
   const popRef = useRef<HTMLDivElement | null>(null);
   const handleNet = ()=>{
     if(process.env.NEXT_PUBLIC_NETWORK=='mainnet'){
@@ -28,6 +29,10 @@ const Header = () => {
       SetNet("testnet");
     }
   }
+
+  useEffect(()=>{
+    setIsOpen(false)
+  },[pathname])
 
  
 
@@ -74,6 +79,17 @@ const Header = () => {
   }
 
 
+  const handleAdminCheck = () => {
+    if(activeAccountId === constants.adminId) {
+      setIsAdminModal(false);
+      push("/admin")
+    } else {
+      setIsAdminModal(true);
+      console.log("Not a admin")
+    }
+  }
+
+
 
   const headerButtonsNotHome = (onClick: ReactEventHandler) => (
     <div className="minsta-header flex w-full justify-between px-4 lg:px-12 items-center">
@@ -101,7 +117,7 @@ const Header = () => {
           <button onClick={() => push("/leaderboard")}>Leaderboard</button>
         </div>
         <div className="menu">
-          <button onClick={() => push("/admin")}>Admin</button>
+          <button onClick={handleAdminCheck}>Admin</button>
         </div>
 
         <button
@@ -147,6 +163,7 @@ const Header = () => {
             </div>
           </div>
         )}
+
         </div>
 
       </div>
@@ -182,7 +199,7 @@ const Header = () => {
                 <button onClick={() => push("/leaderboard")}>Leaderboard</button>
               </div>
               <div className="menu">
-                <button onClick={() => push("/admin")}>Admin</button>
+                <button onClick={handleAdminCheck}>Admin</button>
               </div>
               <button
                   onClick={handlePopUp}
@@ -242,7 +259,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed left-0 top-0 flex w-full justify-center h-12 bg-primary text-headerText">
+      <header className="header fixed left-0 top-0 flex w-full justify-center h-12 bg-primary text-headerText">
         {renderHeaderButtons()}
       </header>
       <div className={isOpen ? "side-bar-open" : "side-bar-close"}>
@@ -279,7 +296,7 @@ const Header = () => {
                   style={{color: "#ff3572"}}
               />
             </li>
-            <li className="side-menu" onClick={() => push("/admin")}>
+            <li className="side-menu" onClick={ handleAdminCheck}>
               <h4>Admin</h4> 
               <InlineSVG
                 src="/images/arrow_right.svg"
@@ -289,6 +306,14 @@ const Header = () => {
             </li>
         </ul>
       </div>
+      {isAdminModal && 
+            <div className="admin-hide-modal-page">
+              <div className="admin-hide-modal">
+                <h2>Only Admins can authorise this page!</h2>
+                <button className="btn ok-btn" onClick={()=>setIsAdminModal(false)}>Ok</button>
+              </div>
+            </div>
+      }
       </div>
     </>
   );

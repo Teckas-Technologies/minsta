@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AdminSideMenu } from '../AdminSideMenu';
 import Leaderboard from '@/app/leaderboard/page';
 import '../../app/style.css'
 import { AdminLeaderBoard } from '../AdminLeaderBoard';
 import { AdminShareSettings } from '../AdminShareSettings';
 import { AdminGiveawayDetails } from '../AdminGiveawayDetails';
+import { AdminMobileMenu } from '../AdminMobileMenu';
+import InlineSVG from 'react-inlinesvg';
 
 export const AdminPage = () => {
   const [leaderboardCriteria, setLeaderboardCriteria] = useState('');
   const [shareInfo, setShareInfo] = useState('');
   const [giveawayDetails, setGiveawayDetails] = useState('');
   const [adminPage, setAdminPage] = useState("Leaderboard");
-  const [adminMobileNav, setAdminMobileNav] = useState(true)
+  const [adminMobileNav, setAdminMobileNav] = useState(false)
+
+  useEffect(()=> {
+    setAdminMobileNav(false)
+  }, [adminPage])
 
   const handleSave = async () => {
     // Implement save logic, possibly sending data to a backend server
@@ -29,16 +35,17 @@ export const AdminPage = () => {
             <div className='md:hidden block'>
               <div className="mobile-nav-div relative">
                 <div className="admin-mobile-button" onClick={()=>setAdminMobileNav(!adminMobileNav)}>
-                  <p className='text-xl font-bold'>=</p>
+                  <p className='text-xl font-bold'>
+                    <InlineSVG
+                            src="/images/menu.svg"
+                            className="fill-current h-12"
+                            color="#222f3e"
+                            /></p>
                 </div>
               </div>
               {adminMobileNav && 
               <div className="mobile-nav-modal absolute">
-                <ul>
-                  <li>Leaderboard</li>
-                  <li>Share Settings</li>
-                  <li>Giveaway Details</li>
-                </ul>
+                <AdminMobileMenu setAdminPage={setAdminPage} />
               </div>}
             </div>
             {adminPage === "Leaderboard" ? <AdminLeaderBoard /> :

@@ -23,7 +23,7 @@ export function Mint({
         </>
       ) : (
         <div className="h-full w-64 md:h-96 md:w-96 flex flex-col gap-4">
-          <Image src={currentPhoto} alt="image"/>
+          <Image src={currentPhoto} alt="image" width={468} height={468}/>
 
           <div className="flex gap-4 w-full">
             <button

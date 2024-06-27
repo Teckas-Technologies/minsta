@@ -19,15 +19,16 @@ export const MetaPage = ({ meta, slug }: any) => {
       transition={{ type: "linear" }}
       className="flex wrap flex-col h-full w-5/6 mb-[30px] pt-20 md:w-[468px] m-auto"
     >
-      <div className="md:w-[468px] md:h-[468px] relative">
+      <div className="image-holder md:w-[468px] md:h-[468px] relative p-2 rounded-md">
         <Image
           alt={meta?.data?.nft_metadata?.[0]?.title}
           src={finalUrl}
           width="468"
           height="468"
+          className="rounded-md image"
         />
         <button
-          className="absolute top-3 right-3 bg-black text-white rounded p-1 text-xs px-2 py-1.5"
+          className="absolute top-4 right-4 bg-sky-500 text-white rounded p-1 text-xs px-2 py-2"
           onClick={(e) => {
             e.preventDefault();
             window.open(
@@ -40,7 +41,51 @@ export const MetaPage = ({ meta, slug }: any) => {
             );
           }}
         >
-          Share
+          <InlineSVG
+            src="/images/share.svg"
+            className="fill-current"
+            color="#fff"
+            />
+        </button>
+        <button
+          className="absolute top-4 left-4 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"
+          onClick={(e) => {
+            e.preventDefault();
+            window.open(
+              `https://twitter.com/intent/tweet?url=%0aCheck%20out%20mine%3A%20${
+                window.location.origin
+              }/meta/${decodeURIComponent(slug)}%2F&via=mintbase&text=${
+                constants.twitterText
+              }`,
+              "_blank"
+            );
+          }}
+        >
+          <InlineSVG
+            src="/images/trash.svg"
+            className="fill-current"
+            color="#fff"
+            />
+        </button>
+        <button
+          className="absolute top-4 left-14 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
+          onClick={(e) => {
+            e.preventDefault();
+            window.open(
+              `https://twitter.com/intent/tweet?url=%0aCheck%20out%20mine%3A%20${
+                window.location.origin
+              }/meta/${decodeURIComponent(slug)}%2F&via=mintbase&text=${
+                constants.twitterText
+              }`,
+              "_blank"
+            );
+          }}
+        >
+          <InlineSVG
+            src="/images/eye_hide.svg"
+            className="fill-current"
+            color="#fff"
+            />
         </button>
       </div>
       <h2 className="font-semibold	py-5 leading-7 text-mainText text-[24px]">

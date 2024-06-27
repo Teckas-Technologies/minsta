@@ -1,30 +1,19 @@
 import React, { useState } from 'react';
 import "../app/style.css"
+import { useLeaderBoardData } from '@/hooks/useLeaderboard';
 
-const leaders = [
-    { name: "User 1", count: "102" },
-    { name: "User 2", count: "56" },
-    { name: "User 3", count: "78" },
-    { name: "User 4", count: "45" },
-    { name: "User 5", count: "89" },
-    { name: "User 6", count: "23" },
-    { name: "User 7", count: "34" },
-    { name: "User 8", count: "90" },
-    { name: "User 9", count: "67" },
-    { name: "User 10", count: "12" },
-    { name: "User 11", count: "47" },
-    { name: "User 12", count: "56" },
-    { name: "User 13", count: "78" },
-    { name: "User 14", count: "34" },
-    { name: "User 15", count: "56" }
-];
+interface Leaderboard {
+    account: string;
+    count: number;
+}
 
 
 export const AdminLeaderBoard = () => {
     const [showModal, setShowModal] = useState(false);
     const [modalAction, setModalAction] = useState<string>("");
     const [selectedLeaders, setSelectedLeaders] = useState<any>([]);
-    const [leaderList, setLeaderList] = useState(leaders);
+    const [leaderList, setLeaderList] = useState<Leaderboard[]>([]);
+    const { leaderboard, activeAccountId, texts} = useLeaderBoardData();
 
     const handleSelectLeader = (leader: any) => {
         if (selectedLeaders.includes(leader)) {
@@ -44,9 +33,10 @@ export const AdminLeaderBoard = () => {
 
     const handleDelete = () => {
         if (selectedLeaders.length > 0) {
-            setLeaderList(leaderList.filter(leader => !selectedLeaders.includes(leader)));
+            setLeaderList(leaderboard.filter(leader => !selectedLeaders.includes(leader)));
             setSelectedLeaders([]);
             setShowModal(false);
+            console.log("Users deleted")
         }
     }
 
@@ -63,19 +53,21 @@ export const AdminLeaderBoard = () => {
                 </div>
                 <div className="admin-leaderboard">
                     <form action="/">
-                        {leaderList.map((leader, i) => (
-                            <div className="leader flex gap-3 mt-2 items-center" key={i}>
+                        {leaderboard.map((leader, i) => (
+                            <div className="leader w-full flex gap-3 mt-2 items-center" key={i}>
                                 <div className="select-leader">
                                     <input 
                                         type="checkbox" 
                                         name="leader" 
-                                        value={leader.name} 
+                                        value={leader.account} 
                                         checked={selectedLeaders.includes(leader)}
                                         onChange={() => handleSelectLeader(leader)}
                                     />
                                 </div>
-                                <div className="leaderboard-account cursor-pointer w-full flex justify-between items-center" onClick={() => handleSelectLeader(leader)}>
-                                    <h3>{leader.name}</h3>
+                                <div className="leaderboard-account cursor-pointer flex justify-between items-center" onClick={() => handleSelectLeader(leader)}>
+                                    <div className="account-name">
+                                        <p className=" truncate">{leader.account}</p>
+                                    </div>
                                     <div className="account-right flex items-center">
                                         <div className="credit-icon">
                                             <span role="img" aria-label="fire" className="mr-2">
@@ -92,7 +84,7 @@ export const AdminLeaderBoard = () => {
                     </form>
                 </div>
                 <div className="admin-leaderboard-footer flex justify-end">
-                    <div className="leaderboard-actions flex gap-5">
+                    <div className="leaderboard-actions flex gap-5 mr-3">
                         <button 
                             className="reset-btn btn" 
                             onClick={() => openModal('reset')} 

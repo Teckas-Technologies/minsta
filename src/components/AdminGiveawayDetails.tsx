@@ -28,10 +28,9 @@ export const AdminGiveawayDetails = () => {
                 </div>
             </div>
             <div className="admin-leaderboard-footer flex justify-end">
-                    <div className="leaderboard-actions flex gap-5">
+                    <div className="leaderboard-actions flex gap-5 mr-3">
                         <button 
                             className="cancel-btn btn" 
-                            
                         >
                             Cancel
                         </button>
