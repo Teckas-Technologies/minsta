@@ -50,17 +50,17 @@ export const HomePage = () => {
                   <label htmlFor="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
                   <div className="relative">
                       <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                           </svg>
                       </div>
-                      <input type="search" id="default-search" className="block w-full p-2 ps-10 border border-gray-300 rounded-lg" placeholder="Search..." required />
-                      <button type="submit" className="text-slate-800 absolute end-2.5 bottom-0.5 bg-slate-200 hover:bg-slate-50 focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-lg text-sm px-4 py-2">Search</button>
+                      <input type="search" id="default-search" className="block w-full p-2 ps-10 border border-gray-300 rounded-lg outline-none border-sky-500" placeholder="Search..." required />
+                      <button type="submit" className="text-white absolute end-2.5 bottom-0.5 bg-sky-400 hover:bg-sky-200 hover:text-black focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-lg text-sm px-4 py-2">Search</button>
                   </div>
               </form>
               <div className="relative inline-block text-left">
                 <div>
-                  <select className="select-option flex items-center px-4 py-2 text-sm font-medium text-slate-800 bg-slate-200 rounded-lg focus:ring-4 hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-300 pr-2">
+                  <select className="select-option flex items-center px-4 py-2 text-sm font-medium text-slate-800 bg-white rounded-lg focus:ring-1 hover:border-sky-200 border-sky-200 focus:border-sky-200 outline-none focus:outline-none focus:ring-1 focus:ring-sky-300 pr-2">
                       <option className="option">Old to new </option>
                       <option className="option">New to Old </option>
                   </select>

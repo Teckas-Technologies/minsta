@@ -7,8 +7,7 @@ import { useLeaderBoardData } from "@/hooks/useLeaderboard";
 import Link from "next/link";
 
 export const LeaderboardPage = () => {
-  const { openModal, leaderboard, activeAccountId, texts } =
-    useLeaderBoardData();
+  const { openModal, leaderboard, activeAccountId, texts } = useLeaderBoardData();
 
   const nfts: any = [];
   leaderboard?.forEach(({ count }) => {
