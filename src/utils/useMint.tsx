@@ -183,7 +183,47 @@ const useMintImage = () => {
     }
   };
 
-  return { mintImage, loading, error };
+  const mintGif = async (gif: File) => {
+    if (!activeAccountId) {
+      setError("Active account ID is not set.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const wallet = await getWallet();
+      const photo = await fileToBase64(gif);
+      const photoFile = convertBase64ToFile(photo);
+      const replicatePhoto = await reduceImageSize(photo, 10); //10MB limit replicate
+      const titleAndDescription = await getTitleAndDescription(replicatePhoto);
+      const refObject = {
+        title: titleAndDescription.title,
+        description: titleAndDescription.description,
+        media: photoFile,
+      };
+      const uploadedData = await uploadReferenceObject(refObject);
+      const metadata = { reference: uploadedData?.id };
+      await performTransaction(wallet, metadata);
+    } catch (error: any) {
+      setError(
+        error?.message || "An error occurred during the minting process."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);  // Cast to string as `result` can be `string | ArrayBuffer`.
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  return { mintImage,mintGif, loading, error };
 };
 
 export default useMintImage;

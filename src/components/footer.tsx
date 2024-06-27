@@ -1,23 +1,49 @@
 "use client";
 
+import { Mint } from "@/components/Mint";
 import { constants } from "@/constants";
-import { useApp } from "@/providers/app";
 import { useMbWallet } from "@mintbase-js/react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { ReactEventHandler, useRef, useState } from "react";
 import InlineSVG from "react-inlinesvg";
+import { useApp } from "@/providers/app";
+import useMintImage from "@/utils/useMint";
 
 export const FooterButton = ({ onClick }: { onClick: ReactEventHandler }) => {
-
   const [galleryOpen, setGalleryOpen] = useState(false);
   const fileInputRef = useRef<any>(null);
+  const [file, setFile] = useState(null);
 
   const handleFileUploadClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
+
+  const {mintGif, loading, error} = useMintImage();
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        console.log("File Type: ",file.type);
+        setFile(file);
+    } else {
+        alert("Only png, jpg, and jpeg files are allowed.");
+    }
+};
+
+const handleUpload = () => {
+    if (!file) {
+        alert("No file selected.");
+        return;
+    }
+    console.log(file);
+    mintGif(file);
+    setGalleryOpen(false);
+};
+
+
 
   return (
   <>
@@ -45,28 +71,27 @@ export const FooterButton = ({ onClick }: { onClick: ReactEventHandler }) => {
         </button>
     </div>
     {galleryOpen &&
-      <div className="gallery-model-page">
-        <div className="gallery-model">
-          <div className="file-upload" onClick={handleFileUploadClick}>
-            <InlineSVG
-              src="/images/cloud_upload.svg"
-              className="icon fill-current text-camera"
-              color="#000"
-            />
-            <p className="allow">* Allows only png, jpg, jpeg</p>
-          </div>
-          <div className="gallery-upload-btns">
-            <button className="btn btn-cancel" onClick={()=> setGalleryOpen(!galleryOpen)}>Cancel</button>
-            <button className="btn btn-upload">Upload</button>
-          </div>
-        </div>
-        <div className="file-upload-input hidden">
-          <form action="/">
-            <input type="file" ref={fileInputRef} />
-          </form>
-        </div>
-      </div>
-    }
+                <div className="gallery-model-page">
+                    <div className="gallery-model">
+                        <div className="file-upload" onClick={handleFileUploadClick}>
+                            <InlineSVG
+                                src="/images/cloud_upload.svg"
+                                className="icon fill-current text-camera"
+                            />
+                            <p className="allow">* Allows only png, jpg, jpeg</p>
+                        </div>
+                        <div className="gallery-upload-btns">
+                            <button className="btn btn-cancel" onClick={() => setGalleryOpen(!galleryOpen)}>Cancel</button>
+                            <button className="btn btn-upload" onClick={handleUpload}>Upload</button>
+                        </div>
+                    </div>
+                    <div className="file-upload-input hidden">
+                        <form action="/">
+                            <input type="file" ref={fileInputRef} onChange={handleFileChange} />
+                        </form>
+                    </div>
+                </div>
+      }
   </>
   )
 };
