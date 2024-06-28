@@ -17,7 +17,7 @@ const Header = () => {
   const[color,SetColor] = useState('');
   const[net,SetNet] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [isAdminModal, setIsAdminModal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const popRef = useRef<HTMLDivElement | null>(null);
   const handleNet = ()=>{
     if(process.env.NEXT_PUBLIC_NETWORK=='mainnet'){
@@ -79,15 +79,18 @@ const Header = () => {
   }
 
 
-  const handleAdminCheck = () => {
-    if(activeAccountId === constants.adminId) {
-      setIsAdminModal(false);
-      push("/admin")
-    } else {
-      setIsAdminModal(true);
-      console.log("Not a admin")
+  useEffect(()=>{
+    const handleIsAdmin = () => {
+      if(activeAccountId === constants.adminId) {
+        setIsAdmin(true);
+        console.log("Its a admin")
+      } else {
+        setIsAdmin(false);
+        console.log("Not a admin")
+      }
     }
-  }
+    handleIsAdmin();
+  },[isAdmin, isConnected, activeAccountId])
 
 
 
@@ -116,9 +119,17 @@ const Header = () => {
         <div className="menu">
           <button onClick={() => push("/leaderboard")}>Leaderboard</button>
         </div>
-        <div className="menu">
-          <button onClick={handleAdminCheck}>Admin</button>
-        </div>
+
+        {isAdmin && isConnected ? 
+          (
+          <div className="menu">
+            <button onClick={()=>push("/admin")}>Admin</button>
+          </div>
+          ) : (
+          <div className="menu">
+            <button onClick={()=>push("/profile")}>Profile</button>
+          </div>
+        )}
 
         <button
             onClick={handlePopUp}
@@ -198,9 +209,16 @@ const Header = () => {
               <div className="menu">
                 <button onClick={() => push("/leaderboard")}>Leaderboard</button>
               </div>
-              <div className="menu">
-                <button onClick={handleAdminCheck}>Admin</button>
-              </div>
+              {isAdmin && isConnected ? 
+                (
+                <div className="menu">
+                  <button onClick={()=>push("/admin")}>Admin</button>
+                </div>
+                ) : (
+                <div className="menu">
+                  <button onClick={()=>push("/profile")}>Profile</button>
+                </div>
+              )}
               <button
                   onClick={handlePopUp}
                   className="h-8 w-8 rounded-md flex items-center justify-center pointer"
@@ -296,24 +314,35 @@ const Header = () => {
                   style={{color: "#ff3572"}}
               />
             </li>
-            <li className="side-menu" onClick={ handleAdminCheck}>
-              <h4>Admin</h4> 
-              <InlineSVG
-                src="/images/arrow_right.svg"
-                className="icon fill-current text-headerText"
-                style={{color: "#ff3572"}}
-              />
-            </li>
+            {isAdmin && isConnected ? (
+              <li className="side-menu" onClick={ ()=> push("/admin")}>
+                <h4>Admin</h4> 
+                <InlineSVG
+                  src="/images/arrow_right.svg"
+                  className="icon fill-current text-headerText"
+                  style={{color: "#ff3572"}}
+                />
+              </li>
+            ):(
+              <li className="side-menu" onClick={ ()=> push("/profile")}>
+                <h4>Profile</h4> 
+                <InlineSVG
+                  src="/images/arrow_right.svg"
+                  className="icon fill-current text-headerText"
+                  style={{color: "#ff3572"}}
+                />
+              </li>
+            )}
         </ul>
       </div>
-      {isAdminModal && 
+      {/* {isAdminModal && 
             <div className="admin-hide-modal-page">
               <div className="admin-hide-modal">
                 <h2>Only Admins can authorise this page!</h2>
                 <button className="btn ok-btn" onClick={()=>setIsAdminModal(false)}>Ok</button>
               </div>
             </div>
-      }
+      } */}
       </div>
     </>
   );

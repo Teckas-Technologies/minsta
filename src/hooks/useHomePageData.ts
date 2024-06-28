@@ -34,18 +34,18 @@ export const useHomePageData = () => {
 
   const { data, isLoading: totalLoading } =
     useGraphQlQuery<InfiniteScrollHook>(queryObj);
-    console.log("All Data", data);
+    // console.log("All Data", data);
 
   /*************** Search Data by owner (Default Desc)**************/
 
-  useSearchTokenByOwner("varatharaj.testnet");
+  // useSearchTokenByOwner("varatharaj.testnet");
 
-  /************** Sort Asc with Owner ************/
+  // /************** Sort Asc with Owner ************/
 
-  useSearchTokenByOwnerByAsc("varatharaj.testnet");
+  // useSearchTokenByOwnerByAsc("varatharaj.testnet");
 
-  /************* Sort Asc all */
-  useFeedAsc();
+  // /************* Sort Asc all */
+  // useFeedAsc();
   
   const firstTokenisBlocked: boolean =
     newToken?.metadata_id && blockedNfts?.includes(newToken?.metadata_id);

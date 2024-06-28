@@ -7,7 +7,11 @@
     background-color: #222f3e;
     height: 5rem;
     width: 100%;
+}
 
+.header {
+    width: 100%;
+    background-color: #222f3e;
 }
 
 .hamburger {
@@ -608,11 +612,11 @@
 
 /* Admin Hide Model */
 
-.header {
+/* .header {
     position: relative;
-}
+} */
 
-.admin-hide-modal-page{
+/* .admin-hide-modal-page{
     position: fixed;
     width: 100%;
     height: 100%;
@@ -644,6 +648,17 @@
 
 .admin-hide-modal h2{
     font-size: 1rem;
+} */
+
+
+/* Filters Style */
+
+.sort-item-holder {
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+}
+
+.sort-item:hover {
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
 }
 
 
