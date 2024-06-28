@@ -141,10 +141,10 @@ export const HomePage = () => {
 
         <FirstToken {...firstTokenProps} />
 
-        {/* <FirstFeed tokensFetched={tokensFetched} blockedNfts={blockedNfts} /> */}
+        <FirstFeed tokensFetched={tokensFetched} blockedNfts={blockedNfts} />
         {/* <FeedScroll tokensFetched={tokensFetched} /> */}
        
-        {data ? <FeedScroll tokensFetched={data?.token} /> : "Not fetched"}
+        {data ? <FeedScroll tokensFetched={data?.token} /> : <FeedScroll tokensFetched={tokensFetched} />}
         
       </DynamicGrid>
     </main>
