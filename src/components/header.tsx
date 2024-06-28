@@ -7,6 +7,7 @@ import InlineSVG from "react-inlinesvg";
 import '../app/style.css'
 import { AdminSideMenu } from "./AdminSideMenu";
 import { constants } from "@/constants";
+import Link from "next/link";
 
 const Header = () => {
   const pathname = usePathname();
@@ -125,11 +126,24 @@ const Header = () => {
           <div className="menu">
             <button onClick={()=>push("/admin")}>Admin</button>
           </div>
-          ) : (
+          ) : activeAccountId ? (
           <div className="menu">
             <button onClick={()=>push("/profile")}>Profile</button>
           </div>
-        )}
+        ) : ""}
+
+        <div className="menu">
+          <Link href="https://github.com/Teckas-Technologies/minsta" target="_blank" rel="noopener noreferrer">
+          <div className="github flex items-center gap-2">
+            <InlineSVG
+                src="/images/github.svg"
+                className="fill-current"
+                color="#fff"
+                />
+            <h2 className="text-white">GitHub</h2>
+          </div>
+          </Link>
+        </div>
 
         <button
             onClick={handlePopUp}
@@ -195,7 +209,7 @@ const Header = () => {
                   />
                 </div>
                 <button className="font-bold text-xl" onClick={() => push("/")}>
-                  {process.env.NEXT_PUBLIC_APP_TITLE || "Minsta"}
+                  {process.env.NEXT_PUBLIC_APP_TITLE || "Moments"}
                 </button>
               </div>
             </div>
@@ -214,11 +228,23 @@ const Header = () => {
                 <div className="menu">
                   <button onClick={()=>push("/admin")}>Admin</button>
                 </div>
-                ) : (
+                ) : activeAccountId ? (
                 <div className="menu">
                   <button onClick={()=>push("/profile")}>Profile</button>
                 </div>
-              )}
+              ) : ""}
+              <div className="menu">
+                <Link href="https://github.com/Teckas-Technologies/minsta" target="_blank" rel="noopener noreferrer">
+                <div className="github flex items-center gap-2">
+                  <InlineSVG
+                      src="/images/github.svg"
+                      className="fill-current"
+                      color="#fff"
+                      />
+                  <h2 className="text-white">GitHub</h2>
+                </div>
+                </Link>
+              </div>
               <button
                   onClick={handlePopUp}
                   className="h-8 w-8 rounded-md flex items-center justify-center pointer"
@@ -323,7 +349,7 @@ const Header = () => {
                   style={{color: "#ff3572"}}
                 />
               </li>
-            ):(
+            ): activeAccountId ? (
               <li className="side-menu" onClick={ ()=> push("/profile")}>
                 <h4>Profile</h4> 
                 <InlineSVG
@@ -332,7 +358,31 @@ const Header = () => {
                   style={{color: "#ff3572"}}
                 />
               </li>
-            )}
+            ) : ""}
+
+            <Link href="https://github.com/Teckas-Technologies/minsta" target="_blank" rel="noopener noreferrer">
+              <li className="side-men flex justify-center items-center gap-3 mt-4">
+                <InlineSVG
+                  src="/images/github.svg"
+                  className="fill-current"
+                  color="#222f3e"
+                  />
+                <h4>GitHub</h4> 
+              </li>
+            </Link>
+
+        {/* <div className="menu">
+          <Link href="https://github.com/Teckas-Technologies/minsta" target="_blank" rel="noopener noreferrer">
+          <div className="github flex items-center gap-2">
+            <InlineSVG
+                src="/images/github.svg"
+                className="fill-current"
+                color="#fff"
+                />
+            <h2 className="text-white">GitHub</h2>
+          </div>
+          </Link>
+        </div> */}
         </ul>
       </div>
       {/* {isAdminModal && 
