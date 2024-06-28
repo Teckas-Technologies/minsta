@@ -105,7 +105,7 @@ const Header = () => {
             className="fill-current text-headerText"
             style={{color: "#fff"}}
           />
-          <h2>{process.env.NEXT_PUBLIC_APP_TITLE || "Minsta"}</h2>
+          <h2>{process.env.NEXT_PUBLIC_APP_TITLE || "Moments"}</h2>
         </button>
       </div>
       <div className="flex gap-4 items-center">
