@@ -1,22 +1,26 @@
 import { InfiniteScrollHook } from "@/data/types";
 import { constants } from "@/constants";
-import { SEARCH_FOR_OWNER_ASC } from "@/data/queries/feed.graphl";
+import { FETCH_FEED_DESC } from "@/data/queries/feed.graphl";
 import { useGraphQlQuery } from "@/data/useGraphQlQuery";
 
-export const useSearchTokenByOwnerByAsc = (tokenOwner: string) => {
+export const useFeedDesc = () => {
 
-    const querySearch = {
-        queryName: "q_SEARCH_FOR_OWNER_ASC",
-        query: SEARCH_FOR_OWNER_ASC,
+
+    const queryObj = {
+        queryName: "q_FETCH_FEED_ASC",
+        query: FETCH_FEED_DESC,
         variables: {
-         owner: tokenOwner,
+          accountIds: [
+            constants.proxyContractAddress,
+            ...constants.legacyProxyAddresses,
+          ],
           contractAddress: constants.tokenContractAddress
         },
         queryOpts: { staleTime: Infinity },
       };
+    
       const { data, isLoading } =
-      useGraphQlQuery<InfiniteScrollHook>(querySearch);
-
+        useGraphQlQuery<InfiniteScrollHook>(queryObj);
 
     return {
         data,

@@ -5,6 +5,7 @@ export interface TokenData {
   media: string;
   metadata_id: string;
   title: string;
+  owner: String | null;
 }
 
 export interface TokenFeedData {
