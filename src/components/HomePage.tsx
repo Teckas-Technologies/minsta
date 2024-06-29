@@ -109,7 +109,7 @@ export const HomePage = () => {
           </div>
         </div>
       </div>
-      <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6}>
+        <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6}>
         {!data?.token && <FirstToken {...firstTokenProps} />}
 
         <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText}/>

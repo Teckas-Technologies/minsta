@@ -74,30 +74,8 @@ const ImageThumb = ({ token, index }: any) => {
             color="#fff"
             />
           </button>
-          {activeAccountId === constants.adminId && 
-          <div>
-            <button
-                className="absolute top-4 left-4 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.open(
-                    `https://twitter.com/intent/tweet?url=%0aCheck%20out%20mine%3A%20${
-                      window.location.origin
-                    }/meta/${decodeURIComponent(
-                      token?.metadata_id
-                    )}%2F&via=mintbase&text=${constants.twitterText}`,
-                    "_blank"
-                  );
-                }}
-              >
-                <InlineSVG
-                src="/images/trash.svg"
-                className="fill-current"
-                color="#fff"
-                />
-              </button>
-              <button
-                className="absolute top-4 left-14 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
+          <button
+                className="absolute top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
                 onClick={(e) => {
                   e.preventDefault();
                   window.open(
@@ -112,6 +90,28 @@ const ImageThumb = ({ token, index }: any) => {
               >
                 <InlineSVG
                 src="/images/eye_hide.svg"
+                className="fill-current"
+                color="#fff"
+                />
+              </button>
+          {activeAccountId === constants.adminId && 
+          <div>
+            <button
+                className="absolute top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.open(
+                    `https://twitter.com/intent/tweet?url=%0aCheck%20out%20mine%3A%20${
+                      window.location.origin
+                    }/meta/${decodeURIComponent(
+                      token?.metadata_id
+                    )}%2F&via=mintbase&text=${constants.twitterText}`,
+                    "_blank"
+                  );
+                }}
+              >
+                <InlineSVG
+                src="/images/trash.svg"
                 className="fill-current"
                 color="#fff"
                 />
