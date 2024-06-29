@@ -3,7 +3,7 @@ import { constants } from "@/constants";
 import { FETCH_FEED_ASC } from "@/data/queries/feed.graphl";
 import { useGraphQlQuery } from "@/data/useGraphQlQuery";
 
-export const useFeedDesc = () => {
+export const useFeedAsc = () => {
 
 
     const queryObj = {
@@ -21,7 +21,6 @@ export const useFeedDesc = () => {
     
       const { data, isLoading } =
         useGraphQlQuery<InfiniteScrollHook>(queryObj);
-        console.log("All Data Asc", data);
 
     return {
         data,
