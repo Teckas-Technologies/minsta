@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 import { useIntersectionObserver } from "usehooks-ts";
 import { MemoizedImageThumb } from "./ImageThumb";
 import { useEffect, useState } from "react";
+import { TokenData } from "@/data/types";
 
 export const FeedScroll = ({ blockedNfts, sort , search}: any) => {
   const [mod, setMod] = useState(true);
@@ -18,7 +19,7 @@ export const FeedScroll = ({ blockedNfts, sort , search}: any) => {
 
     // Filter based on search query if not empty
     if (search) {
-      filteredData = filteredData.filter((token) => {
+      filteredData = filteredData.filter((token: TokenData) => {
         return token.title.toLowerCase().includes(search.toLowerCase()) ||
                token.description.toLowerCase().includes(search.toLowerCase()) ||
                (token.owner && token.owner.toLowerCase().includes(search.toLowerCase()));
@@ -44,14 +45,14 @@ export const FeedScroll = ({ blockedNfts, sort , search}: any) => {
 
     // Filter blocked NFTs
     if (blockedNfts && blockedNfts.length) {
-      filteredData = filteredData.filter(token => !blockedNfts.includes(token.metadata_id));
+      filteredData = filteredData.filter((token:TokenData) => !blockedNfts.includes(token.metadata_id));
     }
 
     // Sort data
     if (sort === "Old to New") {
-      filteredData.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+      filteredData.sort((a: TokenData, b:TokenData) => (a.createdAt > b.createdAt ? 1 : -1));
     } else if (sort === "New to Old") {
-      filteredData.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      filteredData.sort((a: TokenData, b:TokenData) => (a.createdAt < b.createdAt ? 1 : -1));
     }
 
     return filteredData;
