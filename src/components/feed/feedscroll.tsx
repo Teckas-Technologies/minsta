@@ -18,13 +18,25 @@ export const FeedScroll = ({ blockedNfts, sort , search}: any) => {
     let filteredData = items;
 
     // Filter based on search query if not empty
+    // if (search) {
+    //   filteredData = filteredData.filter((token: TokenData) => {
+    //     return token.title.toLowerCase().includes(search.toLowerCase()) ||
+    //            token.description.toLowerCase().includes(search.toLowerCase()) ||
+    //            (token.owner && token.owner.toLowerCase().includes(search.toLowerCase()));
+    //   });
+    // }
     if (search) {
       filteredData = filteredData.filter((token: TokenData) => {
-        return token.title.toLowerCase().includes(search.toLowerCase()) ||
-               token.description.toLowerCase().includes(search.toLowerCase()) ||
-               (token.owner && token.owner.toLowerCase().includes(search.toLowerCase()));
+        const title = token.title ? token.title.toLowerCase() : '';
+        const description = token.description ? token.description.toLowerCase() : '';
+        const owner = token.owner ? token.owner.toLowerCase() : '';
+    
+        return title.includes(search.toLowerCase()) ||
+               description.includes(search.toLowerCase()) ||
+               owner.includes(search.toLowerCase());
       });
     }
+    
 
     const uniqueMetadataIds = new Set<string>();
 
@@ -65,7 +77,7 @@ export const FeedScroll = ({ blockedNfts, sort , search}: any) => {
       })}
       <div ref={ref}>
         {loadingItems?.map((item, i) => (
-          <div className="md:aspect-square rounded overflow-x-hidden cursor-pointer sm:w-full md:w-72 h-72 xl:w-80 xl:h-80 relative" key={`${item}-${i}`}>
+          <div className="md:aspect-square rounded overflow-x-hidden cursor-pointer sm:w-[19rem] md:w-[19rem] md:h-[19rem] xl:w-[19rem] xl:h-[19rem] relative" key={`${item}-${i}`}>
             <div className="rounded animate-pulse w-full h-full bg-gray-600 dark:bg-gray-800" />
           </div>
         ))}

@@ -63,6 +63,8 @@ export default function CameraPage() {
               }}
             />
           )}
+
+          {/* <h1>Hi</h1> */}
         </div>
       </main>
       {!picture && (

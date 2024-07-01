@@ -126,7 +126,7 @@ const Header = () => {
           <div className="menu">
             <button onClick={()=>push("/admin")}>Admin</button>
           </div>
-          ) : activeAccountId ? (
+          ) : activeAccountId && !isAdmin ? (
           <div className="menu">
             <button onClick={()=>push("/profile")}>Profile</button>
           </div>
@@ -154,7 +154,7 @@ const Header = () => {
 
         {isConnected ? (
           <div className="login-btn">
-            <button onClick={handleSignout}> Logout</button>
+            <button className="gradientButton" onClick={handleSignout}> Logout</button>
           </div>
         ) : (
           <div className="login-btn">
@@ -228,7 +228,7 @@ const Header = () => {
                 <div className="menu">
                   <button onClick={()=>push("/admin")}>Admin</button>
                 </div>
-                ) : activeAccountId ? (
+                ) : activeAccountId && !isAdmin ? (
                 <div className="menu">
                   <button onClick={()=>push("/profile")}>Profile</button>
                 </div>
@@ -349,7 +349,7 @@ const Header = () => {
                   style={{color: "#ff3572"}}
                 />
               </li>
-            ): activeAccountId ? (
+            ): activeAccountId && !isAdmin ? (
               <li className="side-menu" onClick={ ()=> push("/profile")}>
                 <h4>Profile</h4> 
                 <InlineSVG

@@ -13,7 +13,26 @@ import useMintImage from "@/utils/useMint";
 export const FooterButton = ({ onClick }: { onClick: ReactEventHandler }) => {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const fileInputRef = useRef<any>(null);
+  const { push } = useRouter();
   const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const {connect, activeAccountId, isConnected } = useMbWallet();
+  const [tag, setTag] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+
+  const addTag = () => {
+    if (tag.trim() !== "" && tags.length < 4) {
+      setTags([...tags, tag.trim()]);
+      setTag("");
+    } else if (tags.length >= 4) {
+      alert("You can only add up to 4 tags.");
+    }
+  };
+
+  const removeTag = (tagText: string) => {
+    setTags(tags.filter(tag => tag !== tagText));
+  };
 
   const handleFileUploadClick = () => {
     if (fileInputRef.current) {
@@ -38,9 +57,14 @@ const handleUpload = () => {
         alert("No file selected.");
         return;
     }
-    console.log(file);
-    mintGif(file);
-    setGalleryOpen(false);
+    if(isConnected){
+      mintGif(file);
+      console.log(file, "Uploading...");
+      // setGalleryOpen(false);
+      setUploading(true);
+    } else {
+      connect();
+    }
 };
 
 
@@ -60,7 +84,7 @@ const handleUpload = () => {
           </div>
         </button>
         <button className="rounded-full h-24 w-24 bg-primary -top-24 right-12 flex items-center justify-center"
-          onClick={()=>setGalleryOpen(!galleryOpen)}
+          onClick={()=>{isConnected ? push("/fileupload") : connect()}}
         >
           <div className="rounded-full h-20 w-20 gradientButton flex items-center justify-center">
             <InlineSVG
@@ -72,18 +96,45 @@ const handleUpload = () => {
     </div>
     {galleryOpen &&
                 <div className="gallery-model-page">
-                    <div className="gallery-model">
-                        <div className="file-upload" onClick={handleFileUploadClick}>
-                            <InlineSVG
-                                src="/images/cloud_upload.svg"
-                                className="icon fill-current text-camera"
-                            />
-                            <p className="allow">* Allows only png, jpg, jpeg</p>
-                        </div>
-                        <div className="gallery-upload-btns">
-                            <button className="btn btn-cancel" onClick={() => setGalleryOpen(!galleryOpen)}>Cancel</button>
-                            <button className="btn btn-upload" onClick={handleUpload}>Upload</button>
-                        </div>
+                    <div className={`gallery-model`}>
+                        {!uploading ?
+                        <>
+                            <div className={file && tag.length > 0 ? `file-upload h-[8rem]` : file && tag.length === 0 ? "file-upload h-[8rem]" : "file-upload h-[13rem]"} onClick={handleFileUploadClick}>
+                              <InlineSVG
+                                  src="/images/cloud_upload.svg"
+                                  className="icon fill-current text-camera"
+                              />
+                              <p className="allow">{file ? `Selected file : ${file.name}` : "* Allows only png, jpg, jpeg"}</p>
+                            </div>
+                            {file && 
+                            <div className="gif-tags flex flex-col items-center">
+                              <div className="input-field flex gap-3">
+                                <input type="text" placeholder="Enter tags..." className="border-none outline-none"  value={tag} onChange={(e)=> {setTag(e.target.value)}}/>
+                                <button className="btn success-btn" onClick={addTag}>Add</button>
+                              </div>
+                              {tags.length > 0 && 
+                              <div className="tags-list mt-2 flex gap-2">
+                                {tags.map((tag, index) => (
+                                  <div
+                                    key={index}
+                                    className="tag1 rounded px-2 py-1 cursor-pointer"
+                                    onClick={()=>removeTag(tag)}
+                                  >
+                                    {tag}
+                                  </div>
+                                ))}
+                                </div>}
+                            </div>
+                            }
+                            <div className="gallery-upload-btns">
+                                <button className="btn btn-cancel" onClick={() => {setGalleryOpen(!galleryOpen); setFile(null);}}>Cancel</button>
+                                <button className="btn btn-upload" onClick={handleUpload}>Upload</button>
+                            </div>
+                        </> : 
+                        <div className="flex flex-col justify-center items-center gap-6 w-full h-full">
+                          <div className="loader"></div>
+                          <h2 className="text-lg title-font">Uploading...</h2>
+                        </div>}
                     </div>
                     <div className="file-upload-input hidden">
                         <form action="/">
