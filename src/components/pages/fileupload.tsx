@@ -1,19 +1,17 @@
 import useMintImage from "@/utils/useMint";
 import { useMbWallet } from "@mintbase-js/react";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import InlineSVG from "react-inlinesvg";
 
-export default function FileUploadPage({
-    backStep
-  }: {
-    backStep: () => void;
-  }) {
+export default function FileUploadPage() {
     const fileInputRef = useRef<any>(null);
     const [title, setTitle] = useState("");
     const [tag, setTag] = useState("");
     const [tags, setTags] = useState<string[]>([]);
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
+    const { push } = useRouter();
     const {connect, activeAccountId, isConnected } = useMbWallet();
 
     const addTag = () => {
@@ -98,6 +96,9 @@ export default function FileUploadPage({
                         </form>
                     </div>
                 </div>
+
+                {!uploading && 
+                <>
                 <div className="tags pb-2 px-2">
                     <div className="input-field">
                       <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e)=> {setTitle(e.target.value)}}/>
@@ -124,9 +125,9 @@ export default function FileUploadPage({
                 <div className="flex gap-4 w-full">
                     <button
                     className="text-secondaryBtnText w-full border border-secondaryBtnText rounded px-4 py-2"
-                    onClick={backStep}
+                    onClick={()=> push("/")}
                     >
-                    Try again
+                    Cancel
                     </button>
                     <button
                     className="gradientButton w-full text-primaryBtnText rounded px-4 py-2"
@@ -136,6 +137,8 @@ export default function FileUploadPage({
                     Upload
                     </button>
                 </div>
+                </>
+                }
             </div>
         </main>
         </>

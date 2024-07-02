@@ -29,7 +29,7 @@ export function Mint({
   };
 
   return (
-    <main className="h-[100vh] w-[100%] px-4  flex flex-col items-center photo-main">
+    <main className="h-[100Vh] w-[100%] px-4  flex flex-col items-center photo-main">
       {isLoading ? (
         <>
           {" "}
@@ -42,7 +42,7 @@ export function Mint({
         </>
       ) : (
         <div className="photo-box h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 scroll mb-2">
-          <Image src={currentPhoto} alt="image" width={400} height={400} className="photo-img"/>
+          <Image src={currentPhoto} alt="image" width={468} height={468} className="photo-img"/>
 
           <div className="tags pb-2 px-2">
             <div className="input-field">
@@ -76,7 +76,7 @@ export function Mint({
             </button>
             <button
               className="gradientButton w-full text-primaryBtnText rounded px-4 py-2"
-              onClick={() => mintImage(currentPhoto)}
+              onClick={() => mintImage(currentPhoto, title)}
               // disabled={inputOpen ? true : false}
             >
               Upload
