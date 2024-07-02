@@ -52,20 +52,20 @@ export const FooterButton = ({ onClick }: { onClick: ReactEventHandler }) => {
     }
 };
 
-const handleUpload = () => {
-    if (!file) {
-        alert("No file selected.");
-        return;
-    }
-    if(isConnected){
-      mintGif(file);
-      console.log(file, "Uploading...");
-      // setGalleryOpen(false);
-      setUploading(true);
-    } else {
-      connect();
-    }
-};
+// const handleUpload = () => {
+//     if (!file) {
+//         alert("No file selected.");
+//         return;
+//     }
+//     if(isConnected){
+//       mintGif(file);
+//       console.log(file, "Uploading...");
+//       // setGalleryOpen(false);
+//       setUploading(true);
+//     } else {
+//       connect();
+//     }
+// };
 
 
 
@@ -94,7 +94,7 @@ const handleUpload = () => {
           </div>
         </button>
     </div>
-    {galleryOpen &&
+    {/* {galleryOpen &&
                 <div className="gallery-model-page">
                     <div className={`gallery-model`}>
                         {!uploading ?
@@ -142,7 +142,7 @@ const handleUpload = () => {
                         </form>
                     </div>
                 </div>
-      }
+      } */}
   </>
   )
 };

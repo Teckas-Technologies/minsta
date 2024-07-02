@@ -9,6 +9,7 @@ export default function FileUploadPage({
     backStep: () => void;
   }) {
     const fileInputRef = useRef<any>(null);
+    const [title, setTitle] = useState("");
     const [tag, setTag] = useState("");
     const [tags, setTags] = useState<string[]>([]);
     const [file, setFile] = useState<File | null>(null);
@@ -52,10 +53,11 @@ export default function FileUploadPage({
             return;
         }
         if(isConnected){
-          mintGif(file);
+          mintGif(file, title);
           console.log(file, "Uploading...");
           // setGalleryOpen(false);
           setUploading(true);
+          setTitle("")
         } else {
           connect();
         }
@@ -97,6 +99,9 @@ export default function FileUploadPage({
                     </div>
                 </div>
                 <div className="tags pb-2 px-2">
+                    <div className="input-field">
+                      <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e)=> {setTitle(e.target.value)}}/>
+                    </div>
                     <div className="input-field">
                     <input type="text" placeholder="Enter tags..." className="border-none outline-none w-full" value={tag} onChange={(e)=> {setTag(e.target.value)}}/>
                     <button className="btn success-btn" onClick={addTag}>Add</button>

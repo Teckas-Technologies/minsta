@@ -11,6 +11,7 @@ export function Mint({
   currentPhoto: string;
 }) {
   const { isLoading, mintImage } = useApp();
+  const [title, setTitle] = useState("");
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
 
@@ -44,6 +45,9 @@ export function Mint({
           <Image src={currentPhoto} alt="image" width={400} height={400} className="photo-img"/>
 
           <div className="tags pb-2 px-2">
+            <div className="input-field">
+            <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e)=> {setTitle(e.target.value)}}/>
+            </div>
             <div className="input-field">
               <input type="text" placeholder="Enter tags..." className="border-none outline-none w-full" value={tag} onChange={(e)=> {setTag(e.target.value)}}/>
               <button className="btn success-btn" onClick={addTag}>Add</button>
