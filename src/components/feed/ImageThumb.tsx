@@ -117,7 +117,7 @@ const ImageThumb = ({ token, index }: any) => {
               {/* <h2>Share apps...</h2> */}
               <div className="share-apps flex items-center">
                 {socialMedias.map((media, i) => (
-                  <div className="share-app cursor-pointer px-2 py-1 mx-1" onClick={(e)=>openMedia(media.name, e)}>
+                  <div key={i} className="share-app cursor-pointer px-2 py-1 mx-1" onClick={(e)=>openMedia(media.name, e)}>
                     <InlineSVG
                       src={media.path}
                       className="fill-current"
