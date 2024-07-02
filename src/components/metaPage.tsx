@@ -25,7 +25,7 @@ export const MetaPage = ({ meta, slug }: any) => {
           src={finalUrl}
           width="468"
           height="468"
-          className="rounded-md image"
+          className="rounded-md image w-full h-full object-cover"
         />
         <button
           className="absolute top-4 right-4 bg-sky-500 text-white rounded p-1 text-xs px-2 py-2"

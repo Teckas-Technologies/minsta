@@ -70,6 +70,10 @@ export const FeedScroll = ({ blockedNfts, sort , search}: any) => {
     return filteredData;
   }, [items, blockedNfts, sort, search]);
 
+  // useEffect(() => {
+  //   window.location.reload();
+  // }, [items]);
+
   return (
     <>
       {memoizedData?.map((token: any, index: number) => {
