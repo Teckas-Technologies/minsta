@@ -11,6 +11,8 @@ interface GridProps {
   nColsXXXl?: number;
   nGap?: number;
   nGapMobile?: number;
+  isMobile:boolean;
+  grid:number
 }
 
 export const DynamicGrid = ({
@@ -24,6 +26,8 @@ export const DynamicGrid = ({
   noMargin,
   nGap,
   nGapMobile,
+  isMobile,
+  grid
 }: GridProps): JSX.Element => {
   const colsXXl = nColsXXl ? `xxl:grid-cols-${nColsXXl} ` : `xxl:grid-cols-5`;
 
@@ -32,6 +36,8 @@ export const DynamicGrid = ({
   const colsXl = nColsXl ? `xl:grid-cols-${nColsXl} ` : `xl:grid-cols-4`;
 
   const cols = nCols ? `grid-cols-${nCols}` : `grid-cols-1`;
+  const cols2 = nCols ? `grid-cols-${nCols}` : `grid-cols-2`;
+  const cols3 = nCols ? `grid-cols-${nCols}` : `grid-cols-3`;
   const margin = noMargin ? `mb-24` : `my-24`;
 
   const colsXXXL = nColsXXXl
@@ -44,7 +50,7 @@ export const DynamicGrid = ({
 
   return (
     <ul
-      className={`grid ${cols} ${colsMd} ${colsLg} ${colsXl} ${colsXXl} ${colsXXXL} ${gapSizeMobile} md:${gapSize} ${margin} `}
+      className={`grid ${grid === 1 ? cols : grid === 2 ? cols2 : cols3} ${colsMd} ${colsLg} ${colsXl} ${colsXXl} ${colsXXXL} ${gapSizeMobile} md:${gapSize} ${margin} `}
     >
    
       {children}

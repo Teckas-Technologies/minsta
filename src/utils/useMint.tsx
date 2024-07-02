@@ -183,7 +183,7 @@ const useMintImage = () => {
     }
   };
 
-  const mintGif = async (gif: File) => {
+  const mintGif = async (gif: File, title: string) => {
     if (!activeAccountId) {
       setError("Active account ID is not set.");
       return;
@@ -198,7 +198,7 @@ const useMintImage = () => {
       const replicatePhoto = await reduceImageSize(photo, 10); //10MB limit replicate
       const titleAndDescription = await getTitleAndDescription(replicatePhoto);
       const refObject = {
-        title: titleAndDescription.title,
+        title: title,
         description: titleAndDescription.description,
         media: photoFile,
       };
