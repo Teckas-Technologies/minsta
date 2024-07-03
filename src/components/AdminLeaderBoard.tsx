@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import "../app/style.css"
 import { useLeaderBoardData } from '@/hooks/useLeaderboard';
+import { useDarkMode } from '@/context/DarkModeContext';
 
 interface Leaderboard {
     account: string;
@@ -14,6 +15,7 @@ export const AdminLeaderBoard = () => {
     const [selectedLeaders, setSelectedLeaders] = useState<any>([]);
     const [leaderList, setLeaderList] = useState<Leaderboard[]>([]);
     const { leaderboard, activeAccountId, texts} = useLeaderBoardData();
+    const { darkMode } = useDarkMode();
 
     const handleSelectLeader = (leader: any) => {
         if (selectedLeaders.includes(leader)) {
@@ -46,12 +48,12 @@ export const AdminLeaderBoard = () => {
     }
 
     return (
-        <>
-            <div className="admin-main-card h-full flex-col flex justify-between gap-3">
+        <div className={darkMode ? "dark" : ""}>
+            <div className="admin-main-card h-full flex-col flex justify-between gap-3 dark:bg-slate-800">
                 <div className="leader-board-title">
-                <h2 className="text-xl text-center sm:text-left py-1 title-font">Leaderboard</h2>
+                <h2 className="text-xl text-center sm:text-left py-1 title-font dark:text-white">Leaderboard</h2>
                 </div>
-                <div className="admin-leaderboard">
+                <div className="admin-leaderboard bg-white">
                     <form action="/">
                         {leaderboard.map((leader, i) => (
                             <div className="leader w-full flex gap-3 mt-2 items-center" key={i}>
@@ -123,7 +125,7 @@ export const AdminLeaderBoard = () => {
                 </div>
                 }
             </div>
-        </>
+        </div>
     )
 }
 

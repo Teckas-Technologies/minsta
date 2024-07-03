@@ -2,6 +2,7 @@ import { useState } from "react"
 import { AccordianItem } from "./AccordianItem"
 import { useFetchSocialMedias, useSaveSocialMedia } from "@/hooks/db/SocialMediaHook";
 import { SocialMedia } from "@/data/types";
+import { useDarkMode } from "@/context/DarkModeContext";
 
 export const AdminShareSettings = () => {
 
@@ -10,6 +11,7 @@ export const AdminShareSettings = () => {
     const [open, setOpen] = useState<number | null>(null);
     const { socialMedias } = useFetchSocialMedias();
     const {saveSocialMedia} = useSaveSocialMedia();
+    const { darkMode } = useDarkMode();
     // const [socialMediasLocal, setSocialMediasLocal] = useState<SocialMedia[] | null>(socialMedias);
     const [socialMediasLocal, setSocialMediasLocal] = useState<SocialMedia[] | null>([
         { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
@@ -55,12 +57,12 @@ export const AdminShareSettings = () => {
     };
 
     return (
-        <>
-         <div className="admin-main-card h-full flex-col flex justify-between gap-3">
+        <div className={darkMode ? "dark" : ""}>
+         <div className="admin-main-card h-full flex-col flex justify-between gap-3 dark:bg-slate-800">
                 <div className="leader-board-title">
-                    <h2 className="text-xl text-center sm:text-left py-1 title-font">Share Settings</h2>
+                    <h2 className="text-xl text-center sm:text-left py-1 title-font dark:text-white">Share Settings</h2>
                 </div>
-                <div className="admin-leaderboard h-full">
+                <div className="admin-leaderboard bg-white h-full">
                     {socialMediasLocal?.map((socialMedia, i)=> {
                         return <AccordianItem 
                             key={i} open={open === i} 
@@ -99,6 +101,6 @@ export const AdminShareSettings = () => {
                     </div>
                 </div>
          </div>
-        </>
+        </div>
     )
 }

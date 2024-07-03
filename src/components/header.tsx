@@ -8,10 +8,12 @@ import '../app/style.css'
 import { AdminSideMenu } from "./AdminSideMenu";
 import { constants } from "@/constants";
 import Link from "next/link";
+import { useDarkMode } from "@/context/DarkModeContext";
 
 const Header = () => {
   const pathname = usePathname();
   const { activeAccountId, isConnected, selector, connect } = useMbWallet();
+  const { darkMode, toggleDarkMode } = useDarkMode();
   const { push } = useRouter();
   const { openModal } = useApp();
   const[pop,setPop] = useState(false);
@@ -109,6 +111,22 @@ const Header = () => {
         </button>
       </div>
       <div className="flex gap-4 items-center">
+
+        <div className="dark-mode flex justify-center items-center">
+          <button onClick={toggleDarkMode} className="flex justify-center items-center">
+            {darkMode ? 
+                    <InlineSVG
+                    src="/images/sun.svg"
+                    className="fill-current w-6 h-6 font-xl cursor-pointer"
+                    color="#fff"
+                    /> : 
+                    <InlineSVG
+                    src="/images/moon.svg"
+                    className="fill-current w-6 h-6 font-xl cursor-pointer"
+                    color="#fff"
+                    />}
+          </button>
+        </div>
         
       
         {!isConnected ? (
@@ -214,6 +232,21 @@ const Header = () => {
               </div>
             </div>
             <div className="flex gap-4 items-center">
+              <div className="dark-mode flex justify-center items-center">
+                <button onClick={toggleDarkMode} className="flex justify-center items-center">
+                  {darkMode ? 
+                    <InlineSVG
+                    src="/images/sun.svg"
+                    className="fill-current w-6 h-6 font-xl cursor-pointer"
+                    color="#fff"
+                    /> : 
+                    <InlineSVG
+                    src="/images/moon.svg"
+                    className="fill-current w-6 h-6 font-xl cursor-pointer"
+                    color="#fff"
+                    />}
+                </button>
+              </div>
               {!isConnected ? (
                 <div className="menu">
                   <button onClick={() => openModal("default")}>About</button>

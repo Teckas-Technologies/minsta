@@ -1,12 +1,16 @@
+import { useDarkMode } from "@/context/DarkModeContext";
 
 export const AdminGiveawayDetails = () => {
+
+    const { darkMode } = useDarkMode();
+
     return (
-        <>
-        <div className="admin-main-card h-full flex-col flex justify-between gap-3">
+        <div className={darkMode ? "dark" : ""}>
+        <div className="admin-main-card h-full flex-col flex justify-between gap-3 dark:bg-slate-800">
             <div className="leader-board-title">
-                <h2 className="text-xl text-center sm:text-left py-1 title-font">Giveaway Details</h2>
+                <h2 className="text-xl text-center sm:text-left py-1 title-font dark:text-white">Giveaway Details</h2>
             </div>
-            <div className="admin-leaderboard h-full flex items-center">
+            <div className="admin-leaderboard h-full flex items-center bg-white">
                 <div className="giveaway-details-form">
                         <div className="giveaway-title">
                             <h2 className="text-xl text-center py-1 title-font">Reward Details</h2>
@@ -42,6 +46,6 @@ export const AdminGiveawayDetails = () => {
                     </div>
                 </div>
         </div>
-        </>
+        </div>
     )
 }
