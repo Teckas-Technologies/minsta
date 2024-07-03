@@ -12,6 +12,7 @@ import { useFeedDesc } from "@/hooks/userFeedDesc";
 import { InfiniteScrollHook } from "@/data/types";
 import InlineSVG from "react-inlinesvg";
 import { useDarkMode } from "@/context/DarkModeContext";
+import { FirstFeed } from "./FirstFeed";
 
 interface NFT {
   data: InfiniteScrollHook | undefined;
@@ -20,7 +21,7 @@ interface NFT {
 
 export const HomePage = () => {
   const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
-  const { connect, isConnected } = useMbWallet();
+  const { connect, isConnected, activeAccountId } = useMbWallet();
   const [searchText, setSearchText] = useState("");
   const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
   const [val, setVal] = useState("");
@@ -136,9 +137,12 @@ export const HomePage = () => {
           </div>
         </div>
         <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
-          {!data?.token && <FirstToken {...firstTokenProps} />}
+          <FirstToken {...firstTokenProps} />
+        
+          <FirstFeed tokensFetched={tokensFetched} blockedNfts={blockedNfts} />
 
           <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode}/>
+
         </DynamicGrid>
       </main>
     </div>
