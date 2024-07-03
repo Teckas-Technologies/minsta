@@ -34,3 +34,13 @@ export interface FirstTokenProps {
   firstTokenisBlocked: boolean;
   isFirstTokenError:boolean
 }
+
+// Added by john
+
+export interface SocialMedia {
+  name: string;
+  title: string;
+  path: string;
+  message: string;
+  enabled: boolean;
+}
