@@ -87,7 +87,7 @@ export const HomePage = () => {
       <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start space-y-4 mt-5 bg-slate-50 dark:bg-slate-800 min-h-[100vh]">
         <div className="max-w-md flex flex-col ml-auto mt-20 justify-center mb-5">
           <div className="flex space-x-2 items-center">
-            <div className="md:hidden" onClick={()=> { handleGrid()}}>
+            <div className="md:hidden" onClick={handleGrid}>
               <InlineSVG
                 src="/images/grid.svg"
                 className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
