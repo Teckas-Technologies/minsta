@@ -12,6 +12,7 @@ export function Mint({
 }) {
   const { isLoading, mintImage } = useApp();
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
 
@@ -27,6 +28,14 @@ export function Mint({
   const removeTag = (tagText: string) => {
     setTags(tags.filter(tag => tag !== tagText));
   };
+
+  const handleUpload = () => {
+    if(currentPhoto) {
+      mintImage(currentPhoto, title, description);
+      setTitle("");
+      setDescription("");
+    }
+  }
 
   return (
     <main className="h-[100Vh] w-[100%] px-4  flex flex-col items-center photo-main">
@@ -46,7 +55,10 @@ export function Mint({
 
           <div className="tags pb-2 px-2">
             <div className="input-field">
-            <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e)=> {setTitle(e.target.value)}}/>
+              <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e)=> {setTitle(e.target.value)}}/>
+            </div>
+            <div className="input-field">
+              <input type="text" placeholder="Enter the description of the NFT..." className="border-none outline-none w-full" value={description} onChange={(e)=> {setDescription(e.target.value)}}/>
             </div>
             <div className="input-field">
               <input type="text" placeholder="Enter tags..." className="border-none outline-none w-full" value={tag} onChange={(e)=> {setTag(e.target.value)}}/>
@@ -76,7 +88,7 @@ export function Mint({
             </button>
             <button
               className="gradientButton w-full text-primaryBtnText rounded px-4 py-2"
-              onClick={() => mintImage(currentPhoto, title)}
+              onClick={handleUpload}
               // disabled={inputOpen ? true : false}
             >
               Upload
