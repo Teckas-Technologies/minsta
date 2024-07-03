@@ -1,7 +1,7 @@
 import { useApp } from "@/providers/app";
-import { Spinner } from "./Spinner";
 import Image from "next/image";
 import { useState } from "react";
+import { useDarkMode } from "@/context/DarkModeContext";
 
 export function Mint({
   backStep,
@@ -15,6 +15,7 @@ export function Mint({
   const [description, setDescription] = useState("");
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const { darkMode } = useDarkMode();
 
   const addTag = () => {
     if (tag.trim() !== "" && tags.length < 4) {
@@ -38,7 +39,8 @@ export function Mint({
   }
 
   return (
-    <main className="h-[100Vh] w-[100%] px-4  flex flex-col items-center photo-main">
+    <div className={darkMode ? "dark" : ""}>
+    <main className="h-[100Vh] w-[100%] px-4 flex flex-col items-center photo-main dark:bg-slate-800">
       {isLoading ? (
         <>
           {" "}
@@ -50,7 +52,7 @@ export function Mint({
           </h1>
         </>
       ) : (
-        <div className="photo-box h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 scroll mb-2">
+        <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 scroll mb-2`}>
           <Image src={currentPhoto} alt="image" width={468} height={468} className="photo-img"/>
 
           <div className="tags pb-2 px-2">
@@ -106,5 +108,6 @@ export function Mint({
         </div>
       )}
     </main>
+    </div>
   );
 }

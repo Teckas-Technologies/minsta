@@ -9,7 +9,7 @@ import { getImageUrl } from "@/utils/imageUrl";
 import InlineSVG from "react-inlinesvg";
 import { useMbWallet } from "@mintbase-js/react";
 
-const ImageThumb = ({ token, index }: any) => {
+const ImageThumb = ({ token, index, dark }: any) => {
   const imageUrl = token?.media;
   const [error, setError] = useState(false);
   const { isConnected, activeAccountId } = useMbWallet();
@@ -76,11 +76,13 @@ const ImageThumb = ({ token, index }: any) => {
       </div>
     );
 
+    console.log("Dark Image >>", dark)
+
   if (imageUrl) {
     const finalUrl = getImageUrl(imageUrl);
 
     return (
-      <div className="image-holder p-2 rounded-md aspect-square sm:w-[18rem] md:w-[18rem] md:h-[18rem] xl:w-[18rem] xl:h-[18rem] relative">
+      <div className={`${dark ? "image-holder-dark" : "image-holder"} p-2 rounded-md aspect-square sm:w-[18rem] md:w-[18rem] md:h-[18rem] xl:w-[18rem] xl:h-[18rem] relative`}>
         {/* <Link
           key={`${token?.metadata_id}-${index}`}
           href={`meta/${token?.metadata_id}`}
