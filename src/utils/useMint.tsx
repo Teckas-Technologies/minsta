@@ -153,7 +153,7 @@ const useMintImage = () => {
     });
   };
 
-  const mintImage = async (photo: string, title:string) => {
+  const mintImage = async (photo: string, title:string, description: string) => {
     if (!activeAccountId) {
       setError("Active account ID is not set.");
       return;
@@ -167,9 +167,10 @@ const useMintImage = () => {
       const replicatePhoto = await reduceImageSize(photo, 10); //10MB limit replicate
       const titleAndDescription = await getTitleAndDescription(replicatePhoto);
       const originalTitle = title && title.trim() ? title : titleAndDescription.title;
+      const originalDescription = description && description.trim() ? description : titleAndDescription.description;
       const refObject = {
         title: originalTitle,
-        description: titleAndDescription.description,
+        description: originalDescription,
         media: photoFile,
       };
       const uploadedData = await uploadReferenceObject(refObject);
@@ -184,7 +185,7 @@ const useMintImage = () => {
     }
   };
 
-  const mintGif = async (gif: File, title: string) => {
+  const mintGif = async (gif: File, title: string, description:string) => {
     if (!activeAccountId) {
       setError("Active account ID is not set.");
       return;
@@ -199,9 +200,10 @@ const useMintImage = () => {
       const replicatePhoto = await reduceImageSize(photo, 10); //10MB limit replicate
       const titleAndDescription = await getTitleAndDescription(replicatePhoto);
       const originalTitle = title && title.trim() ? title : titleAndDescription.title;
+      const originalDescription = description && description.trim() ? description : titleAndDescription.description;
       const refObject = {
         title: originalTitle,
-        description: titleAndDescription.description,
+        description: originalDescription,
         media: photoFile,
       };
       const uploadedData = await uploadReferenceObject(refObject);
