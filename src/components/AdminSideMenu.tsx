@@ -7,12 +7,12 @@ export const AdminSideMenu = ({setAdminPage}: any) => {
         <div className="card">
             <div className="card-header">
                 <div className="card-title">
-                    <h2>Admin Menu</h2>
+                    <h2 className="dark:text-white">Admin Menu</h2>
                 </div>
             </div>
             <div className="card-content">
                 <ul className="admin-menu-list">
-                    <li className="admin-menu" onClick={()=>setAdminPage("Leaderboard")}>
+                    <li className="admin-menu dark:bg-white" onClick={()=>setAdminPage("Leaderboard")}>
                         <h4 className="flex items-center gap-3">
                             <InlineSVG
                                 src="/images/leader.svg"
@@ -22,9 +22,9 @@ export const AdminSideMenu = ({setAdminPage}: any) => {
                         <InlineSVG
                         src="/images/arrow_right.svg"
                         className="icon fill-current text-headerText"
-                        style={{color: "#ff3572"}}
+                        style={{color: "#0ea5e9"}}
                     /></li>
-                    <li className="admin-menu" onClick={()=>setAdminPage("Share Settings")}>
+                    <li className="admin-menu dark:bg-white" onClick={()=>setAdminPage("Share Settings")}>
                         <h4 className="flex items-center gap-3"> 
                             <InlineSVG
                                 src="/images/slider.svg"
@@ -34,9 +34,9 @@ export const AdminSideMenu = ({setAdminPage}: any) => {
                         <InlineSVG
                         src="/images/arrow_right.svg"
                         className="icon fill-current text-headerText"
-                        style={{color: "#ff3572"}}
+                        style={{color: "#0ea5e9"}}
                     /></li>
-                    <li className="admin-menu" onClick={()=>setAdminPage("Giveaway Details")}>
+                    <li className="admin-menu dark:bg-white" onClick={()=>setAdminPage("Giveaway Details")}>
                         <h4 className="flex items-center gap-3">
                             <InlineSVG
                                 src="/images/details.svg"
@@ -46,7 +46,7 @@ export const AdminSideMenu = ({setAdminPage}: any) => {
                         <InlineSVG
                         src="/images/arrow_right.svg"
                         className="icon fill-current text-headerText"
-                        style={{color: "#ff3572"}}
+                        style={{color: "#0ea5e9"}}
                     /></li>
                 </ul>
             </div>

@@ -15,13 +15,13 @@ const ViewYourNfts = () => {
         rel="noopener noreferrer"
         passHref
         href={`${constants.mintbaseBaseUrl}/human/${activeAccountId}/owned/0`}
-        className="text-linkColor text-sm"
+        className="text-linkColor text-sm dark:text-white"
       >
         View your NFTs
       </Link>
       <InlineSVG
         src="/images/link_arrow.svg"
-        className="fill-current text-linkColor"
+        className="fill-current text-linkColor dark:text-white"
       />
     </div>
   ) : null;
