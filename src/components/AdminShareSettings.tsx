@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { AccordianItem } from "./AccordianItem"
 import { useFetchSocialMedias, useSaveSocialMedia } from "@/hooks/db/SocialMediaHook";
 import { SocialMedia } from "@/data/types";
@@ -9,14 +9,15 @@ export const AdminShareSettings = () => {
     type MessageKeys = 'facebook' | 'twitter' | 'whatsapp';
 
     const [open, setOpen] = useState<number | null>(null);
-    const { socialMedias } = useFetchSocialMedias();
     const {saveSocialMedia} = useSaveSocialMedia();
+    const [toast, setToast] = useState(false);
     const { darkMode } = useDarkMode();
     // const [socialMediasLocal, setSocialMediasLocal] = useState<SocialMedia[] | null>(socialMedias);
     const [socialMediasLocal, setSocialMediasLocal] = useState<SocialMedia[] | null>([
-        { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
+        // { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
         { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: false },
         { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: false },
+        { name: 'telegram', title: "Telegram", path: "/images/telegram.svg",  message: "", enabled: false },
     ]);
 
     const toggle = (index: number, key: MessageKeys) => {
@@ -33,9 +34,7 @@ export const AdminShareSettings = () => {
     };
 
     const handleSave = () => {
-        // const enabledMessages = socialMedias?.filter(item => item.enabled);
-        // console.log("Saved messages: ", enabledMessages);
-        console.log("Saved messages 2 : ", socialMediasLocal);
+        console.log("Saved messages 1 : ", socialMediasLocal);
         if(socialMediasLocal) {
             socialMediasLocal.map((media, i)=> {
                 const updatedMedia: SocialMedia = {
@@ -46,15 +45,35 @@ export const AdminShareSettings = () => {
                     enabled: media.enabled
                 };
                 saveSocialMedia(updatedMedia);
-            })
-            console.log("Saved messages 1: ", socialMediasLocal);
+                console.log("Saved messages 2: ", updatedMedia);
+            });
+            setSocialMediasLocal([
+                { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
+                { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: false },
+                { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: false },
+                { name: 'telegram', title: "Telegram", path: "/images/telegram.svg",  message: "", enabled: false },
+
+            ])
+            setToast(true);
         }
     };
 
     const handleCancel = () => {
-        // setSocialMediasLocal(socialMedias);
-        // console.log("Erased messages: ", socialMediasLocal);
+        setSocialMediasLocal([
+            { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
+            { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: false },
+            { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: false },
+            { name: 'telegram', title: "Telegram", path: "/images/telegram.svg",  message: "", enabled: false },
+        ])
     };
+
+    useEffect(()=> {
+        if(toast) {
+            setTimeout(()=> {
+                setToast(false);
+            }, 5000)
+        }
+    }, [toast])
 
     return (
         <div className={darkMode ? "dark" : ""}>
@@ -101,6 +120,19 @@ export const AdminShareSettings = () => {
                     </div>
                 </div>
          </div>
+         {toast && 
+         <div id="toast-default" className="toast-container left-1/2 transform -translate-x-1/2 absolute ">
+            <div className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
+                <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                    <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                    </svg>
+                    <span className="sr-only">Check icon</span>
+                </div>
+                <div className="ms-1 text-sm font-normal">Share Settings Updated Successfully!</div>
+            </div>
+            <div className="border-bottom-animation"></div>
+        </div>}
         </div>
     )
 }
