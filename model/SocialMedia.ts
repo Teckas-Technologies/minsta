@@ -22,8 +22,7 @@ const socialMediaSchema = new mongoose.Schema({
         required: true,
     },
     message: {
-        type: String,
-        required: true,
+        type: String
     },
     enabled: {
         type: Boolean,

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { getImageUrl } from "@/utils/imageUrl";
 import InlineSVG from "react-inlinesvg";
 import { useMbWallet } from "@mintbase-js/react";
+import { useFetchSocialMedias } from "@/hooks/db/SocialMediaHook";
 
 const ImageThumb = ({ token, index }: any) => {
   const imageUrl = token?.media;
@@ -17,11 +18,15 @@ const ImageThumb = ({ token, index }: any) => {
   type MessageKeys = 'facebook' | 'twitter' | 'whatsapp';
   const toggleShareRef = useRef<HTMLDivElement | null>(null);
 
-  const [socialMedias, setSocialMedias] = useState<Array<{name: MessageKeys, title: string, path: string, message: string, enabled: boolean}>>([
-      { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: true },
-      { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: true },
-      { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: true },
-  ]);
+  const { socialMedias } = useFetchSocialMedias();
+
+  // const [socialMedias, setSocialMedias] = useState<Array<{name: MessageKeys, title: string, path: string, message: string, enabled: boolean}>>([
+  //     { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: true },
+  //     { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: true },
+  //     { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: true },
+  // ]);
+
+  let enabledMedia = socialMedias?.filter((media) => media.enabled === true);
 
   const handleError = () => {
     setError(true);
@@ -36,18 +41,43 @@ const ImageThumb = ({ token, index }: any) => {
     window.location.href = `meta/${token?.metadata_id}`;
   };
 
-  const openMedia = (name: string, e:any) => {
+  // const openMedia = (name: string, message:string, e:any) => {
+  //   e.preventDefault();
+  //   if(name === "twitter"){
+  //     window.open(
+  //       `https://twitter.com/intent/tweet?url=%0aCheck%20out%20mine%3A%20${
+  //         window.location.origin
+  //       }/meta/${decodeURIComponent(
+  //         token?.metadata_id
+  //       )}%2F&via=mintbase&text=${message}`,
+  //       "_blank"
+  //     );
+  //   }
+  // }
+
+  const openMedia = (name: string, message: string, e: any) => {
     e.preventDefault();
-    if(name === "twitter"){
-      window.open(
-        `https://twitter.com/intent/tweet?url=%0aCheck%20out%20mine%3A%20${
-          window.location.origin
-        }/meta/${decodeURIComponent(
-          token?.metadata_id
-        )}%2F&via=mintbase&text=${constants.twitterText}`,
-        "_blank"
-      );
+    const url = `${window.location.origin}/meta/${decodeURIComponent(token?.metadata_id)}`;
+    let shareUrl = '';
+  
+    switch(name) {
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?url=%0aCheck%20out%20mine%3A%20${url}%2F&via=mintbase&text=${message}`;
+        break;
+      case 'telegram':
+        shareUrl = `https://telegram.me/share/url?url=${url}&text=${message}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        break;
+      case 'whatsapp':
+        shareUrl = `https://api.whatsapp.com/send?text=${message}%20${url}`;
+        break;
+      default:
+        return;
     }
+  
+    window.open(shareUrl, "_blank");
   }
 
   useEffect(() => {
@@ -114,10 +144,10 @@ const ImageThumb = ({ token, index }: any) => {
           </button>
           {shareModal && 
             <div className="absolute top-[-2rem] w-full flex justify-end pr-4" ref={toggleShareRef}>
-              {/* <h2>Share apps...</h2> */}
+              {enabledMedia ?
               <div className="share-apps flex items-center">
-                {socialMedias.map((media, i) => (
-                  <div key={i} className="share-app cursor-pointer px-2 py-1 mx-1" onClick={(e)=>openMedia(media.name, e)}>
+                {enabledMedia?.map((media, i) => (
+                  <div key={i} className="share-app cursor-pointer px-2 py-1 mx-1" onClick={(e)=>openMedia(media.name, media.message, e)}>
                     <InlineSVG
                       src={media.path}
                       className="fill-current"
@@ -125,7 +155,11 @@ const ImageThumb = ({ token, index }: any) => {
                       />
                   </div>
                 ))}
+              </div> : 
+              <div className="no-share">
+                <h2>Can't Share</h2>
               </div>
+              }
             </div>
           }
           <button
