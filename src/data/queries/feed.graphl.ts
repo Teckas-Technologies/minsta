@@ -171,3 +171,30 @@ export const FETCH_FEED_DESC = gql`
     }
   }
 `;
+
+export const HIDE_POST = gql`
+query minsta_search_token(
+    $owner: String
+    $contractAddress: String
+  ) {
+    token: 
+ mb_views_nft_tokens(
+    where: {
+      nft_contract_id: {_eq: $contractAddress},
+      burned_timestamp: {_is_null: true},
+      metadata_content_flag: {_is_null: true},
+      nft_contract_content_flag: {_is_null: true},
+      token_id: {_nin: $hidePostIds}
+    }
+    order_by: {minted_timestamp: desc}
+  ) {
+    id: token_id
+    createdAt: minted_timestamp
+    media
+    title
+    description
+    metadata_id
+    owner
+  }
+}
+`

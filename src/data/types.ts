@@ -44,3 +44,12 @@ export interface SocialMedia {
   message: string;
   enabled: boolean;
 }
+
+export interface HidePost {
+  accountId : string;
+  hiddedTokenIds: HideTokenId[];
+}
+
+export interface HideTokenId {
+  id: string;
+}
