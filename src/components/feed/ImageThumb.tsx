@@ -159,7 +159,7 @@ const ImageThumb = ({ token, index, dark }: any) => {
                 ))}
               </div> : 
               <div className="no-share">
-                <h2>Can't Share</h2>
+                <h2>Can&apos;t Share</h2>
               </div>
               }
             </div>
