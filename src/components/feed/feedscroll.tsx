@@ -6,7 +6,7 @@ import { MemoizedImageThumb } from "./ImageThumb";
 import { useEffect, useState } from "react";
 import { TokenData } from "@/data/types";
 
-export const FeedScroll = ({ blockedNfts, sort , search, dark}: any) => {
+export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids}: any) => {
   const [mod, setMod] = useState(true);
   const ref = useRef<HTMLDivElement | null>(null);
   const entry = useIntersectionObserver(ref, {});
@@ -36,8 +36,14 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark}: any) => {
                owner.includes(search.toLowerCase());
       });
     }
-    
 
+    // hide post
+    if (hidepostids?.length > 0) {
+      filteredData = filteredData.filter((token: TokenData) => {
+        return !hidepostids.includes(token.id);
+      });
+    }
+    
     const uniqueMetadataIds = new Set<string>();
 
       filteredData = filteredData?.filter((token: any) => {
@@ -68,12 +74,8 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark}: any) => {
     }
 
     return filteredData;
-  }, [items, blockedNfts, sort, search]);
+  }, [items, blockedNfts, sort, search, hidepostids]);
 
-  // useEffect(() => {
-  //   window.location.reload();
-  // }, [items]);
-  console.log("Dark Feed >>", dark)
 
   return (
     <>
