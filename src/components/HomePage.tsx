@@ -13,6 +13,7 @@ import { InfiniteScrollHook } from "@/data/types";
 import InlineSVG from "react-inlinesvg";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { FirstFeed } from "./FirstFeed";
+import { useFetchHiddenPost } from "@/hooks/db/HidePostHook";
 
 interface NFT {
   data: InfiniteScrollHook | undefined;
@@ -30,8 +31,17 @@ export const HomePage = () => {
   const [selectedOption, setSelectedOption] = useState("New to Old");
   let [grid, setGrid] = useState(1);
   const {darkMode} = useDarkMode();
+  const [hidePostIds, setHidePostIds] = useState<string[]>([]);
 
-  // const {data, isLoading} = useSearchTokenByOwner("owenerid");
+  const { hiddenPost } = useFetchHiddenPost(activeAccountId?.toString() || "");
+  
+  useEffect(() => {
+    if (hiddenPost?.hiddedTokenIds) {
+      const ids = hiddenPost.hiddedTokenIds.map(token => token.id);
+      setHidePostIds(ids);
+    }
+    console.log("Ids >>>>>>>>> ", hidePostIds)
+  }, [hiddenPost]);
 
   const router = useRouter();
   const handleLetsGoBtn = () => {
@@ -141,7 +151,7 @@ export const HomePage = () => {
         
           <FirstFeed tokensFetched={tokensFetched} blockedNfts={blockedNfts} />
 
-          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode}/>
+          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode} hidepostids={hidePostIds}/>
 
         </DynamicGrid>
       </main>
