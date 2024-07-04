@@ -11,9 +11,9 @@ export const useFetchSocialMedias = () => {
             setLoading(true);
             setError(null);
             try {
-                // const response = await fetch(`/api/socialmedia`);
-                // if (!response.ok) throw new Error('Network response was not ok');
-                // const socialMedias:SocialMedia[] = await response.json();
+                const response = await fetch(`/api/socials`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const socialMedias:SocialMedia[] = await response.json();
                 console.log(" Social Medias : ", socialMedias)
                 setSocialMedias(socialMedias)
             } catch (err) {
@@ -42,17 +42,17 @@ export const useSaveSocialMedia = () => {
   
       try {
         console.log("Hook Social Media :", data)
-        // const response = await fetch('/api/socialmedia', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify(data),
-        // });
+        const response = await fetch('/api/socials', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
   
-        // if (!response.ok) {
-        //   throw new Error('Failed to save data');
-        // }
+        if (!response.ok) {
+          throw new Error('Failed to save data');
+        }
       } catch (error) {
         console.error('Error saving data:', error);
         setError('Failed to save Social Media');
