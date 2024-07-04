@@ -11,7 +11,6 @@ interface GridProps {
   nColsXXXl?: number;
   nGap?: number;
   nGapMobile?: number;
-  isMobile:boolean;
   grid:number
 }
 
@@ -26,7 +25,6 @@ export const DynamicGrid = ({
   noMargin,
   nGap,
   nGapMobile,
-  isMobile,
   grid
 }: GridProps): JSX.Element => {
   const colsXXl = nColsXXl ? `xxl:grid-cols-${nColsXXl} ` : `xxl:grid-cols-5`;

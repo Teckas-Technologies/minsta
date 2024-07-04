@@ -1,3 +1,4 @@
+import { useDarkMode } from "@/context/DarkModeContext";
 import useMintImage from "@/utils/useMint";
 import { useMbWallet } from "@mintbase-js/react";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,7 @@ export default function FileUploadPage() {
     const [uploading, setUploading] = useState(false);
     const { push } = useRouter();
     const {connect, activeAccountId, isConnected } = useMbWallet();
+    const { darkMode } = useDarkMode();
 
     const addTag = () => {
         if (tag.trim() !== "" && tags.length < 4) {
@@ -65,9 +67,9 @@ export default function FileUploadPage() {
 
 
     return (
-        <>
-        <main className="h-[100vh] w-[100%] px-4  flex flex-col items-center photo-main">
-            <div className="photo-box h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 scroll mb-2">
+        <div className={darkMode ? "dark" : ""}>
+        <main className="h-[100vh] w-[100%] px-4  flex flex-col items-center photo-main bg-white dark:bg-slate-800">
+            <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 scroll mb-2`}>
                 <div className="gallery-model-page1">
                     <div className={`gallery-model1`}>
                         {!uploading ?
@@ -146,6 +148,6 @@ export default function FileUploadPage() {
                 }
             </div>
         </main>
-        </>
+        </div>
     )
 }
