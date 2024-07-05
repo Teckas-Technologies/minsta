@@ -14,7 +14,6 @@ export const useFetchSocialMedias = () => {
                 const response = await fetch(`/api/socials`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const socialMedias:SocialMedia[] = await response.json();
-                console.log(" Social Medias : ", socialMedias)
                 setSocialMedias(socialMedias)
             } catch (err) {
                 console.error('Error fetching social medias:', err);
@@ -41,7 +40,6 @@ export const useSaveSocialMedia = () => {
       setError(null);
   
       try {
-        console.log("Hook Social Media :", data)
         const response = await fetch('/api/socials', {
           method: 'POST',
           headers: {

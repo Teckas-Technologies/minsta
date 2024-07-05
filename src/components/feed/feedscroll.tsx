@@ -12,7 +12,11 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
   const entry = useIntersectionObserver(ref, {});
   const isVisible = !!entry?.isIntersecting;
 
-  const { items, loadingItems, total, error } = useInfiniteScrollGQL("q_FETCH_FEED", isVisible, { query: FETCH_FEED });
+  const { items, loadingItems, total, error, setSearchInput } = useInfiniteScrollGQL("q_FETCH_FEED", isVisible, { query: FETCH_FEED }, search);
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
 
   let memoizedData = useMemo(() => {
     let filteredData = items;
@@ -26,7 +30,7 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
     //   });
     // }
     if (search) {
-      filteredData = filteredData.filter((token: TokenData) => {
+      filteredData = filteredData?.filter((token: TokenData) => {
         const title = token.title ? token.title.toLowerCase() : '';
         const description = token.description ? token.description.toLowerCase() : '';
         const owner = token.owner ? token.owner.toLowerCase() : '';
@@ -39,7 +43,7 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
 
     // hide post
     if (hidepostids?.length > 0) {
-      filteredData = filteredData.filter((token: TokenData) => {
+      filteredData = filteredData?.filter((token: TokenData) => {
         return !hidepostids.includes(token.id);
       });
     }
@@ -62,15 +66,15 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
       });
 
     // Filter blocked NFTs
-    if (blockedNfts && blockedNfts.length) {
-      filteredData = filteredData.filter((token:TokenData) => !blockedNfts.includes(token.metadata_id));
-    }
+    // if (blockedNfts && blockedNfts.length) {
+    //   filteredData = filteredData?.filter((token:TokenData) => !blockedNfts.includes(token.metadata_id));
+    // }
 
     // Sort data
     if (sort === "Old to New") {
-      filteredData.sort((a: TokenData, b:TokenData) => (a.createdAt > b.createdAt ? 1 : -1));
+      filteredData?.sort((a: TokenData, b:TokenData) => (a.createdAt > b.createdAt ? 1 : -1));
     } else if (sort === "New to Old") {
-      filteredData.sort((a: TokenData, b:TokenData) => (a.createdAt < b.createdAt ? 1 : -1));
+      filteredData?.sort((a: TokenData, b:TokenData) => (a.createdAt < b.createdAt ? 1 : -1));
     }
 
     return filteredData;

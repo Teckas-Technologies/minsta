@@ -55,7 +55,6 @@ export const HomePage = () => {
       const ids = hiddenPost.hiddedTokenIds.map(token => token.id);
       setHidePostIds(ids);
     }
-    console.log("Ids >>>>>>>>> ", hidePostIds)
   }, [hiddenPost]);
 
   const router = useRouter();
@@ -80,7 +79,6 @@ export const HomePage = () => {
   };
 
   const handleGrid = () => {
-    console.log("Grid :", grid)
     if(grid === 1) {
       setGrid(2)
     } else if(grid === 2) {
@@ -162,9 +160,9 @@ export const HomePage = () => {
           </div>
         </div>
         <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
-          <FirstToken {...firstTokenProps} />
+          {/* <FirstToken {...firstTokenProps} /> */}
         
-          <FirstFeed tokensFetched={tokensFetched} blockedNfts={blockedNfts} />
+          {/* <FirstFeed tokensFetched={tokensFetched} blockedNfts={blockedNfts} /> */}
 
           <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode} hidepostids={hidePostIds} setToast={setToast}/>
 
