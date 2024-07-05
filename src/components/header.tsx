@@ -5,7 +5,6 @@ import { usePathname, useRouter} from "next/navigation";
 import { ReactEventHandler, useState ,useEffect,useRef } from "react";
 import InlineSVG from "react-inlinesvg";
 import '../app/style.css'
-import { AdminSideMenu } from "./AdminSideMenu";
 import { constants } from "@/constants";
 import Link from "next/link";
 import { useDarkMode } from "@/context/DarkModeContext";
@@ -141,9 +140,14 @@ const Header = () => {
 
         {isAdmin && isConnected ? 
           (
-          <div className="menu">
-            <button onClick={()=>push("/admin")}>Admin</button>
-          </div>
+          <>
+            <div className="menu">
+              <button onClick={()=>push("/admin")}>Admin</button>
+            </div>
+            <div className="menu">
+              <button onClick={()=>push("/profile")}>Profile</button>
+            </div>
+          </>
           ) : activeAccountId && !isAdmin ? (
           <div className="menu">
             <button onClick={()=>push("/profile")}>Profile</button>
@@ -258,9 +262,14 @@ const Header = () => {
               </div>
               {isAdmin && isConnected ? 
                 (
+                <>
                 <div className="menu">
                   <button onClick={()=>push("/admin")}>Admin</button>
                 </div>
+                <div className="menu">
+                  <button onClick={()=>push("/profile")}>Profile</button>
+                </div>
+                </>
                 ) : activeAccountId && !isAdmin ? (
                 <div className="menu">
                   <button onClick={()=>push("/profile")}>Profile</button>
@@ -374,6 +383,7 @@ const Header = () => {
               />
             </li>
             {isAdmin && isConnected ? (
+              <>
               <li className="side-menu" onClick={ ()=> push("/admin")}>
                 <h4>Admin</h4> 
                 <InlineSVG
@@ -382,6 +392,15 @@ const Header = () => {
                   style={{color: "#ff3572"}}
                 />
               </li>
+              <li className="side-menu" onClick={ ()=> push("/profile")}>
+                <h4>Profile</h4> 
+                <InlineSVG
+                  src="/images/arrow_right.svg"
+                  className="icon fill-current text-headerText"
+                  style={{color: "#ff3572"}}
+                />
+              </li>
+              </>
             ): activeAccountId && !isAdmin ? (
               <li className="side-menu" onClick={ ()=> push("/profile")}>
                 <h4>Profile</h4> 

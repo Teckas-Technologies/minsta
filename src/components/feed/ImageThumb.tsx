@@ -12,7 +12,7 @@ import { useFetchSocialMedias } from "@/hooks/db/SocialMediaHook";
 import { useSaveHidePost } from "@/hooks/db/HidePostHook";
 import { HidePost } from "@/data/types";
 
-const ImageThumb = ({ token, index, dark }: any) => {
+const ImageThumb = ({ token, index, dark, setToast }: any) => {
   const imageUrl = token?.media;
   const [error, setError] = useState(false);
   const { isConnected, activeAccountId } = useMbWallet();
@@ -65,10 +65,10 @@ const ImageThumb = ({ token, index, dark }: any) => {
   
     switch(name) {
       case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?url=%0aCheck%20out%20mine%3A%20${url}%2F&via=mintbase&text=${message}`;
+        shareUrl = `https://twitter.com/intent/tweet?url=%20${url}%2F&via=mintbase&text=${message}`;
         break;
       case 'telegram':
-        shareUrl = `https://telegram.me/share/url?url=${url}&text=${message}`;
+        shareUrl = `https://telegram.me/share/url?text=${message}&url=${url}`;
         break;
       case 'facebook':
         shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
@@ -104,7 +104,9 @@ const ImageThumb = ({ token, index, dark }: any) => {
         }
       ]
     }
-    await saveHidePost(data)
+    await saveHidePost(data).then(()=>{
+      setToast(true);
+    })
   }
 
 
@@ -120,8 +122,6 @@ const ImageThumb = ({ token, index, dark }: any) => {
         </div>
       </div>
     );
-
-    console.log("Dark Image >>", dark)
 
   if (imageUrl) {
     const finalUrl = getImageUrl(imageUrl);
@@ -193,17 +193,7 @@ const ImageThumb = ({ token, index, dark }: any) => {
           <div>
             <button
                 className="absolute top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.open(
-                    `https://twitter.com/intent/tweet?url=%0aCheck%20out%20mine%3A%20${
-                      window.location.origin
-                    }/meta/${decodeURIComponent(
-                      token?.metadata_id
-                    )}%2F&via=mintbase&text=${constants.twitterText}`,
-                    "_blank"
-                  );
-                }}
+                onClick={(e) => {console.log("Deleted")}}
               >
                 <InlineSVG
                 src="/images/trash.svg"

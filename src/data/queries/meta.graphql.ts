@@ -15,6 +15,7 @@ query v2_omnisite_GetMetadataStaticReferences($metadataId: String!) {
       }
       distinct_on: owner
     ) {
+      id: token_id
       owner
     }
 }

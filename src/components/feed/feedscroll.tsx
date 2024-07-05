@@ -6,7 +6,7 @@ import { MemoizedImageThumb } from "./ImageThumb";
 import { useEffect, useState } from "react";
 import { TokenData } from "@/data/types";
 
-export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids}: any) => {
+export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setToast}: any) => {
   const [mod, setMod] = useState(true);
   const ref = useRef<HTMLDivElement | null>(null);
   const entry = useIntersectionObserver(ref, {});
@@ -80,7 +80,7 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids}: any
   return (
     <>
       {memoizedData?.map((token: any, index: number) => {
-        return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} dark={dark}/>;
+        return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} dark={dark} setToast={setToast}/>;
       })}
       <div ref={ref}>
         {loadingItems?.map((item, i) => (
