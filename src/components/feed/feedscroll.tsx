@@ -66,9 +66,9 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
       });
 
     // Filter blocked NFTs
-    // if (blockedNfts && blockedNfts.length) {
-    //   filteredData = filteredData?.filter((token:TokenData) => !blockedNfts.includes(token.metadata_id));
-    // }
+    if (blockedNfts && blockedNfts.length) {
+      filteredData = filteredData?.filter((token:TokenData) => !blockedNfts.includes(token.metadata_id));
+    }
 
     // Sort data
     if (sort === "Old to New") {
