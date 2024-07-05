@@ -6,13 +6,17 @@ import { MemoizedImageThumb } from "./ImageThumb";
 import { useEffect, useState } from "react";
 import { TokenData } from "@/data/types";
 
-export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids}: any) => {
+export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setToast}: any) => {
   const [mod, setMod] = useState(true);
   const ref = useRef<HTMLDivElement | null>(null);
   const entry = useIntersectionObserver(ref, {});
   const isVisible = !!entry?.isIntersecting;
 
-  const { items, loadingItems, total, error } = useInfiniteScrollGQL("q_FETCH_FEED", isVisible, { query: FETCH_FEED });
+  const { items, loadingItems, total, error, setSearchInput } = useInfiniteScrollGQL("q_FETCH_FEED", isVisible, { query: FETCH_FEED }, search);
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
 
   let memoizedData = useMemo(() => {
     let filteredData = items;
@@ -26,7 +30,7 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids}: any
     //   });
     // }
     if (search) {
-      filteredData = filteredData.filter((token: TokenData) => {
+      filteredData = filteredData?.filter((token: TokenData) => {
         const title = token.title ? token.title.toLowerCase() : '';
         const description = token.description ? token.description.toLowerCase() : '';
         const owner = token.owner ? token.owner.toLowerCase() : '';
@@ -39,7 +43,7 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids}: any
 
     // hide post
     if (hidepostids?.length > 0) {
-      filteredData = filteredData.filter((token: TokenData) => {
+      filteredData = filteredData?.filter((token: TokenData) => {
         return !hidepostids.includes(token.id);
       });
     }
@@ -63,14 +67,14 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids}: any
 
     // Filter blocked NFTs
     if (blockedNfts && blockedNfts.length) {
-      filteredData = filteredData.filter((token:TokenData) => !blockedNfts.includes(token.metadata_id));
+      filteredData = filteredData?.filter((token:TokenData) => !blockedNfts.includes(token.metadata_id));
     }
 
     // Sort data
     if (sort === "Old to New") {
-      filteredData.sort((a: TokenData, b:TokenData) => (a.createdAt > b.createdAt ? 1 : -1));
+      filteredData?.sort((a: TokenData, b:TokenData) => (a.createdAt > b.createdAt ? 1 : -1));
     } else if (sort === "New to Old") {
-      filteredData.sort((a: TokenData, b:TokenData) => (a.createdAt < b.createdAt ? 1 : -1));
+      filteredData?.sort((a: TokenData, b:TokenData) => (a.createdAt < b.createdAt ? 1 : -1));
     }
 
     return filteredData;
@@ -80,7 +84,7 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids}: any
   return (
     <>
       {memoizedData?.map((token: any, index: number) => {
-        return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} dark={dark}/>;
+        return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} dark={dark} setToast={setToast}/>;
       })}
       <div ref={ref}>
         {loadingItems?.map((item, i) => (

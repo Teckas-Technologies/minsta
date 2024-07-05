@@ -1,11 +1,14 @@
-import { constants } from "@/constants";
+import { FETCH_FEED, SEARCH_SIMILAR_OWNER } from "@/data/queries/feed.graphl";
+import { SEARCH_FOR_OWNER } from "@/data/queries/feed.graphl";
 import { graphqlQLServiceNew } from "@/data/graphqlService";
 import { InfiniteScrollHook, InfiniteScrollHookResult } from "@/data/types";
 import { extractErrorMessage } from "@/providers/data";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useReducer } from "react";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useReducer, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useMediaQuery } from "usehooks-ts";
+import { constants } from "@/constants";
+import { debounce } from "lodash";
 
 const initialState = {
   items: [],
@@ -13,6 +16,7 @@ const initialState = {
   isLoading: false,
   calledOffsets: [0],
   total: null,
+  searchItems: [],
 };
 
 const reducer = (state: any, action: any) => {
@@ -23,10 +27,16 @@ const reducer = (state: any, action: any) => {
       return {
         ...state,
         items: [...state.items, ...action.payload],
+        isLoading: false,
+      };
+    case "FETCH_SEARCH_SUCCESS":
+      return {
+        ...state,
+        searchItems: action.payload,
+        isLoading: false,
       };
     case "FETCH_RESET":
       return initialState;
-
     case "SET_TOTAL":
       return { ...state, total: action.payload };
     case "SET_CALLED_OFFSETS":
@@ -34,7 +44,6 @@ const reducer = (state: any, action: any) => {
         ...state,
         calledOffsets: [...state.calledOffsets, action.payload],
       };
-
     case "SET_OFFSET":
       return { ...state, offset: action.payload };
     case "SET_LOADING":
@@ -49,12 +58,15 @@ const reducer = (state: any, action: any) => {
 const useInfiniteScrollGQL = (
   queryKey: string,
   isVisible: boolean,
-  graphQLObj?: any
+  graphQLObj?: any,
+  initialSearch?: string
 ) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [searchInput, setSearchInput] = useState(initialSearch || "");
+  const queryClient = useQueryClient();
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const fetchNum = isDesktop ? 11 : 3;
+  const fetchNum = isDesktop ? 12 : 15;
 
   const fetchItems = async () => {
     dispatch({ type: "FETCH_START" });
@@ -66,7 +78,7 @@ const useInfiniteScrollGQL = (
         ...constants.legacyProxyAddresses,
       ],
       contractAddress: constants.tokenContractAddress,
-      offset: state.offset === 1 ? 1 : (Number(state.offset) - 1) * fetchNum,
+      offset: (state.offset - 1) * fetchNum,
     };
 
     const scrollData = (await graphqlQLServiceNew<InfiniteScrollHook>({
@@ -74,7 +86,7 @@ const useInfiniteScrollGQL = (
       variables: variables,
     })) as InfiniteScrollHookResult;
 
-    const { data } = scrollData;
+    const { data } : any = scrollData;
 
     dispatch({ type: "SET_LOADING", payload: false });
     dispatch({ type: "SET_OFFSET", payload: state.offset + 1 });
@@ -92,8 +104,38 @@ const useInfiniteScrollGQL = (
     return data?.token;
   };
 
-  // useInfiniteQuery
+  const fetchSearchItems = async () => {
+    dispatch({ type: "FETCH_START" });
 
+    const searchText = searchInput?.toString().trim();
+
+    const searchTextNew = searchText ?? "";
+
+    const variables = {
+      owner: searchTextNew,
+      accountIds: [
+        constants.proxyContractAddress,
+        ...constants.legacyProxyAddresses,
+      ],
+      contractAddress: constants.tokenContractAddress,
+    };
+    const searchData = (await graphqlQLServiceNew<InfiniteScrollHook>({
+      query: SEARCH_SIMILAR_OWNER,
+      variables: variables,
+    })) as InfiniteScrollHookResult;
+
+    dispatch({ type: "SET_LOADING", payload: false });
+    dispatch({
+      type: "FETCH_SEARCH_SUCCESS",
+      payload: searchData.data.token,
+    });
+
+    return searchData.data.token;
+  };
+
+  const debouncedFetchSearchItems = debounce(fetchSearchItems, 3000);
+
+  // useInfiniteQuery
   const { data, fetchNextPage, isFetchingNextPage, error } = useInfiniteQuery(
     [queryKey, state.offset],
     fetchItems,
@@ -102,11 +144,17 @@ const useInfiniteScrollGQL = (
       cacheTime: Infinity,
       refetchOnWindowFocus: false,
       enabled:
-        !state.calledOffsets.includes(state.offset) || state.offset === 1,
+        !state.calledOffsets.includes(state.offset) && !searchInput,
     }
   );
 
-  // need to do error treatment, for now will render an error message on screen
+  useEffect(() => {
+    if (searchInput) {
+      debouncedFetchSearchItems();
+    } else {
+      fetchNextPage();
+    }
+  }, [searchInput]);
 
   useEffect(() => {
     if (error) {
@@ -132,8 +180,6 @@ const useInfiniteScrollGQL = (
     }
   };
 
-  // scroll mechanism, detects if users reached bottom
-
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -146,8 +192,9 @@ const useInfiniteScrollGQL = (
   const isMinthenInfiniteScrollNum = state.items.length < fetchNum;
 
   return {
-    items: state.items,
+    items: searchInput ? state.searchItems : state.items,
     resetItemList,
+    setSearchInput, // Provide the setSearchInput function to update the search input state
     loadingItems:
       state.items.length < state.total && !isMinthenInfiniteScrollNum
         ? Array.from({ length: 1 }, (_) => ({ id: "" }))

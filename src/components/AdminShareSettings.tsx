@@ -48,7 +48,7 @@ export const AdminShareSettings = () => {
                 console.log("Saved messages 2: ", updatedMedia);
             });
             setSocialMediasLocal([
-                { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
+                // { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
                 { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: false },
                 { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: false },
                 { name: 'telegram', title: "Telegram", path: "/images/telegram.svg",  message: "", enabled: false },
@@ -60,7 +60,7 @@ export const AdminShareSettings = () => {
 
     const handleCancel = () => {
         setSocialMediasLocal([
-            { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
+            // { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
             { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: false },
             { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: false },
             { name: 'telegram', title: "Telegram", path: "/images/telegram.svg",  message: "", enabled: false },
@@ -76,7 +76,7 @@ export const AdminShareSettings = () => {
     }, [toast])
 
     return (
-        <div className={darkMode ? "dark" : ""}>
+        <div className={`${darkMode ? "dark" : ""}`}>
          <div className="admin-main-card h-full flex-col flex justify-between gap-3 dark:bg-slate-800">
                 <div className="leader-board-title">
                     <h2 className="text-xl text-center sm:text-left py-1 title-font dark:text-white">Share Settings</h2>
@@ -121,7 +121,7 @@ export const AdminShareSettings = () => {
                 </div>
          </div>
          {toast && 
-         <div id="toast-default" className="toast-container left-1/2 transform -translate-x-1/2 absolute ">
+         <div id="toast-default" className="toast-container top-20 left-1/2 transform -translate-x-1/2 absolute ">
             <div className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
                 <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
                     <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">

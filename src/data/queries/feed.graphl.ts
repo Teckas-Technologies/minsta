@@ -198,3 +198,34 @@ query minsta_search_token(
   }
 }
 `
+
+export const SEARCH_SIMILAR_OWNER = gql`
+  query minsta_fetch_feed_minted_tokens(
+    $accountIds: [String!]!
+    $contractAddress: String
+    $owner: String
+  ) {
+    token: mb_views_nft_tokens(
+      where: {nft_contract_id: 
+        {_eq: $contractAddress}, 
+        burned_timestamp: {_is_null: true}, 
+        metadata_content_flag: {_is_null: true}, 
+        nft_contract_content_flag: {_is_null: true}, 
+        owner: {_iregex: $owner}}
+      order_by: {minted_timestamp: desc}
+    ) {
+      id: token_id
+      createdAt: minted_timestamp
+      media
+      title
+      description
+      metadata_id
+      owner
+    }
+    mb_views_nft_tokens_aggregate(where: {minter: {_in: $accountIds}, nft_contract_id: {_eq: $contractAddress}, burned_timestamp: {_is_null: true}}) {
+      aggregate {
+      count
+      }
+    }
+  }
+`;
