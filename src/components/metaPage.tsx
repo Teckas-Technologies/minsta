@@ -42,7 +42,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
   
     switch(name) {
       case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?url=%0aCheck%20out%20mine%3A%20${url}%2F&via=mintbase&text=${message}`;
+        shareUrl = `https://twitter.com/intent/tweet?url=%20${url}%2F&via=mintbase&text=${message}`;
         break;
       case 'telegram':
         shareUrl = `https://telegram.me/share/url?url=${url}&text=${message}`;
