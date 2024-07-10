@@ -1,7 +1,7 @@
 import { FETCH_FEED, SEARCH_SIMILAR_OWNER } from "@/data/queries/feed.graphl";
 import { SEARCH_FOR_OWNER } from "@/data/queries/feed.graphl";
 import { graphqlQLServiceNew } from "@/data/graphqlService";
-import { InfiniteScrollHook, InfiniteScrollHookResult } from "@/data/types";
+import { HidePost, InfiniteScrollHook, InfiniteScrollHookResult } from "@/data/types";
 import { extractErrorMessage } from "@/providers/data";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useReducer, useState } from "react";
@@ -9,6 +9,8 @@ import { toast } from "react-hot-toast";
 import { useMediaQuery } from "usehooks-ts";
 import { constants } from "@/constants";
 import { debounce } from "lodash";
+import { useFetchHiddenPost } from "./db/HidePostHook";
+import { useMbWallet } from "@mintbase-js/react";
 
 const initialState = {
   items: [],
@@ -59,11 +61,15 @@ const useInfiniteScrollGQL = (
   queryKey: string,
   isVisible: boolean,
   graphQLObj?: any,
-  initialSearch?: string
+  initialSearch?: string,
+  hiddedTokenIds?: any,
+  activeId?:any
 ) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [searchInput, setSearchInput] = useState(initialSearch || "");
   const queryClient = useQueryClient();
+  const { activeAccountId } = useMbWallet();
+  const { hiddenPost, fetchHiddenPost } = useFetchHiddenPost();
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const fetchNum = isDesktop ? 12 : 15;
@@ -71,12 +77,25 @@ const useInfiniteScrollGQL = (
   const fetchItems = async () => {
     dispatch({ type: "FETCH_START" });
 
+    let idsList: string[] = [];
+    if (activeId) {
+      const hidedPosts = await fetchHiddenPost(activeId);
+      idsList = hidedPosts?.hiddedTokenIds.map(token => token.id) || [];
+    }
+
+    console.log("Active Id >> ", activeId)
+
+    console.log("Hidden Ids from useHook >>> ", idsList)
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+
     const variables = {
       limit: fetchNum,
       accountIds: [
         constants.proxyContractAddress,
         ...constants.legacyProxyAddresses,
       ],
+      hiddenIds: idsList,
       contractAddress: constants.tokenContractAddress,
       offset: (state.offset - 1) * fetchNum,
     };
@@ -176,6 +195,7 @@ const useInfiniteScrollGQL = (
       const newOffset = state.offset + 1;
       if (!state.calledOffsets.includes(newOffset)) {
         fetchNextPage();
+        // setTimeout(fetchNextPage, 5000);
       }
     }
   };
@@ -194,7 +214,7 @@ const useInfiniteScrollGQL = (
   return {
     items: searchInput ? state.searchItems : state.items,
     resetItemList,
-    setSearchInput, // Provide the setSearchInput function to update the search input state
+    setSearchInput, 
     loadingItems:
       state.items.length < state.total && !isMinthenInfiniteScrollNum
         ? Array.from({ length: 1 }, (_) => ({ id: "" }))

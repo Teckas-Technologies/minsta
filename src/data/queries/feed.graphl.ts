@@ -35,6 +35,42 @@ export const FETCH_FEED = gql`
   }
 `;
 
+export const FETCH_FEED_NEW = gql`
+  query minsta_fetch_feed_minted_tokens(
+    $accountIds: [String!]!
+    $contractAddress: String
+    $limit: Int
+    $offset: Int
+    $hiddenIds: [String!]!
+  ) {
+    token: mb_views_nft_tokens(
+      where: {
+        nft_contract_id: { _eq: $contractAddress }
+        burned_timestamp: { _is_null: true }
+        metadata_content_flag: { _is_null: true }
+        nft_contract_content_flag: { _is_null: true }
+        _not: {token_id: {_in: $hiddenIds}}
+      }
+      order_by: { minted_timestamp: desc },
+       offset: $offset,
+       limit: $limit
+    ) {
+      id: token_id
+      createdAt: minted_timestamp
+      media
+      title
+      description
+      metadata_id
+      owner
+    }
+    mb_views_nft_tokens_aggregate(where: {minter: {_in: $accountIds}, nft_contract_id: {_eq: $contractAddress}, burned_timestamp: {_is_null: true}}) {
+      aggregate {
+      count
+      }
+    }
+  }
+`;
+
 export const FETCH_FIRST_TOKEN = gql`
 query minsta_fetch_firstToken($accountId: String!, $contractAddress: String) {
   token: mb_views_nft_tokens(where: {minter: {_eq: $accountId}, nft_contract_id: {_eq: $contractAddress}, 
@@ -211,7 +247,12 @@ export const SEARCH_SIMILAR_OWNER = gql`
         burned_timestamp: {_is_null: true}, 
         metadata_content_flag: {_is_null: true}, 
         nft_contract_content_flag: {_is_null: true}, 
-        owner: {_iregex: $owner}}
+        _or: [
+          {owner: {_iregex: $owner}}, 
+          {extra: {_iregex: $owner}},
+          {title: {_iregex: $owner}}
+        ]
+      }
       order_by: {minted_timestamp: desc}
     ) {
       id: token_id

@@ -21,6 +21,8 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const popRef = useRef<HTMLDivElement | null>(null);
+  const headerAccountRef = useRef<HTMLDivElement | null>(null);
+  const [subMenu, setSubmenu] = useState(false);
   const handleNet = ()=>{
     if(process.env.NEXT_PUBLIC_NETWORK=='mainnet'){
       console.log(process.env.NEXT_PUBLIC_NETWORK);
@@ -52,6 +54,19 @@ const Header = () => {
   
     document.addEventListener("mousedown", handleClickOutside);
   
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (headerAccountRef.current && !headerAccountRef.current.contains(event.target as Node)) {
+      setSubmenu(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -138,22 +153,6 @@ const Header = () => {
           <button onClick={() => push("/leaderboard")}>Leaderboard</button>
         </div>
 
-        {isAdmin && isConnected ? 
-          (
-          <>
-            <div className="menu">
-              <button onClick={()=>push("/admin")}>Admin</button>
-            </div>
-            <div className="menu">
-              <button onClick={()=>push("/profile")}>Profile</button>
-            </div>
-          </>
-          ) : activeAccountId && !isAdmin ? (
-          <div className="menu">
-            <button onClick={()=>push("/profile")}>Profile</button>
-          </div>
-        ) : ""}
-
         <div className="menu">
           <Link href="https://github.com/Teckas-Technologies/minsta" target="_blank" rel="noopener noreferrer">
           <div className="github flex items-center gap-2">
@@ -175,14 +174,118 @@ const Header = () => {
         </button>
 
         {isConnected ? (
-          <div className="login-btn">
-            <button className="gradientButton" onClick={handleSignout}> Logout</button>
-          </div>
-        ) : (
-          <div className="login-btn">
-            <button onClick={handleSignIn}> Login</button>
-          </div>
-        )}
+          // <div className="login-btn">
+          //   <button className="gradientButton" onClick={handleSignout}> Logout I</button>
+          // </div>
+          <div className="new relative" ref={headerAccountRef}>
+                  <div className="header-account bg-slate-700 flex items-center gap-3 px-3 rounded-3xl cursor-pointer" onClick={()=> setSubmenu(!subMenu)}>
+                    <div className="profile-icon">
+                        <InlineSVG
+                          src="/images/profile.svg"
+                          className="fill-current text-camera h-12"
+                        />
+                    </div>
+                    <div className="owner-name">
+                      <h2 className="text-white">{activeAccountId}</h2>
+                    </div>
+                    <div className="profile-dropdown">
+                        {!subMenu ? 
+                          <InlineSVG
+                            src="/images/right_arrow.svg"
+                            className="fill-current text-camera h-12"
+                          /> :
+                          <InlineSVG
+                            src="/images/down_arrow.svg"
+                            className="fill-current text-camera h-12"
+                          />
+                        }
+                    </div>
+                  </div>
+                  {subMenu && 
+                    <div className="absolute bg-slate-700 rounded-md top-[110%] w-full">
+                      <ul className="sub-menu-list flex flex-col gap-2 px-3 py-2">
+                        {isAdmin && isConnected ? 
+                          (
+                          <>
+                          <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={()=>{push("/profile"); setSubmenu(false);}}>
+                            <div className="sub-menu-icon">
+                              <InlineSVG
+                                src="/images/edit_profile.svg"
+                                className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                              />
+                            </div>
+                            <div className="sub-menu">
+                              <h2 className="text-slate-300 group-hover:text-white">Profile</h2>
+                            </div>
+                          </li>
+                          <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={()=>{push("/admin"); setSubmenu(false);}}>
+                            <div className="sub-menu-icon">
+                              <InlineSVG
+                                src="/images/edit_profile.svg"
+                                className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                              />
+                            </div>
+                            <div className="sub-menu">
+                              <h2 className="text-slate-300 group-hover:text-white">Admin</h2>
+                            </div>
+                          </li>
+                          </>
+                          ) : activeAccountId && !isAdmin ? (
+                            <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={()=>{push("/profile"); setSubmenu(false);}}>
+                              <div className="sub-menu-icon">
+                                <InlineSVG
+                                  src="/images/edit_profile.svg"
+                                  className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                                />
+                              </div>
+                              <div className="sub-menu">
+                                <h2 className="text-slate-300 group-hover:text-white">Profile</h2>
+                              </div>
+                            </li>
+                          ) : ""}
+                        
+                        <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={()=>{push("/hiddenposts"); setSubmenu(false);}}>
+                          <div className="sub-menu-icon">
+                            <InlineSVG
+                              src="/images/eye_hide.svg"
+                              className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                            />
+                          </div>
+                          <div className="sub-menu">
+                            <h2 className="text-slate-300 group-hover:text-white">Hidden Moments</h2>
+                          </div>
+                        </li>
+                        <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={()=>{push("/blockeduser"); setSubmenu(false);}}>
+                          <div className="sub-menu-icon">
+                            <InlineSVG
+                              src="/images/blocked_user.svg"
+                              className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                            />
+                          </div>
+                          <div className="sub-menu">
+                            <h2 className="text-slate-300 group-hover:text-white">Blocked Users</h2>
+                          </div>
+                        </li>
+                        <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={handleSignout}>
+                          <div className="sub-menu-icon">
+                            <InlineSVG
+                              src="/images/sign_out.svg"
+                              className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                            />
+                          </div>
+                          <div className="sub-menu">
+                            <h2 className="text-slate-300 group-hover:text-white">Sign Out</h2>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  }
+              </div>
+          ) : (
+            <div className="login-btn">
+              <button onClick={handleSignIn}> Login</button>
+            </div>
+          )}
 
         <div className="relative inline-block">
 
@@ -260,21 +363,6 @@ const Header = () => {
               <div className="menu">
                 <button onClick={() => push("/leaderboard")}>Leaderboard</button>
               </div>
-              {isAdmin && isConnected ? 
-                (
-                <>
-                <div className="menu">
-                  <button onClick={()=>push("/admin")}>Admin</button>
-                </div>
-                <div className="menu">
-                  <button onClick={()=>push("/profile")}>Profile</button>
-                </div>
-                </>
-                ) : activeAccountId && !isAdmin ? (
-                <div className="menu">
-                  <button onClick={()=>push("/profile")}>Profile</button>
-                </div>
-              ) : ""}
               <div className="menu">
                 <Link href="https://github.com/Teckas-Technologies/minsta" target="_blank" rel="noopener noreferrer">
                 <div className="github flex items-center gap-2">
@@ -294,8 +382,111 @@ const Header = () => {
                   <div className={`h-5 w-5 ${color=='green'?`bg-green-600`:`bg-yellow-400`} rounded-full`}></div>
               </button>
               {isConnected ? (
-                <div className="login-btn">
-                  <button onClick={handleSignout} > Logout</button>
+                // <div className="login-btn">
+                //   <button onClick={handleSignout} > Logout I</button>
+                // </div>
+                <div className="new relative" ref={headerAccountRef}>
+                  <div className="header-account bg-slate-700 flex items-center gap-3 px-3 rounded-3xl cursor-pointer" onClick={()=> setSubmenu(!subMenu)}>
+                    <div className="profile-icon">
+                        <InlineSVG
+                          src="/images/profile.svg"
+                          className="fill-current text-camera h-12"
+                        />
+                    </div>
+                    <div className="owner-name">
+                      <h2 className="text-white">{activeAccountId}</h2>
+                    </div>
+                    <div className="profile-dropdown">
+                        {!subMenu ? 
+                          <InlineSVG
+                            src="/images/right_arrow.svg"
+                            className="fill-current text-camera h-12"
+                          /> :
+                          <InlineSVG
+                            src="/images/down_arrow.svg"
+                            className="fill-current text-camera h-12"
+                          />
+                        }
+                    </div>
+                  </div>
+                  {subMenu && 
+                    <div className="absolute bg-slate-700 rounded-md top-[110%] w-full">
+                      <ul className="sub-menu-list flex flex-col gap-2 px-3 py-2">
+                        {isAdmin && isConnected ? 
+                          (
+                          <>
+                          <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={()=>push("/profile")}>
+                            <div className="sub-menu-icon">
+                              <InlineSVG
+                                src="/images/edit_profile.svg"
+                                className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                              />
+                            </div>
+                            <div className="sub-menu">
+                              <h2 className="text-slate-300 group-hover:text-white">Profile</h2>
+                            </div>
+                          </li>
+                          <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={()=>push("/admin")}>
+                            <div className="sub-menu-icon">
+                              <InlineSVG
+                                src="/images/admin_profile.svg"
+                                className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                              />
+                            </div>
+                            <div className="sub-menu">
+                              <h2 className="text-slate-300 group-hover:text-white">Admin</h2>
+                            </div>
+                          </li>
+                          </>
+                          ) : activeAccountId && !isAdmin ? (
+                            <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={()=>push("/profile")}>
+                              <div className="sub-menu-icon">
+                                <InlineSVG
+                                  src="/images/edit_profile.svg"
+                                  className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                                />
+                              </div>
+                              <div className="sub-menu">
+                                <h2 className="text-slate-300 group-hover:text-white">Profile</h2>
+                              </div>
+                            </li>
+                          ) : ""}
+                        
+                        <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={()=>{push("/hiddenposts"); setSubmenu(false);}}>
+                          <div className="sub-menu-icon">
+                            <InlineSVG
+                              src="/images/eye_hide.svg"
+                              className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                            />
+                          </div>
+                          <div className="sub-menu">
+                            <h2 className="text-slate-300 group-hover:text-white">Hidden Moments</h2>
+                          </div>
+                        </li>
+                        <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={()=>{push("/blockeduser"); setSubmenu(false);}}>
+                          <div className="sub-menu-icon">
+                            <InlineSVG
+                              src="/images/blocked_user.svg"
+                              className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                            />
+                          </div>
+                          <div className="sub-menu">
+                            <h2 className="text-slate-300 group-hover:text-white">Blocked Users</h2>
+                          </div>
+                        </li>
+                        <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={handleSignout}>
+                          <div className="sub-menu-icon">
+                            <InlineSVG
+                              src="/images/sign_out.svg"
+                              className="fill-current text-camera h-6 text-slate-300 group-hover:text-white"
+                            />
+                          </div>
+                          <div className="sub-menu">
+                            <h2 className="text-slate-300 group-hover:text-white">Sign Out</h2>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>}
                 </div>
               ) : (
                 <div className="login-btn">

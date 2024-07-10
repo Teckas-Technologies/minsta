@@ -9,7 +9,7 @@ import { FeedScroll } from "./feed/feedscroll";
 import { useEffect, useState } from "react";
 import { useSearchTokenByOwner } from "@/hooks/useSearchTokenByOwner";
 import { useFeedDesc } from "@/hooks/userFeedDesc";
-import { InfiniteScrollHook } from "@/data/types";
+import { HidePost, InfiniteScrollHook } from "@/data/types";
 import InlineSVG from "react-inlinesvg";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { FirstFeed } from "./FirstFeed";
@@ -34,7 +34,7 @@ export const HomePage = () => {
   const [toast, setToast] = useState(false);
   const [hidePostIds, setHidePostIds] = useState<string[]>([]);
 
-  const { hiddenPost } = useFetchHiddenPost(activeAccountId?.toString() || "");
+  const { hiddenPost, fetchHiddenPost } = useFetchHiddenPost();
 
   const handleCloseToast = () => {
     setToast(false);
@@ -51,8 +51,15 @@ export const HomePage = () => {
   }, [toast])
   
   useEffect(() => {
+    if (activeAccountId) {
+      const res = fetchHiddenPost(activeAccountId);
+      console.log("Res >> ", res)
+    }
+  }, [activeAccountId]);
+
+  useEffect(() => {
     if (hiddenPost?.hiddedTokenIds) {
-      const ids = hiddenPost.hiddedTokenIds.map(token => token.id);
+      const ids = hiddenPost.hiddedTokenIds.map((token) => token.id);
       setHidePostIds(ids);
     }
   }, [hiddenPost]);
@@ -130,7 +137,7 @@ export const HomePage = () => {
             </div>
             <div>
               <div className="relative">
-                <button type="button" className="relative w-full cursor-pointer rounded-3xl dd-box bg-white py-1.5 pl-1 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-sky-300 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm sm:leading-6" aria-haspopup="listbox" aria-expanded={isDropdownOpen} onClick={handleDropdownClick}>
+                <button type="button" className="relative w-full cursor-pointer rounded-3xl dd-box bg-white py-1.5 pl-1 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset  focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm sm:leading-6" aria-haspopup="listbox" aria-expanded={isDropdownOpen} onClick={handleDropdownClick}>
                   <span className="flex items-center">
                     <span className="ml-3 block truncate">{selectedOption}</span>
                   </span>
@@ -143,12 +150,12 @@ export const HomePage = () => {
 
                 {isDropdownOpen && (
                   <ul className="absolute sort-item-holder z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" role="listbox">
-                    <li className="relative sort-item cursor-default select-none py-2 pl-3 pr-9 text-gray-900" id="listbox-option-1" role="option" onClick={() => handleOptionClick("Old to New")}>
+                    <li className="relative sort-item cursor-default select-none py-2 pl-3 pr-3 text-gray-900" id="listbox-option-1" role="option" onClick={() => handleOptionClick("Old to New")}>
                       <div className="flex items-center">
                         <span className="ml-3 block truncate font-normal">Old to New</span>
                       </div>
                     </li>
-                    <li className="relative sort-item cursor-default select-none py-2 pl-3 pr-9 text-gray-900" id="listbox-option-0" role="option" onClick={() => handleOptionClick("New to Old")}>
+                    <li className="relative sort-item cursor-default select-none py-2 pl-3 pr-3 text-gray-900" id="listbox-option-0" role="option" onClick={() => handleOptionClick("New to Old")}>
                       <div className="flex items-center">
                         <span className="ml-3 block truncate font-normal">New to Old</span>
                       </div>
@@ -160,11 +167,8 @@ export const HomePage = () => {
           </div>
         </div>
         <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
-          {/* <FirstToken {...firstTokenProps} /> */}
-        
-          {/* <FirstFeed tokensFetched={tokensFetched} blockedNfts={blockedNfts} /> */}
 
-          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode} hidepostids={hidePostIds} setToast={setToast}/>
+          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode} hidepostids={hidePostIds} setToast={setToast} activeId={activeAccountId}/>
 
         </DynamicGrid>
         {toast && 

@@ -13,12 +13,23 @@ export const AdminShareSettings = () => {
     const [toast, setToast] = useState(false);
     const { darkMode } = useDarkMode();
     // const [socialMediasLocal, setSocialMediasLocal] = useState<SocialMedia[] | null>(socialMedias);
+    const { socialMedias } = useFetchSocialMedias();
     const [socialMediasLocal, setSocialMediasLocal] = useState<SocialMedia[] | null>([
-        // { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
+        { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
         { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: false },
         { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: false },
         { name: 'telegram', title: "Telegram", path: "/images/telegram.svg",  message: "", enabled: false },
     ]);
+
+    useEffect(() => {
+        if (socialMedias && socialMediasLocal) {
+            const updatedSocialMediasLocal = socialMediasLocal?.map((mediaLocal) => {
+                const matchedMedia = socialMedias.find(media => media.name === mediaLocal.name);
+                return matchedMedia ? { ...mediaLocal, message: matchedMedia.message } : mediaLocal;
+            });
+            setSocialMediasLocal(updatedSocialMediasLocal);
+        }
+    }, [socialMedias]);
 
     const toggle = (index: number, key: MessageKeys) => {
         setOpen(open === index ? null : index);
@@ -34,7 +45,6 @@ export const AdminShareSettings = () => {
     };
 
     const handleSave = () => {
-        console.log("Saved messages 1 : ", socialMediasLocal);
         if(socialMediasLocal) {
             socialMediasLocal.map((media, i)=> {
                 const updatedMedia: SocialMedia = {
@@ -45,10 +55,9 @@ export const AdminShareSettings = () => {
                     enabled: media.enabled
                 };
                 saveSocialMedia(updatedMedia);
-                console.log("Saved messages 2: ", updatedMedia);
             });
             setSocialMediasLocal([
-                // { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
+                { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
                 { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: false },
                 { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: false },
                 { name: 'telegram', title: "Telegram", path: "/images/telegram.svg",  message: "", enabled: false },
@@ -60,7 +69,7 @@ export const AdminShareSettings = () => {
 
     const handleCancel = () => {
         setSocialMediasLocal([
-            // { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
+            { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
             { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: false },
             { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: false },
             { name: 'telegram', title: "Telegram", path: "/images/telegram.svg",  message: "", enabled: false },

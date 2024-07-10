@@ -18,7 +18,7 @@ const hidepost = () => {
       },
       POST: async (request: Request) => {
         const body = await request.json();
-        const hidePost: HidePost = body;
+        const hidePost: HidePost & { unhide?: boolean } = body;
         console.log("API Hide Post :", hidePost);
         const savedHiddenPost = await saveHidePost(hidePost);
         return NextResponse.json(savedHiddenPost, { status: 200 });

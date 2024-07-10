@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { HidePost } from "@/data/types";
 
 
-export const useFetchHiddenPost = (accountId: string) => {
+export const useFetchHiddenPost = () => {
         const [hiddenPost, setHiddenPost] = useState<HidePost | null>(null)
         const [loading, setLoading] = useState<boolean>(false);
         const [error, setError] = useState<string | null>(null);
 
-        const fetchHiddenPost = async () => {
+        const fetchHiddenPost = async (accountId: string) => {
             setLoading(true);
             setError(null);
             try {
@@ -16,6 +16,7 @@ export const useFetchHiddenPost = (accountId: string) => {
                 const hiddenPost:HidePost = await response.json();
                 console.log(" Hidden Post : ", hiddenPost)
                 setHiddenPost(hiddenPost)
+                return hiddenPost;
             } catch (err) {
                 console.error('Error fetching hidden post:', err);
                 setError("Error fetching hidden post!");
@@ -25,20 +26,20 @@ export const useFetchHiddenPost = (accountId: string) => {
         };
   
         
-        useEffect(() => {
-            if(accountId) {
-                fetchHiddenPost();
-            }
-        }, [accountId]);
+        // useEffect(() => {
+        //     if(accountId) {
+        //         fetchHiddenPost();
+        //     }
+        // }, [accountId]);
   
-    return { hiddenPost, loading, error };
+    return { hiddenPost, loading, error, fetchHiddenPost };
 };
 
 export const useSaveHidePost = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    const saveHidePost = async (data: HidePost): Promise<void> => {
+    const saveHidePost = async (data: HidePost & { unhide?: boolean }): Promise<void> => {
       setLoading(true);
       setError(null);
   

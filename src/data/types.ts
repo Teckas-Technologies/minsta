@@ -6,6 +6,7 @@ export interface TokenData {
   metadata_id: string;
   title: string;
   owner: String | null;
+  tags?: string[]
 }
 
 export interface TokenFeedData {
