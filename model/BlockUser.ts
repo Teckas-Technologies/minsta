@@ -7,11 +7,6 @@ export interface BlockUser extends Document {
 
 export interface BlockedUser {
     blockedUserId: string;
-    tokenIds: TokenId[]
-}
-
-export interface TokenId {
-    id: string;
 }
   
 const blockUserSchema = new mongoose.Schema({
@@ -23,13 +18,7 @@ const blockUserSchema = new mongoose.Schema({
         blockedUserId: {
             type: String,
             required: true,
-        },
-        tokenIds: [{
-            id: {
-                type: String,
-                required: true,
-            }
-        }]
+        }
     }]
 }, { timestamps: true });
 

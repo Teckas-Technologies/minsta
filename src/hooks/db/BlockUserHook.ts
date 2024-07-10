@@ -32,7 +32,7 @@ export const useSaveBlockUser = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    const saveBlockUser = async (data: BlockUserType): Promise<void> => {
+    const saveBlockUser = async (data: BlockUserType) => {
       setLoading(true);
       setError(null);
   
@@ -49,9 +49,14 @@ export const useSaveBlockUser = () => {
         if (!response.ok) {
           throw new Error('Failed to save data');
         }
+        const responseData = await response.json();
+        const status = response.status;
+
+        return { status, responseData };
       } catch (error) {
         console.error('Error saving data:', error);
         setError('Failed to save block user');
+        return null;
       } finally {
         setLoading(false);
       }

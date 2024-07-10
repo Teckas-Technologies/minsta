@@ -117,25 +117,21 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
   }
 
   const handleDeleteUser = async (token: any,e:any) => {
-
-    if(token.owner) {
-      const fetchData = await searchTokenByOwner(token?.owner);
-      console.log("Query Data >> ", fetchData)
-    }
-
     const data : BlockUserType = {
       accountId: activeAccountId?.toString() || "",
       blockedUsers: [
         {
           blockedUserId: token?.owner,
-          tokenIds: [
-            {id: ""}
-          ]
         }
       ]
     }
     console.log("Delete Action >> ", token)
-    // await saveBlockUser(data);
+    await saveBlockUser(data).then((res)=>{
+      if(res?.status == 200){
+        setDeleteModal(false);
+        setToast(true);
+      }
+    });
   }
 
 

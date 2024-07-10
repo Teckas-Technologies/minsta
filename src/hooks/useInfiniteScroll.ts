@@ -11,6 +11,7 @@ import { constants } from "@/constants";
 import { debounce } from "lodash";
 import { useFetchHiddenPost } from "./db/HidePostHook";
 import { useMbWallet } from "@mintbase-js/react";
+import { useFetchBlockUser } from "./db/BlockUserHook";
 
 const initialState = {
   items: [],
@@ -76,6 +77,7 @@ const useInfiniteScrollGQL = (
   const [searchInput, setSearchInput] = useState(initialSearch || "");
   const queryClient = useQueryClient();
   const { hiddenPost, fetchHiddenPost } = useFetchHiddenPost();
+  const { fetchBlockUser } = useFetchBlockUser();
   const [activeAccount, setActiveAccount] = useState(activeId || "");
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -92,6 +94,7 @@ const useInfiniteScrollGQL = (
         ...constants.legacyProxyAddresses,
       ],
       hiddenIds: [],
+      owner:[],
       contractAddress: constants.tokenContractAddress,
       offset: (state.offset - 1) * fetchNum,
     };
@@ -166,7 +169,14 @@ const useInfiniteScrollGQL = (
     dispatch({ type: "FETCH_START" });
   
     const hidedPosts = await fetchHiddenPost(activeAccount);
-    const idsList = hidedPosts?.hiddedTokenIds.map(token => token.id) || [];
+    const user = await fetchBlockUser(activeAccount);
+        
+    const idsList = hidedPosts?.hiddedTokenIds?.map(token => token.id) || [];
+    const blockedUsers = user?.blockedUsers?.map(blockedUser => blockedUser.blockedUserId) || [];
+
+    console.log("Blocked Users >> ", blockedUsers);
+    console.log("Ids List >> ", idsList);
+    await new Promise(resolve => setTimeout(resolve, 2000));
   
     const variables = {
       limit: fetchNum,
@@ -175,6 +185,7 @@ const useInfiniteScrollGQL = (
         ...constants.legacyProxyAddresses,
       ],
       hiddenIds: idsList,
+      owner: blockedUsers,
       contractAddress: constants.tokenContractAddress,
       offset: (state.offset - 1) * fetchNum,
     };

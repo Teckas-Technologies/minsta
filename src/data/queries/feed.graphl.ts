@@ -42,18 +42,22 @@ export const FETCH_FEED_NEW = gql`
     $limit: Int
     $offset: Int
     $hiddenIds: [String!]!
+    $owner: [String!]!
   ) {
     token: mb_views_nft_tokens(
       where: {
-        nft_contract_id: { _eq: $contractAddress }
-        burned_timestamp: { _is_null: true }
-        metadata_content_flag: { _is_null: true }
-        nft_contract_content_flag: { _is_null: true }
-        _not: {token_id: {_in: $hiddenIds}}
-      }
+        nft_contract_id: { _eq: $contractAddress },
+        burned_timestamp: { _is_null: true },
+        metadata_content_flag: { _is_null: true },
+        nft_contract_content_flag: { _is_null: true },
+        _and: [
+          { token_id: { _nin: $hiddenIds } },
+          { owner: { _nin: $owner } }
+        ]
+      },
       order_by: { minted_timestamp: desc },
-       offset: $offset,
-       limit: $limit
+      offset: $offset,
+      limit: $limit
     ) {
       id: token_id
       createdAt: minted_timestamp

@@ -25,11 +25,15 @@ export async function saveBlockUser(data: BlockUserType): Promise<any> {
     await connectToDatabase();
     const { accountId, blockedUsers } = data;
 
-    try{
+    try {
         let existingBlockUser = await BlockUser.findOne({ accountId });
 
         if (existingBlockUser) {
-            existingBlockUser.blockedUsers = blockedUsers;
+            blockedUsers.forEach(user => {
+                if (!existingBlockUser?.blockedUsers.includes(user)) {
+                    existingBlockUser?.blockedUsers.push(user);
+                }
+            });
             return existingBlockUser.save();
         } else {
             const newBlockUser = new BlockUser({

@@ -62,9 +62,4 @@ export interface BlockUserType {
 
 export interface BlockedUser {
   blockedUserId: string;
-  tokenIds: TokenId[]
-}
-
-export interface TokenId {
-  id: string;
 }
