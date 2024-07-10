@@ -10,7 +10,9 @@ import InlineSVG from "react-inlinesvg";
 import { useMbWallet } from "@mintbase-js/react";
 import { useFetchSocialMedias } from "@/hooks/db/SocialMediaHook";
 import { useSaveHidePost } from "@/hooks/db/HidePostHook";
-import { HidePost } from "@/data/types";
+import { BlockUserType, HidePost } from "@/data/types";
+import { useSaveBlockUser } from "@/hooks/db/BlockUserHook";
+import { useSearchTokensByOwner } from "@/hooks/useSearchTokensByOwnerFunc";
 // import 'react-tooltip/dist/react-tooltip.css';
 
 const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
@@ -18,11 +20,14 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
   const [error, setError] = useState(false);
   const { isConnected, activeAccountId } = useMbWallet();
   const [shareModal, setShareModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
   type MessageKeys = 'facebook' | 'twitter' | 'whatsapp';
   const toggleShareRef = useRef<HTMLDivElement | null>(null);
 
   const { socialMedias } = useFetchSocialMedias();
-  const { saveHidePost } = useSaveHidePost()
+  const { saveHidePost } = useSaveHidePost();
+  const { saveBlockUser } = useSaveBlockUser();
+  const { searchTokenByOwner } = useSearchTokensByOwner();
 
   const [showTooltip, setShowTooltip] = useState({ share: false, hide: false, delete: false });
 
@@ -109,6 +114,28 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
     await saveHidePost(data).then(()=>{
       setToast(true);
     })
+  }
+
+  const handleDeleteUser = async (token: any,e:any) => {
+
+    if(token.owner) {
+      const fetchData = await searchTokenByOwner(token?.owner);
+      console.log("Query Data >> ", fetchData)
+    }
+
+    const data : BlockUserType = {
+      accountId: activeAccountId?.toString() || "",
+      blockedUsers: [
+        {
+          blockedUserId: token?.owner,
+          tokenIds: [
+            {id: ""}
+          ]
+        }
+      ]
+    }
+    console.log("Delete Action >> ", token)
+    // await saveBlockUser(data);
   }
 
 
@@ -209,7 +236,7 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
                 className="absolute top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"
                 onMouseEnter={() => toggleTooltip('delete', true)}
                 onMouseLeave={() => toggleTooltip('delete', false)}
-                onClick={(e) => {console.log("Deleted")}}
+                onClick={() => setDeleteModal(!deleteModal)}
               >
                 <InlineSVG
                 src="/images/trash.svg"
@@ -218,6 +245,17 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
                 />
               </button>
               {showTooltip.delete && <div className="tooltip absolute top-[-1.8rem] left-10 bg-white px-2 py-1 rounded-md box-shadow">Delete</div>}
+              {deleteModal && 
+                <div className="absolute top-0 left-0 bottom-0 right-0 rounded-md bg-sky-50 w-full flex justify-center items-center px-2">
+                  <div className="delete-content flex flex-col items-center gap-3 rounded-md px-2 py-2 bg-white box-shadow">
+                    <h3 className="text-center">Are you sure want to delete the all moments from this user?</h3>
+                    <div className="delete-btns flex items-center justify-center gap-2">
+                      <button className="btn cancel-btn" onClick={()=>setDeleteModal(false)}>Cancel</button>
+                      <button className="btn delete-btn" onClick={(e) => handleDeleteUser(token, e)}>Delete</button>
+                    </div>
+                  </div>
+                </div>
+              }
             </div>}
         {/* </Link> */}
       </div>

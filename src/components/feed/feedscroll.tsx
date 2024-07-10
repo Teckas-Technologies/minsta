@@ -13,12 +13,18 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
   const entry = useIntersectionObserver(ref, {});
   const isVisible = !!entry?.isIntersecting;
 
-  const { items, loadingItems, total, error, setSearchInput } = useInfiniteScrollGQL("q_FETCH_FEED", isVisible, { query: FETCH_FEED_NEW }, search, hidepostids, activeId);
-  console.log("Hidden Post Ids >> ", hidepostids);
+  const { items, loadingItems, total, error, setSearchInput, setActiveAccount } = useInfiniteScrollGQL("q_FETCH_FEED", isVisible, { query: FETCH_FEED_NEW }, search, hidepostids, activeId);
+
 
   useEffect(() => {
     setSearchInput(search);
   }, [search]);
+
+  useEffect(() => {
+    if(activeId) {
+      setActiveAccount(activeId);
+    }
+  }, [activeId]);
 
   let memoizedData = useMemo(() => {
     let filteredData = items;
@@ -36,18 +42,18 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
     // }
 
     // hide post
-    if (hidepostids?.length > 0) {
-      if(hiddenPage) {
-        filteredData = filteredData?.filter((token: TokenData) => {
-          return hidepostids.includes(token.id);
-        });
-      }
+    // if (hidepostids?.length > 0) {
+      // if(hiddenPage) {
+      //   filteredData = filteredData?.filter((token: TokenData) => {
+      //     return hidepostids.includes(token.id);
+      //   });
+      // }
       // } else {
       //   filteredData = filteredData?.filter((token: TokenData) => {
       //     return !hidepostids.includes(token.id);
       //   });
       // }
-    }
+    // }
     
     const uniqueMetadataIds = new Set<string>();
 

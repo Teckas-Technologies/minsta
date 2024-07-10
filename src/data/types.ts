@@ -54,3 +54,17 @@ export interface HidePost {
 export interface HideTokenId {
   id: string;
 }
+
+export interface BlockUserType {
+  accountId : string;
+  blockedUsers: BlockedUser[];
+}
+
+export interface BlockedUser {
+  blockedUserId: string;
+  tokenIds: TokenId[]
+}
+
+export interface TokenId {
+  id: string;
+}

@@ -33,6 +33,7 @@ export const HomePage = () => {
   const {darkMode} = useDarkMode();
   const [toast, setToast] = useState(false);
   const [hidePostIds, setHidePostIds] = useState<string[]>([]);
+  const [accountId, setAccountId] = useState("");
 
   const { hiddenPost, fetchHiddenPost } = useFetchHiddenPost();
 
@@ -52,8 +53,7 @@ export const HomePage = () => {
   
   useEffect(() => {
     if (activeAccountId) {
-      const res = fetchHiddenPost(activeAccountId);
-      console.log("Res >> ", res)
+      setAccountId(activeAccountId);
     }
   }, [activeAccountId]);
 
@@ -168,7 +168,7 @@ export const HomePage = () => {
         </div>
         <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
 
-          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode} hidepostids={hidePostIds} setToast={setToast} activeId={activeAccountId}/>
+          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode} hidepostids={hidePostIds} setToast={setToast} activeId={accountId}/>
 
         </DynamicGrid>
         {toast && 

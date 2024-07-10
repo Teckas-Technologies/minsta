@@ -467,7 +467,7 @@
     color: #222f3e;
 }
 
-.admin-leaderboard .select-leader input[type="checkbox"] {
+.admin-leaderboard .select-leader input[type="checkbox"], .blocked-users .select-leader input[type="checkbox"]{
     appearance: none;
     width: 1.2rem;
     height: 1.2rem;
@@ -856,6 +856,36 @@
     border-radius: 0.2rem;
     color: #0ea5e9;
     border: 0.1rem solid #0ea5e9;
+}
+
+/* Blocked Users Page  */
+
+.blocked-users {
+    margin: 1rem;
+    height: calc(100vh - 8rem);
+    /* width: 100%; */
+    /* max-width: 23.5rem; */
+    /* padding: 1rem 6rem; */
+    border-radius: 0.7rem;
+    background-color: #fff;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+}
+
+.blocked-user-board {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    /* max-width: 100%; */
+    min-height: calc(100vh - 20rem);
+    overflow: scroll;
+    border-radius: 0.6rem;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+}
+
+.blocked-user-board .leader{
+    /* width: 100%; */
+    max-width: calc(100% - 2rem);
 }
 
 /* Loading */
