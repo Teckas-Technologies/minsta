@@ -12,22 +12,17 @@ import { useFetchSocialMedias } from "@/hooks/db/SocialMediaHook";
 import { useSaveHidePost } from "@/hooks/db/HidePostHook";
 import { BlockUserType, HidePost } from "@/data/types";
 import { useSaveBlockUser } from "@/hooks/db/BlockUserHook";
-import { useSearchTokensByOwner } from "@/hooks/useSearchTokensByOwnerFunc";
-// import 'react-tooltip/dist/react-tooltip.css';
 
 const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
   const imageUrl = token?.media;
   const [error, setError] = useState(false);
-  const { isConnected, activeAccountId } = useMbWallet();
+  const { activeAccountId } = useMbWallet();
   const [shareModal, setShareModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
-  type MessageKeys = 'facebook' | 'twitter' | 'whatsapp';
   const toggleShareRef = useRef<HTMLDivElement | null>(null);
-
   const { socialMedias } = useFetchSocialMedias();
   const { saveHidePost } = useSaveHidePost();
   const { saveBlockUser } = useSaveBlockUser();
-  const { searchTokenByOwner } = useSearchTokensByOwner();
 
   const [showTooltip, setShowTooltip] = useState({ share: false, hide: false, delete: false });
 
@@ -112,7 +107,11 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
       unhide
     }
     await saveHidePost(data).then(()=>{
-      setToast(true);
+      if(unhide){
+        setToast("Moment Unhided Successfully!", true);
+      } else {
+        setToast("Moment Hided Successfully!", true);
+      }
     })
   }
 
@@ -125,11 +124,10 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
         }
       ]
     }
-    console.log("Delete Action >> ", token)
     await saveBlockUser(data).then((res)=>{
       if(res?.status == 200){
         setDeleteModal(false);
-        setToast(true);
+        setToast("User Blocked Successfully!",true);
       }
     });
   }
@@ -207,26 +205,29 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
               }
             </div>
           }
-          <button
-                className="absolute top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
-                onMouseEnter={() => toggleTooltip('hide', true)}
-                onMouseLeave={() => toggleTooltip('hide', false)}
-                onClick={(e) => {handleHidePost(token?.id, hiddenPage, e)}}
-              >
-                {!hiddenPage ? 
-                <InlineSVG
-                src="/images/eye_hide.svg"
-                className="fill-current"
-                color="#fff"
-                /> : 
-                <InlineSVG
-                src="/images/eye.svg"
-                className="fill-current"
-                color="#fff"
-                />}
-          </button>
-          {showTooltip.hide && <div className="tooltip absolute top-[-1.8rem] left-2 bg-white px-2 py-1 rounded-md box-shadow">Hide</div>}
-          {!hiddenPage && 
+          {
+            activeAccountId && 
+            <button
+              className="absolute top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
+              onMouseEnter={() => toggleTooltip('hide', true)}
+              onMouseLeave={() => toggleTooltip('hide', false)}
+              onClick={(e) => {handleHidePost(token?.id, hiddenPage, e)}}
+            >
+              {!hiddenPage ? 
+              <InlineSVG
+              src="/images/eye_hide.svg"
+              className="fill-current"
+              color="#fff"
+              /> : 
+              <InlineSVG
+              src="/images/eye.svg"
+              className="fill-current"
+              color="#fff"
+              />}
+            </button>
+          }
+          {showTooltip.hide && <div className="tooltip absolute top-[-1.8rem] left-2 bg-white px-2 py-1 rounded-md box-shadow">{hiddenPage ? "Unhide" : "Hide"}</div>}
+          {!hiddenPage && activeAccountId && 
           <div>
             <button
                 className="absolute top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"

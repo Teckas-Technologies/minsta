@@ -79,6 +79,8 @@ const useInfiniteScrollGQL = (
   const { hiddenPost, fetchHiddenPost } = useFetchHiddenPost();
   const { fetchBlockUser } = useFetchBlockUser();
   const [activeAccount, setActiveAccount] = useState(activeId || "");
+  const [blockedIdList, setBlockedIdList] = useState<string[]>([]);
+  const [hidedIds, setHidedIds] = useState<string[]>([]);
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const fetchNum = isDesktop ? 12 : 15;
@@ -93,12 +95,12 @@ const useInfiniteScrollGQL = (
         constants.proxyContractAddress,
         ...constants.legacyProxyAddresses,
       ],
-      hiddenIds: [],
-      owner:[],
+      hiddenIds: hidedIds,
+      blockedAccounts: blockedIdList,
+      searchInput:searchInput,
       contractAddress: constants.tokenContractAddress,
-      offset: (state.offset - 1) * fetchNum,
+      offset: (state.offset - 1) * fetchNum
     };
-
     const scrollData = (await graphqlQLServiceNew<InfiniteScrollHook>({
       query: graphQLObj.query,
       variables: variables,
@@ -122,121 +124,56 @@ const useInfiniteScrollGQL = (
     return data?.token;
   };
 
-  const fetchSearchItems = async () => {
-    dispatch({ type: "FETCH_START" });
-  
-    const searchText = searchInput?.toString().trim();
 
-    console.log("Step 1 >> ", searchText)
-  
-    const variables = {
-      owner: searchText,
-      accountIds: [
-        constants.proxyContractAddress,
-        ...constants.legacyProxyAddresses,
-      ],
-      contractAddress: constants.tokenContractAddress,
-    };
-  
-    const searchData = await graphqlQLServiceNew<InfiniteScrollHook>({
-      query: SEARCH_SIMILAR_OWNER,
-      variables: variables,
-    });
-
-    console.log("Step 2 >> ", searchData)
-  
-    const { data } = searchData;
-  
-    dispatch({ type: "SET_LOADING", payload: false });
-    dispatch({ type: "SET_OFFSET", payload: state.offset + 1 });
-    dispatch({ type: "SET_CALLED_OFFSETS", payload: state.offset + 1 });
-    dispatch({
-      type: "SET_TOTAL",
-      payload: data?.mb_views_nft_tokens_aggregate?.aggregate?.count,
-    });
-    dispatch({
-      type: "FETCH_SEARCH_SUCCESS",
-      payload: data?.token,
-    });
-  
-    return data?.token;
-  };
-  
-
-  // const debouncedFetchSearchItems = debounce(fetchSearchItems, 3000);
-
-  const fetchNonBlockItem = async () => {
-    dispatch({ type: "FETCH_START" });
-  
-    const hidedPosts = await fetchHiddenPost(activeAccount);
-    const user = await fetchBlockUser(activeAccount);
-        
-    const idsList = hidedPosts?.hiddedTokenIds?.map(token => token.id) || [];
-    const blockedUsers = user?.blockedUsers?.map(blockedUser => blockedUser.blockedUserId) || [];
-
-    console.log("Blocked Users >> ", blockedUsers);
-    console.log("Ids List >> ", idsList);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-  
-    const variables = {
-      limit: fetchNum,
-      accountIds: [
-        constants.proxyContractAddress,
-        ...constants.legacyProxyAddresses,
-      ],
-      hiddenIds: idsList,
-      owner: blockedUsers,
-      contractAddress: constants.tokenContractAddress,
-      offset: (state.offset - 1) * fetchNum,
-    };
-  
-    const nonBlockData = (await graphqlQLServiceNew<InfiniteScrollHook>({
-      query: graphQLObj.query,
-      variables: variables,
-    })) as InfiniteScrollHookResult;
-  
-    const { data } = nonBlockData;
-  
-    dispatch({ type: "SET_LOADING", payload: false });
-    dispatch({ type: "SET_OFFSET", payload: state.offset + 1 });
-    dispatch({ type: "SET_CALLED_OFFSETS", payload: state.offset + 1 });
-    dispatch({
-      type: "SET_TOTAL",
-      payload: data?.mb_views_nft_tokens_aggregate?.aggregate?.count,
-    });
-    dispatch({
-      type: "BLOCK_FILTER_SUCCESS",
-      payload: data?.token,
-    });
-  
-    return data?.token;
-  };  
 
   // useInfiniteQuery
   const { data, fetchNextPage, isFetchingNextPage, error } = useInfiniteQuery(
     [queryKey, state.offset],
-    ()=> activeAccount && !searchInput ? fetchNonBlockItem() : activeAccount && searchInput ? fetchSearchItems() : fetchItems(),
+    ()=> searchInput ? debouncedFetchSearchItems() : fetchItems(),
     {
       getNextPageParam: () => state.offset >= 0,
       cacheTime: Infinity,
       refetchOnWindowFocus: false,
-      enabled:
-        !state.calledOffsets.includes(state.offset) && !searchInput,
+      enabled: state.calledOffsets.includes(state.offset)
     }
   );
 
-  useEffect(() => {
-      fetchNextPage();
-  }, [searchInput, activeAccount]);
-  
+  const fetchHidedIds = async() => {
+    const hidedPosts = await fetchHiddenPost(activeAccount);
+    console.log("Active Id", activeAccount);
+    console.log("Hidden Ids", hiddedTokenIds)
+    const idsList = hidedPosts?.hiddedTokenIds.map(token => token.id) || [];
+    setHidedIds(idsList);
+  }
 
-  // useEffect(() => {
-  //   if (activeAccount) {
-  //     fetchNonBlockItem();
-  //   } else {
-  //     fetchNextPage();
-  //   }
-  // }, [activeAccount]);
+  const fetchBlockedUsers = async() => {
+    const blockedUsers = await fetchBlockUser(activeAccount);
+    console.log("Active Id", activeAccount);
+    console.log("Hidden Ids", hidedIds);
+    console.log("Blocked User Ids", blockedIdList);
+    const idsList = blockedUsers?.blockedUsers.map(blockedUser => blockedUser.blockedUserId) || [];
+    setBlockedIdList(idsList);
+  }
+
+  const debouncedFetchSearchItems = debounce(fetchItems, 3000);
+
+  useEffect(() => {
+    if(activeAccount) {
+      fetchBlockedUsers();
+      fetchHidedIds();
+    }
+    else {
+      fetchNextPage();
+    }
+  }, [activeAccount]);
+  useEffect(() => {
+    if(searchInput) {
+      debouncedFetchSearchItems();
+    } else {
+      fetchNextPage();
+    }
+  }, [searchInput]);
+  
 
   useEffect(() => {
     if (error) {
@@ -252,11 +189,7 @@ const useInfiniteScrollGQL = (
   }, [error]);
 
   const handleScroll = () => {
-    const hasNewPage = activeAccount && !searchInput
-    ? state.nonBlockItems.length < state.total
-    : searchInput && activeAccount
-    ? state.searchItems.length < state.total
-    : state.items.length < state.total;
+    const hasNewPage = state.items.length < state.total;
 
     if (!state.isLoading && isVisible && hasNewPage && !isFetchingNextPage) {
       const newOffset = state.offset + 1;
@@ -277,10 +210,9 @@ const useInfiniteScrollGQL = (
   };
 
   const isMinthenInfiniteScrollNum = state.items.length < fetchNum;
-  const itemsToUse = activeAccount && !searchInput ? state.nonBlockItems : searchInput && activeAccount ? state.searchItems : state.items;
 
   return {
-    items: itemsToUse,
+    items: state.items,
     resetItemList,
     setSearchInput,
     setActiveAccount, 

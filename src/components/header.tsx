@@ -112,7 +112,7 @@ const Header = () => {
 
 
   const headerButtonsNotHome = (onClick: ReactEventHandler) => (
-    <div className="minsta-header flex w-full justify-between px-4 lg:px-12 items-center">
+    <div className="minsta-header flex gap-5 w-full justify-between px-4 lg:px-12 items-center">
       
       <div className="dashboard-menu">
         <button className="h-8 w-auto text-headerText font-bold text-xl flex items-center gap-3" onClick={onClick}>
@@ -178,15 +178,15 @@ const Header = () => {
           //   <button className="gradientButton" onClick={handleSignout}> Logout I</button>
           // </div>
           <div className="new relative" ref={headerAccountRef}>
-                  <div className="header-account bg-slate-700 flex items-center gap-3 px-3 rounded-3xl cursor-pointer" onClick={()=> setSubmenu(!subMenu)}>
+                  <div className="header-account bg-slate-700 flex items-center gap-3 md:px-3 px-2 rounded-3xl cursor-pointer" onClick={()=> setSubmenu(!subMenu)}>
                     <div className="profile-icon">
                         <InlineSVG
                           src="/images/profile.svg"
                           className="fill-current text-camera h-12"
                         />
                     </div>
-                    <div className="owner-name">
-                      <h2 className="text-white">{activeAccountId}</h2>
+                    <div className="owner-name max-w-[4.5rem] overflow-hidden md:max-w-[8rem] md:overflow-hidden">
+                      <h2 className="text-white overflow-hidden text-ellipsis whitespace-nowrap">{activeAccountId}</h2>
                     </div>
                     <div className="profile-dropdown">
                         {!subMenu ? 
@@ -202,7 +202,7 @@ const Header = () => {
                     </div>
                   </div>
                   {subMenu && 
-                    <div className="absolute bg-slate-700 rounded-md top-[110%] w-full">
+                    <div className="absolute bg-slate-700 rounded-md top-[110%] md:left-0 left-[-5rem] md:w-full w-[15rem]">
                       <ul className="sub-menu-list flex flex-col gap-2 px-3 py-2">
                         {isAdmin && isConnected ? 
                           (
@@ -324,7 +324,7 @@ const Header = () => {
     switch (pathname) {
       case "/":
         return (
-          <div className="minsta-header flex w-full justify-between px-4 lg:px-12  items-center">
+          <div className="minsta-header flex w-full gap-5 justify-between px-4 lg:px-12  items-center">
             <div>
               <div className="dashboard-menu">
                 <div className="hamburger" onClick={()=>setIsOpen(!isOpen)}>
@@ -393,8 +393,8 @@ const Header = () => {
                           className="fill-current text-camera h-12"
                         />
                     </div>
-                    <div className="owner-name">
-                      <h2 className="text-white">{activeAccountId}</h2>
+                    <div className="owner-name max-w-[4.5rem] overflow-hidden md:max-w-[8rem] md:overflow-hidden">
+                      <h2 className="text-white overflow-hidden text-ellipsis whitespace-nowrap">{activeAccountId}</h2>
                     </div>
                     <div className="profile-dropdown">
                         {!subMenu ? 
@@ -410,7 +410,7 @@ const Header = () => {
                     </div>
                   </div>
                   {subMenu && 
-                    <div className="absolute bg-slate-700 rounded-md top-[110%] w-full">
+                    <div className="absolute bg-slate-700 rounded-md top-[110%] md:left-0 left-[-5rem] md:w-full w-[15rem]">
                       <ul className="sub-menu-list flex flex-col gap-2 px-3 py-2">
                         {isAdmin && isConnected ? 
                           (

@@ -21,19 +21,25 @@ export const findBlockedUserById = async (accountId: string): Promise<any> => {
     }
 }
 
-export async function saveBlockUser(data: BlockUserType): Promise<any> {
+export async function saveBlockUser(data: BlockUserType & { unblock?: boolean }): Promise<any> {
     await connectToDatabase();
-    const { accountId, blockedUsers } = data;
+    const { accountId, blockedUsers, unblock } = data;
 
     try {
         let existingBlockUser = await BlockUser.findOne({ accountId });
 
         if (existingBlockUser) {
-            blockedUsers.forEach(user => {
-                if (!existingBlockUser?.blockedUsers.includes(user)) {
-                    existingBlockUser?.blockedUsers.push(user);
-                }
-            });
+            if(unblock){
+                existingBlockUser.blockedUsers = existingBlockUser?.blockedUsers.filter(
+                    userId => !blockedUsers.some(blockeduser => blockeduser?.blockedUserId === userId?.blockedUserId)
+                );
+            } else {
+                blockedUsers.forEach(user => {
+                    if (!existingBlockUser?.blockedUsers.includes(user)) {
+                        existingBlockUser?.blockedUsers.push(user);
+                    }
+                });
+            }
             return existingBlockUser.save();
         } else {
             const newBlockUser = new BlockUser({

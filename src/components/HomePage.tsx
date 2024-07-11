@@ -9,10 +9,9 @@ import { FeedScroll } from "./feed/feedscroll";
 import { useEffect, useState } from "react";
 import { useSearchTokenByOwner } from "@/hooks/useSearchTokenByOwner";
 import { useFeedDesc } from "@/hooks/userFeedDesc";
-import { HidePost, InfiniteScrollHook } from "@/data/types";
+import { InfiniteScrollHook } from "@/data/types";
 import InlineSVG from "react-inlinesvg";
 import { useDarkMode } from "@/context/DarkModeContext";
-import { FirstFeed } from "./FirstFeed";
 import { useFetchHiddenPost } from "@/hooks/db/HidePostHook";
 
 interface NFT {
@@ -25,17 +24,17 @@ export const HomePage = () => {
   const { connect, isConnected, activeAccountId } = useMbWallet();
   const [searchText, setSearchText] = useState("");
   const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
-  const [val, setVal] = useState("");
   const { data, isLoading }: NFT = useFeedDesc();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState("New to Old");
   let [grid, setGrid] = useState(1);
   const {darkMode} = useDarkMode();
   const [toast, setToast] = useState(false);
+  const [toastText, setToastText] = useState("");
   const [hidePostIds, setHidePostIds] = useState<string[]>([]);
   const [accountId, setAccountId] = useState("");
 
-  const { hiddenPost, fetchHiddenPost } = useFetchHiddenPost();
+  const { fetchHiddenPost } = useFetchHiddenPost();
 
   const handleCloseToast = () => {
     setToast(false);
@@ -46,23 +45,31 @@ export const HomePage = () => {
     if(toast) {
         setTimeout(()=> {
             setToast(false);
+            setToastText("");
             window.location.reload();
         }, 5000)
     }
-  }, [toast])
-  
+  }, [toast]);
+
+  const setHandleToast = (message: string, open: boolean) => {
+    setToast(open);
+    setToastText(message);
+  }
+
   useEffect(() => {
-    if (activeAccountId) {
-      setAccountId(activeAccountId);
+    if(activeAccountId) {
+        setAccountId(activeAccountId);
+        fetchHidedPosts(activeAccountId);
     }
   }, [activeAccountId]);
 
-  useEffect(() => {
-    if (hiddenPost?.hiddedTokenIds) {
-      const ids = hiddenPost.hiddedTokenIds.map((token) => token.id);
-      setHidePostIds(ids);
-    }
-  }, [hiddenPost]);
+  const fetchHidedPosts = async (accountId: string)=> {
+      const hiddenPosts = await fetchHiddenPost(accountId);
+      if (hiddenPosts?.hiddedTokenIds) {
+          const ids = hiddenPosts.hiddedTokenIds.map(token => token.id);
+          setHidePostIds(ids);
+      }
+  }
 
   const router = useRouter();
   const handleLetsGoBtn = () => {
@@ -168,7 +175,7 @@ export const HomePage = () => {
         </div>
         <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
 
-          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode} hidepostids={hidePostIds} setToast={setToast} activeId={accountId}/>
+          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode} hidepostids={hidePostIds} setToast={setHandleToast} hiddenPage={false} activeId={accountId}/>
 
         </DynamicGrid>
         {toast && 
@@ -180,7 +187,7 @@ export const HomePage = () => {
                     </svg>
                     <span className="sr-only">Check icon</span>
                 </div>
-                <div className="ms-1 text-sm font-normal">Post hidden successfully!</div>
+                <div className="ms-1 text-sm font-normal">{toastText}</div>
                 {/* <button type="button" onClick={handleCloseToast} className="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" data-dismiss-target="#toast-default" aria-label="Close">
                     <span className="sr-only">Close</span>
                     <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">

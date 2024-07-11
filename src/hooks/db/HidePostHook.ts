@@ -14,7 +14,6 @@ export const useFetchHiddenPost = () => {
                 const response = await fetch(`/api/hidepost?accountId=${accountId}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const hiddenPost:HidePost = await response.json();
-                console.log(" Hidden Post : ", hiddenPost)
                 setHiddenPost(hiddenPost)
                 return hiddenPost;
             } catch (err) {
@@ -24,13 +23,6 @@ export const useFetchHiddenPost = () => {
                 setLoading(false);
             }
         };
-  
-        
-        // useEffect(() => {
-        //     if(accountId) {
-        //         fetchHiddenPost();
-        //     }
-        // }, [accountId]);
   
     return { hiddenPost, loading, error, fetchHiddenPost };
 };
@@ -44,7 +36,6 @@ export const useSaveHidePost = () => {
       setError(null);
   
       try {
-        console.log("Hook Hide Post :", data)
         const response = await fetch('/api/hidepost', {
           method: 'POST',
           headers: {

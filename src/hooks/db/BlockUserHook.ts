@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BlockUserType, HidePost } from "@/data/types";
+import { BlockUserType } from "@/data/types";
 
 
 export const useFetchBlockUser = () => {
@@ -14,7 +14,6 @@ export const useFetchBlockUser = () => {
                 const response = await fetch(`/api/blockuser?accountId=${accountId}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const blockUser:BlockUserType = await response.json();
-                console.log(" Block User : ", blockUser)
                 setBlockUser(blockUser)
                 return blockUser;
             } catch (err) {
@@ -32,7 +31,7 @@ export const useSaveBlockUser = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    const saveBlockUser = async (data: BlockUserType) => {
+    const saveBlockUser = async (data: BlockUserType & { unblock?: boolean }) => {
       setLoading(true);
       setError(null);
   

@@ -1,4 +1,4 @@
-import { FETCH_FEED, FETCH_FEED_NEW } from "@/data/queries/feed.graphl";
+import { FETCH_FEED, FETCH_FEED_NEW, FETCH_FEED_UNI } from "@/data/queries/feed.graphl";
 import useInfiniteScrollGQL from "@/hooks/useInfiniteScroll";
 import { useMemo, useRef } from "react";
 import { useIntersectionObserver } from "usehooks-ts";
@@ -13,7 +13,7 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
   const entry = useIntersectionObserver(ref, {});
   const isVisible = !!entry?.isIntersecting;
 
-  const { items, loadingItems, total, error, setSearchInput, setActiveAccount } = useInfiniteScrollGQL("q_FETCH_FEED", isVisible, { query: FETCH_FEED_NEW }, search, hidepostids, activeId);
+  const { items, loadingItems, total, error, setSearchInput, setActiveAccount } = useInfiniteScrollGQL("q_FETCH_FEED", isVisible, { query: FETCH_FEED_UNI }, search, hidepostids, activeId);
 
 
   useEffect(() => {

@@ -16,18 +16,23 @@ export const ProfilePage = () => {
     const {activeAccountId, connect, isConnected} = useMbWallet();
     const { darkMode } = useDarkMode();
     let [grid, setGrid] = useState(1);
-    const owenerid = activeAccountId?.toString();
+    const [owner, setOwner] = useState("")
     const [newData, setNewData] = useState<InfiniteScrollHook | undefined>();
-    const { data, isLoading } = useSearchTokenByOwner(owenerid ? owenerid : "");
     
 
-    useEffect(()=> {
-        if(owenerid) {
-            setFilteredNFT(data)
-        } else if(!owenerid) {
-            setNewData(data)
+    // useEffect(()=> {
+    //     if(owenerid) {
+    //         setFilteredNFT(data)
+    //     } else if(!owenerid) {
+    //         setNewData(data)
+    //     }
+    // }, [owenerid]);
+
+    useEffect(()=>{
+        if(activeAccountId){
+            setOwner(activeAccountId.toString());
         }
-    }, [owenerid]);
+    },[activeAccountId])
 
     const handleGrid = () => {
         console.log("Grid :", grid)
@@ -56,7 +61,7 @@ export const ProfilePage = () => {
                 </div>
             </div>
             <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
-                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={activeAccountId?.toString()} dark={darkMode}/>
+                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dark={darkMode} hiddenPage={false} activeId={owner}/>
             </DynamicGrid>
         </main>
         </div>

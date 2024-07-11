@@ -17,7 +17,7 @@ const blockuser = () => {
       },
       POST: async (request: Request) => {
         const body = await request.json();
-        const blockUser: BlockUserType = body;
+        const blockUser: BlockUserType & { unblock?: boolean } = body;
         const savedBlockUser = await saveBlockUser(blockUser);
         return NextResponse.json(savedBlockUser, { status: 200 });
       },
