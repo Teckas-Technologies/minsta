@@ -292,8 +292,8 @@ export const FETCH_FEED_UNI = gql`
     $limit: Int
     $offset: Int
     $hiddenIds: [String!]!
-    $blockedAccounts:[String!]!
-    $searchInput: String!
+    $owner: [String!]!
+    $search: String
   ) {
     token:  mb_views_nft_tokens(
     where: {nft_contract_id: {_eq: $contractAddress}, 
@@ -301,11 +301,11 @@ export const FETCH_FEED_UNI = gql`
       metadata_content_flag: {_is_null: true}, 
       nft_contract_content_flag: {_is_null: true}, 
       token_id: {_nin: $hiddenIds}, 
-      owner: {_nin: $blockedAccounts},
+      owner: {_nin: $owner},
        _or:[
-        {title:{_iregex:$searchInput}},
-        {owner:{_iregex:$searchInput}},
-        {extra:{_iregex:$searchInput}}
+        {title:{_iregex:$search}},
+        {owner:{_iregex:$search}},
+        {extra:{_iregex:$search}}
       ]
      
     },
@@ -329,3 +329,58 @@ export const FETCH_FEED_UNI = gql`
     }
   }
 `;
+
+
+export const FETCH_FEED_ALL = gql`
+  query minsta_fetch_feed_minted_tokens(
+    $accountIds: [String!]!
+    $contractAddress: String
+    $limit: Int
+    $offset: Int
+    $hiddenIds: [String!]!
+    $owner: [String!]!
+    $search: String
+  ) {
+  token: mb_views_nft_tokens(
+    where: {
+      nft_contract_id: { _eq: $contractAddress }
+      burned_timestamp: { _is_null: true }
+      metadata_content_flag: { _is_null: true }
+      nft_contract_content_flag: { _is_null: true }
+      _and: [
+        { token_id: { _nin: $hiddenIds } }
+        { owner: { _nin: $owner } }
+        {
+          _or: [
+            { owner: { _iregex: $search } }
+            { extra: { _iregex: $search } }
+            { title: { _iregex: $search } }
+          ]
+        }
+      ]
+    }
+    order_by: { minted_timestamp: desc }
+    offset: $offset
+    limit: $limit
+  ) {
+    id: token_id
+    createdAt: minted_timestamp
+    media
+    title
+    description
+    metadata_id
+    owner
+    extra
+  }
+  mb_views_nft_tokens_aggregate(
+    where: {
+      minter: { _in: $accountIds }
+      nft_contract_id: { _eq: $contractAddress }
+      burned_timestamp: { _is_null: true }
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}`

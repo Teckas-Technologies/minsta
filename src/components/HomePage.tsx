@@ -33,6 +33,7 @@ export const HomePage = () => {
   const [toastText, setToastText] = useState("");
   const [hidePostIds, setHidePostIds] = useState<string[]>([]);
   const [accountId, setAccountId] = useState("");
+  const [search, setSearch] = useState("");
 
   const { fetchHiddenPost } = useFetchHiddenPost();
 
@@ -88,7 +89,9 @@ export const HomePage = () => {
 
   const handleSearch = () => {
     if (searchText) {
-      setSearchText(searchText);
+      setSearch(searchText);
+    } else {
+      setSearch("")
     }
   };
 
@@ -138,7 +141,7 @@ export const HomePage = () => {
                 </svg>
               </div>
               <input type="search" value={searchText} id="default-search" className={`block w-full p-1.5 ps-10 search-box border focus:border-sky-500 rounded-3xl outline-none`} placeholder="Search..." required onChange={(e) => setSearchText(e.target.value)} />
-              {/* <button className="text-white absolute end-2.5 bottom-0.5 bg-sky-400 hover:bg-sky-200 hover:text-black focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-lg text-sm px-4 py-1.5" onClick={handleSearch}>
+              {/* <button className="text-white transition-all absolute end-2.5 bottom-0.5 bg-sky-400 hover:bg-white hover:border-solid border border-sky-400  hover:text-black focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-3xl text-sm px-4 py-1.5" onClick={handleSearch}>
                 Search
               </button> */}
             </div>
@@ -188,12 +191,6 @@ export const HomePage = () => {
                     <span className="sr-only">Check icon</span>
                 </div>
                 <div className="ms-1 text-sm font-normal">{toastText}</div>
-                {/* <button type="button" onClick={handleCloseToast} className="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" data-dismiss-target="#toast-default" aria-label="Close">
-                    <span className="sr-only">Close</span>
-                    <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                    </svg>
-                </button> */}
             </div>
             <div className="border-bottom-animation"></div>
         </div>}

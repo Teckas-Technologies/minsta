@@ -32,7 +32,7 @@ export const ProfilePage = () => {
         if(activeAccountId){
             setOwner(activeAccountId.toString());
         }
-    },[activeAccountId])
+    },[activeAccountId]);
 
     const handleGrid = () => {
         console.log("Grid :", grid)
@@ -61,7 +61,7 @@ export const ProfilePage = () => {
                 </div>
             </div>
             <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
-                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dark={darkMode} hiddenPage={false} activeId={owner}/>
+                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dark={darkMode} hiddenPage={false} activeId={owner} profilePage={true}/>
             </DynamicGrid>
         </main>
         </div>

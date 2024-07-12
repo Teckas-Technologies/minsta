@@ -6,7 +6,7 @@ import { useDarkMode } from "@/context/DarkModeContext";
 
 export const AdminShareSettings = () => {
 
-    type MessageKeys = 'facebook' | 'twitter' | 'whatsapp';
+    type MessageKeys = 'telegram' | 'twitter' | 'whatsapp';
 
     const [open, setOpen] = useState<number | null>(null);
     const {saveSocialMedia} = useSaveSocialMedia();
@@ -15,7 +15,7 @@ export const AdminShareSettings = () => {
     // const [socialMediasLocal, setSocialMediasLocal] = useState<SocialMedia[] | null>(socialMedias);
     const { socialMedias } = useFetchSocialMedias();
     const [socialMediasLocal, setSocialMediasLocal] = useState<SocialMedia[] | null>([
-        { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
+        // { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
         { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: false },
         { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: false },
         { name: 'telegram', title: "Telegram", path: "/images/telegram.svg",  message: "", enabled: false },
@@ -57,7 +57,7 @@ export const AdminShareSettings = () => {
                 saveSocialMedia(updatedMedia);
             });
             setSocialMediasLocal([
-                { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
+                // { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
                 { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: false },
                 { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: false },
                 { name: 'telegram', title: "Telegram", path: "/images/telegram.svg",  message: "", enabled: false },
@@ -69,7 +69,7 @@ export const AdminShareSettings = () => {
 
     const handleCancel = () => {
         setSocialMediasLocal([
-            { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
+            // { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: false },
             { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: false },
             { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: false },
             { name: 'telegram', title: "Telegram", path: "/images/telegram.svg",  message: "", enabled: false },
