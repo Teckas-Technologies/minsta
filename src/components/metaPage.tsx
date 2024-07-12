@@ -28,6 +28,12 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
   const { socialMedias } = useFetchSocialMedias();
   const { saveHidePost } = useSaveHidePost()
 
+  const [showTooltip, setShowTooltip] = useState({ share: false, hide: false, delete: false });
+
+  const toggleTooltip = (tooltip: any, state: any) => {
+    setShowTooltip((prevState) => ({ ...prevState, [tooltip]: state }));
+  };
+
   let enabledMedia = socialMedias?.filter((media) => media.enabled === true);
 
   const toggleShare = (e: React.MouseEvent) => {
@@ -42,7 +48,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
   
     switch(name) {
       case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?url=%0aCheck%20out%20mine%3A%20${url}%2F&via=mintbase&text=${message}`;
+        shareUrl = `https://twitter.com/intent/tweet?url=%20${url}%2F&via=mintbase&text=${message}`;
         break;
       case 'telegram':
         shareUrl = `https://telegram.me/share/url?url=${url}&text=${message}`;
@@ -92,6 +98,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
   //   }
   // }, [toast])
 
+  const tags = JSON.parse(meta?.data?.nft_metadata?.[0]?.extra);
 
   return (
     <div className={darkMode ? "dark" : ""}>
@@ -102,7 +109,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
       transition={{ type: "linear" }}
       className={`flex wrap flex-col h-[100%] min-h-[100vh] px-4 items-center pb-[30px] pt-20  w-[100%] m-auto  bg-white dark:bg-slate-800`}
     >
-      <div className={`meta-page-holder ${darkMode ? "box-shadow-dark" : "box-shadow"} px-4 pb-10 mt-2 rounded-lg`}>
+      <div className={`meta-page-holder ${darkMode ? "box-shadow-dark" : "box-shadow"} px-4 pb-10 mt-2 rounded-lg max-w-[31.4rem]`}>
         <div className={`${darkMode ? "image-holder-dark" : "image-holder"}  md:w-[468px] md:h-[468px] relative p-2 mt-10 rounded-md`}>
           <Image
             alt={meta?.data?.nft_metadata?.[0]?.title}
@@ -113,6 +120,8 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
           />
           <button
             className="absolute top-4 right-4 bg-sky-500 text-white rounded p-1 text-xs px-2 py-2"
+            onMouseEnter={() => toggleTooltip('share', true)}
+            onMouseLeave={() => toggleTooltip('share', false)}
             onClick={toggleShare}
           >
             <InlineSVG
@@ -121,6 +130,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
               color="#fff"
               />
           </button>
+          {showTooltip.share && !shareModal && <div className="tooltip absolute top-[-1.8rem] right-1 bg-white px-2 py-1 rounded-md box-shadow">Share</div>}
           {shareModal && 
               <div className="absolute top-[-2.2rem] w-full flex justify-end pr-4" ref={toggleShareRef}>
                 {enabledMedia ?
@@ -143,6 +153,8 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
             }
           <button
             className="absolute top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
+            onMouseEnter={() => toggleTooltip('hide', true)}
+            onMouseLeave={() => toggleTooltip('hide', false)}
             onClick={(e) => {handleHidePost(tokenId, e)}}
           >
             <InlineSVG
@@ -151,10 +163,13 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
               color="#fff"
               />
           </button>
+          {showTooltip.hide && <div className="tooltip absolute top-[-1.8rem] left-2 bg-white px-2 py-1 rounded-md box-shadow">Hide</div>}
           {activeAccountId === constants.adminId && 
             <div>
               <button
                   className="absolute top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"
+                  onMouseEnter={() => toggleTooltip('delete', true)}
+                  onMouseLeave={() => toggleTooltip('delete', false)}
                   onClick={(e) => {console.log("Delete")}}
                 >
                   <InlineSVG
@@ -163,16 +178,46 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
                   color="#fff"
                   />
                 </button>
+                {showTooltip.delete && <div className="tooltip absolute top-[-1.8rem] left-10 bg-white px-2 py-1 rounded-md box-shadow">Delete</div>}
           </div>}
         </div>
-        <h2 className="font-semibold	py-5 leading-7 text-mainText text-[24px] dark:text-white">
-          {" "}
-          {meta?.data?.nft_metadata?.[0]?.title}
+        <h2 className="font-semibold	pt-5 pb-2 leading-7 text-lg dark:text-white">
+          <span className="text-lg font-bold dark:text-white">Title:</span> {meta?.data?.nft_metadata?.[0]?.title}
         </h2>
-        <h3 className="text-[14px] mb-4 text-mainText dark:text-white">
-          {" "}
-          {meta?.data?.nft_metadata?.[0]?.description}
+        <h3 className="text-[14px] mb-2 text-lg dark:text-white text-justify">
+          <span className="text-lg font-bold dark:text-white">Description:</span> {meta?.data?.nft_metadata?.[0]?.description}
         </h3>
+        {
+          tags?.tag1 && <>
+          <h2 className="text-lg pb-1 font-bold dark:text-white">Tags:</h2>
+        <div className={`meta-tags ${darkMode ? "box-shadow-dark" : "box-shadow"}  px-3 py-2 mb-2 rounded-lg flex gap-3 mb-3`}>
+          {
+            tags?.tag1 && 
+            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
+              <h3 className="text-white">#{tags?.tag1}</h3>
+            </div>
+          }
+          {
+            tags?.tag2 && 
+            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
+              <h3 className="text-white">#{tags?.tag2}</h3>
+            </div>
+          }
+          {
+            tags?.tag3 && 
+            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
+              <h3 className="text-white">#{tags?.tag3}</h3>
+            </div>
+          }
+          {
+            tags?.tag4 && 
+            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
+              <h3 className="text-white">#{tags?.tag4}</h3>
+            </div>
+          }
+        </div>
+          </>
+        }
         <p className="text-[14px] text-mainText dark:text-white">
           {" "}
           Owner:{" "}

@@ -6,6 +6,7 @@ export interface TokenData {
   metadata_id: string;
   title: string;
   owner: String | null;
+  tags?: string[]
 }
 
 export interface TokenFeedData {
@@ -52,4 +53,13 @@ export interface HidePost {
 
 export interface HideTokenId {
   id: string;
+}
+
+export interface BlockUserType {
+  accountId : string;
+  blockedUsers: BlockedUser[];
+}
+
+export interface BlockedUser {
+  blockedUserId: string;
 }

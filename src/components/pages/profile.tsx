@@ -16,18 +16,23 @@ export const ProfilePage = () => {
     const {activeAccountId, connect, isConnected} = useMbWallet();
     const { darkMode } = useDarkMode();
     let [grid, setGrid] = useState(1);
-    const owenerid = activeAccountId?.toString();
+    const [owner, setOwner] = useState("")
     const [newData, setNewData] = useState<InfiniteScrollHook | undefined>();
-    const { data, isLoading } = useSearchTokenByOwner(owenerid ? owenerid : "");
     
 
-    useEffect(()=> {
-        if(owenerid) {
-            setFilteredNFT(data)
-        } else if(!owenerid) {
-            setNewData(data)
+    // useEffect(()=> {
+    //     if(owenerid) {
+    //         setFilteredNFT(data)
+    //     } else if(!owenerid) {
+    //         setNewData(data)
+    //     }
+    // }, [owenerid]);
+
+    useEffect(()=>{
+        if(activeAccountId){
+            setOwner(activeAccountId.toString());
         }
-    }, [owenerid]);
+    },[activeAccountId]);
 
     const handleGrid = () => {
         console.log("Grid :", grid)
@@ -43,6 +48,9 @@ export const ProfilePage = () => {
     return (
         <div className={darkMode ? "dark" : ""}>
         <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start space-y-4 mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh]">
+            <div className="page-title mt-20">
+                <h2 className="title-font text-3xl dark:text-white underline underline-offset-4">Profile</h2>
+            </div>
             <div className="max-w-md flex gap-3 iems-center flex ml-auto mt-20 justify-center mb-5">
                 <div className="md:hidden flex items-center justify-center" onClick={()=> { handleGrid()}}>
                     <InlineSVG
@@ -51,18 +59,9 @@ export const ProfilePage = () => {
                     color="#222f3e"
                     />
                 </div>
-                {activeAccountId &&
-                <div className="accout-owner border py-2 px-4 rounded-3xl">
-                    <div className="account-box">
-                        <h3> {activeAccountId}</h3>
-                        {/* <h2 className="text-white dark:text-black">John</h2> */}
-                    </div>
-                </div>}
             </div>
             <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
-                {!newData?.token && <FirstToken {...firstTokenProps} />}
-
-                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={activeAccountId?.toString()} dark={darkMode}/>
+                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dark={darkMode} hiddenPage={false} activeId={owner} profilePage={true}/>
             </DynamicGrid>
         </main>
         </div>
