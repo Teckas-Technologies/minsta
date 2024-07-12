@@ -10,7 +10,6 @@ type ReferenceObject = {
   title?: string;
   description?: string;
   media?: File | string;
-  extra?: string;
 };
 
 const useMintImage = () => {
@@ -181,7 +180,7 @@ const useMintImage = () => {
         media: photoFile,
       };
       const uploadedData = await uploadReferenceObject(refObject);
-      const metadata = { reference: uploadedData?.id, extra: JSON.stringify(originalTags) };
+      const metadata = { reference: uploadedData?.id };
       await performTransaction(wallet, metadata);
     } catch (error: any) {
       setError(
@@ -220,7 +219,7 @@ const useMintImage = () => {
         media: photoFile,
       };
       const uploadedData = await uploadReferenceObject(refObject);
-      const metadata = { reference: uploadedData?.id, extra: JSON.stringify(originalTags) };
+      const metadata = { reference: uploadedData?.id };
       await performTransaction(wallet, metadata);
     } catch (error: any) {
       setError(
