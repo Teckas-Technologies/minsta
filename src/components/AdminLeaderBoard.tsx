@@ -53,7 +53,8 @@ export const AdminLeaderBoard = () => {
                 <div className="leader-board-title">
                 <h2 className="text-xl text-center sm:text-left py-1 title-font dark:text-white">Leaderboard</h2>
                 </div>
-                <div className="admin-leaderboard bg-white">
+                <div className="admin-leaderboard bg-white h-auto">
+                    {leaderboard.length > 0 ? 
                     <form action="/">
                         {leaderboard.map((leader, i) => (
                             <div className="leader w-full flex gap-3 mt-2 items-center" key={i}>
@@ -83,7 +84,11 @@ export const AdminLeaderBoard = () => {
                                 </div>
                             </div>
                         ))}
-                    </form>
+                    </form> : 
+                    <div className='w-full h-full flex items-center justify-center'>
+                        <div className='loader'>
+                        </div>
+                    </div>}
                 </div>
                 <div className="admin-leaderboard-footer flex justify-end">
                     <div className="leaderboard-actions flex gap-5 mr-3">

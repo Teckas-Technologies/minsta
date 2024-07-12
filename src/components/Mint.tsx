@@ -32,9 +32,10 @@ export function Mint({
 
   const handleUpload = () => {
     if(currentPhoto) {
-      mintImage(currentPhoto, title, description);
+      mintImage(currentPhoto, title, description, tags);
       setTitle("");
       setDescription("");
+      setTags([])
     }
   }
 

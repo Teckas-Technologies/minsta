@@ -54,12 +54,13 @@ export default function FileUploadPage() {
             return;
         }
         if(isConnected){
-          mintGif(file, title, description);
+          mintGif(file, title, description, tags);
           console.log(file, "Uploading...");
           // setGalleryOpen(false);
           setUploading(true);
           setTitle("");
           setDescription("");
+          setTags([]);
         } else {
           connect();
         }

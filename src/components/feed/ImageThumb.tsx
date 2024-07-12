@@ -10,24 +10,25 @@ import InlineSVG from "react-inlinesvg";
 import { useMbWallet } from "@mintbase-js/react";
 import { useFetchSocialMedias } from "@/hooks/db/SocialMediaHook";
 import { useSaveHidePost } from "@/hooks/db/HidePostHook";
-import { HidePost } from "@/data/types";
+import { BlockUserType, HidePost } from "@/data/types";
+import { useSaveBlockUser } from "@/hooks/db/BlockUserHook";
 
-const ImageThumb = ({ token, index, dark, setToast }: any) => {
+const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
   const imageUrl = token?.media;
   const [error, setError] = useState(false);
-  const { isConnected, activeAccountId } = useMbWallet();
+  const { activeAccountId } = useMbWallet();
   const [shareModal, setShareModal] = useState(false);
-  type MessageKeys = 'facebook' | 'twitter' | 'whatsapp';
+  const [deleteModal, setDeleteModal] = useState(false);
   const toggleShareRef = useRef<HTMLDivElement | null>(null);
-
   const { socialMedias } = useFetchSocialMedias();
-  const { saveHidePost } = useSaveHidePost()
+  const { saveHidePost } = useSaveHidePost();
+  const { saveBlockUser } = useSaveBlockUser();
 
-  // const [socialMedias, setSocialMedias] = useState<Array<{name: MessageKeys, title: string, path: string, message: string, enabled: boolean}>>([
-  //     { name: 'facebook', title: "Facebook", path: "/images/facebook.svg", message: "", enabled: true },
-  //     { name: 'twitter', title: "Twitter", path: "/images/twitter_x.svg",  message: "", enabled: true },
-  //     { name: 'whatsapp', title: "Whatsapp", path: "/images/whatsapp.svg",  message: "", enabled: true },
-  // ]);
+  const [showTooltip, setShowTooltip] = useState({ share: false, hide: false, delete: false });
+
+  const toggleTooltip = (tooltip: any, state: any) => {
+    setShowTooltip((prevState) => ({ ...prevState, [tooltip]: state }));
+  };
 
   let enabledMedia = socialMedias?.filter((media) => media.enabled === true);
 
@@ -71,7 +72,7 @@ const ImageThumb = ({ token, index, dark, setToast }: any) => {
         shareUrl = `https://telegram.me/share/url?text=${message}&url=${url}`;
         break;
       case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${message}`;
         break;
       case 'whatsapp':
         shareUrl = `https://api.whatsapp.com/send?text=${message}%20${url}`;
@@ -95,18 +96,40 @@ const ImageThumb = ({ token, index, dark, setToast }: any) => {
     };
   }, [toggleShareRef]);
 
-  const handleHidePost = async (tokenId: any, e: any) => {
-    const data: HidePost = {
+  const handleHidePost = async (tokenId: any, unhide: boolean, e: any) => {
+    const data: HidePost & { unhide?: boolean } = {
       accountId: activeAccountId?.toString() || "",
       hiddedTokenIds: [
         {
             id: tokenId
         }
-      ]
+      ],
+      unhide
     }
     await saveHidePost(data).then(()=>{
-      setToast(true);
+      if(unhide){
+        setToast("Moment Unhided Successfully!", true);
+      } else {
+        setToast("Moment Hided Successfully!", true);
+      }
     })
+  }
+
+  const handleDeleteUser = async (token: any,e:any) => {
+    const data : BlockUserType = {
+      accountId: activeAccountId?.toString() || "",
+      blockedUsers: [
+        {
+          blockedUserId: token?.owner,
+        }
+      ]
+    }
+    await saveBlockUser(data).then((res)=>{
+      if(res?.status == 200){
+        setDeleteModal(false);
+        setToast("User Blocked Successfully!",true);
+      }
+    });
   }
 
 
@@ -150,6 +173,8 @@ const ImageThumb = ({ token, index, dark, setToast }: any) => {
           />
           <button
             className="absolute top-4 right-4 bg-sky-500 text-white rounded p-1 text-xs px-2 py-1.5"
+            onMouseEnter={() => toggleTooltip('share', true)}
+            onMouseLeave={() => toggleTooltip('share', false)}
             onClick={toggleShare}
             // ref={toggleShareRef}
           >
@@ -159,6 +184,7 @@ const ImageThumb = ({ token, index, dark, setToast }: any) => {
             color="#fff"
             />
           </button>
+          {showTooltip.share && !shareModal && <div className="tooltip absolute top-[-1.8rem] right-1 bg-white px-2 py-1 rounded-md box-shadow">Share</div>}
           {shareModal && 
             <div className="absolute top-[-2rem] w-full flex justify-end pr-4" ref={toggleShareRef}>
               {enabledMedia ?
@@ -179,21 +205,35 @@ const ImageThumb = ({ token, index, dark, setToast }: any) => {
               }
             </div>
           }
-          <button
-                className="absolute top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
-                onClick={(e) => {handleHidePost(token?.id, e)}}
-              >
-                <InlineSVG
-                src="/images/eye_hide.svg"
-                className="fill-current"
-                color="#fff"
-                />
-          </button>
-          {activeAccountId === constants.adminId && 
+          {
+            activeAccountId && 
+            <button
+              className="absolute top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
+              onMouseEnter={() => toggleTooltip('hide', true)}
+              onMouseLeave={() => toggleTooltip('hide', false)}
+              onClick={(e) => {handleHidePost(token?.id, hiddenPage, e)}}
+            >
+              {!hiddenPage ? 
+              <InlineSVG
+              src="/images/eye_hide.svg"
+              className="fill-current"
+              color="#fff"
+              /> : 
+              <InlineSVG
+              src="/images/eye.svg"
+              className="fill-current"
+              color="#fff"
+              />}
+            </button>
+          }
+          {showTooltip.hide && <div className="tooltip absolute top-[-1.8rem] left-2 bg-white px-2 py-1 rounded-md box-shadow">{hiddenPage ? "Unhide" : "Hide"}</div>}
+          {!hiddenPage && activeAccountId && 
           <div>
             <button
                 className="absolute top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"
-                onClick={(e) => {console.log("Deleted")}}
+                onMouseEnter={() => toggleTooltip('delete', true)}
+                onMouseLeave={() => toggleTooltip('delete', false)}
+                onClick={() => setDeleteModal(!deleteModal)}
               >
                 <InlineSVG
                 src="/images/trash.svg"
@@ -201,6 +241,18 @@ const ImageThumb = ({ token, index, dark, setToast }: any) => {
                 color="#fff"
                 />
               </button>
+              {showTooltip.delete && <div className="tooltip absolute top-[-1.8rem] left-10 bg-white px-2 py-1 rounded-md box-shadow">Delete</div>}
+              {deleteModal && 
+                <div className="absolute top-0 left-0 bottom-0 right-0 rounded-md bg-sky-50 w-full flex justify-center items-center px-2">
+                  <div className="delete-content flex flex-col items-center gap-3 rounded-md px-2 py-2 bg-white box-shadow">
+                    <h3 className="text-center">Are you sure want to delete the all moments from this user?</h3>
+                    <div className="delete-btns flex items-center justify-center gap-2">
+                      <button className="btn cancel-btn" onClick={()=>setDeleteModal(false)}>Cancel</button>
+                      <button className="btn delete-btn" onClick={(e) => handleDeleteUser(token, e)}>Delete</button>
+                    </div>
+                  </div>
+                </div>
+              }
             </div>}
         {/* </Link> */}
       </div>

@@ -6,11 +6,11 @@ import { generateRandomId } from "./generateRandomId";
 import { useReplicate } from "@/providers/replicate";
 import { constants } from "@/constants";
 
-interface ReferenceObject {
-  title: string;
-  description: string;
-  media: File;
-}
+type ReferenceObject = {
+  title?: string;
+  description?: string;
+  media?: File | string;
+};
 
 const useMintImage = () => {
   const [loading, setLoading] = useState(false);
@@ -153,7 +153,7 @@ const useMintImage = () => {
     });
   };
 
-  const mintImage = async (photo: string, title:string, description: string) => {
+  const mintImage = async (photo: string, title:string, description: string, tags: string[]) => {
     if (!activeAccountId) {
       setError("Active account ID is not set.");
       return;
@@ -168,6 +168,12 @@ const useMintImage = () => {
       const titleAndDescription = await getTitleAndDescription(replicatePhoto);
       const originalTitle = title && title.trim() ? title : titleAndDescription.title;
       const originalDescription = description && description.trim() ? description : titleAndDescription.description;
+      const originalTags = {
+        tag1: tags[0],
+        tag2: tags[1],
+        tag3: tags[2],
+        tag4: tags[3]
+      }
       const refObject = {
         title: originalTitle,
         description: originalDescription,
@@ -185,7 +191,7 @@ const useMintImage = () => {
     }
   };
 
-  const mintGif = async (gif: File, title: string, description:string) => {
+  const mintGif = async (gif: File, title: string, description:string, tags: string[]) => {
     if (!activeAccountId) {
       setError("Active account ID is not set.");
       return;
@@ -201,6 +207,12 @@ const useMintImage = () => {
       const titleAndDescription = await getTitleAndDescription(replicatePhoto);
       const originalTitle = title && title.trim() ? title : titleAndDescription.title;
       const originalDescription = description && description.trim() ? description : titleAndDescription.description;
+      const originalTags = {
+        tag1: tags[0],
+        tag2: tags[1],
+        tag3: tags[2],
+        tag4: tags[3]
+      }
       const refObject = {
         title: originalTitle,
         description: originalDescription,
