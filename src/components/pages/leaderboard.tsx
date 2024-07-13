@@ -5,10 +5,11 @@ import ViewYourNfts from "../buttons/ViewYourNft";
 import RewardsModal from "../RewardsModal";
 import { useLeaderBoardData } from "@/hooks/useLeaderboard";
 import Link from "next/link";
+import { useDarkMode } from "@/context/DarkModeContext";
 
 export const LeaderboardPage = () => {
-  const { openModal, leaderboard, activeAccountId, texts } =
-    useLeaderBoardData();
+  const { openModal, leaderboard, activeAccountId, texts } = useLeaderBoardData();
+  const { darkMode } = useDarkMode();
 
   const nfts: any = [];
   leaderboard?.forEach(({ count }) => {
@@ -18,14 +19,14 @@ export const LeaderboardPage = () => {
   const sum = nfts?.reduce((x: number, y: number) => x + y, 0);
 
   return (
-    <>
-      <main className="pt-20 flex flex-col gap-6 items-center justify-center text-mainText">
-        <div>Leaderboard</div>
+    <div className={darkMode ? "dark" : ""}>
+      <main className="pt-20 flex flex-col gap-6 items-center justify-center text-mainText bg-white dark:bg-slate-800">
+        <div className="dark:text-white">Leaderboard</div>
         <div className="flex text-center gap-10">
           <ViewYourNfts />
           {constants.showRewards ? (
             <button
-              className="text-linkColor text-sm"
+              className="text-linkColor text-sm dark:text-white"
               onClick={() => openModal("rewards")}
             >
               View Rewards
@@ -34,10 +35,10 @@ export const LeaderboardPage = () => {
         </div>
         <div className="flex flex-col gap-4 w-full px-4 pb-24 max-w-3xl text-leaderboardText">
           <div className="flex">
-            👤 <b className="pl-1"> {leaderboard?.length}</b>{" "}
-            <span className="pl-1 pr-3"> Minters</span> 🖼️{" "}
-            <b className="pl-1"> {sum}</b>{" "}
-            <span className="pl-1"> Moments</span>{" "}
+            👤 <b className="pl-1 dark:text-white"> {leaderboard?.length}</b>{" "}
+            <span className="pl-1 pr-3 dark:text-white"> Minters</span> 🖼️{" "}
+            <b className="pl-1 dark:text-white"> {sum}</b>{" "}
+            <span className="pl-1 dark:text-white"> Moments</span>{" "}
           </div>
           {leaderboard?.map(({ account, count }, index) => {
             const isCurrentUser = account === activeAccountId;
@@ -77,6 +78,6 @@ export const LeaderboardPage = () => {
         </div>
       </main>
       <RewardsModal texts={texts} />
-    </>
+    </div>
   );
 };

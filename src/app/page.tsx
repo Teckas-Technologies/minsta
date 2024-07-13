@@ -1,4 +1,5 @@
 import { HomePage } from "@/components/HomePage";
+import { DarkModeProvider } from "@/context/DarkModeContext";
 import { MINSTA_META } from "@/data/fallback";
 import { Metadata } from "next";
 
@@ -31,5 +32,5 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return <HomePage />;
+  return  <HomePage />
 }

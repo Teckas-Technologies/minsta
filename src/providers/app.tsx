@@ -14,7 +14,7 @@ export const AppContext = createContext<{
   closeModal: () => void;
   isMainModalOpen: boolean;
   isRewardsModalOpen: boolean;
-  mintImage: (photo: string) => void;
+  mintImage: (photo: string, title:string, description: string,  tags: string[]) => void;
   isLoading: boolean;
 }>({
   cameraRef: undefined,
@@ -25,7 +25,7 @@ export const AppContext = createContext<{
   closeModal: () => null,
   isMainModalOpen: false,
   isRewardsModalOpen: false,
-  mintImage: (photo: string) => null,
+  mintImage: (photo: string, title:string, description: string, tags: string[]) => null,
   isLoading: false,
 });
 
@@ -38,7 +38,7 @@ interface IAppConsumer {
   closeModal: () => void;
   isMainModalOpen: boolean;
   isRewardsModalOpen: boolean;
-  mintImage: (photo: string) => void;
+  mintImage: (photo: string, title:string, description: string, tags: string[]) => void;
   isLoading: false;
 }
 

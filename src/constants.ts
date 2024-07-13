@@ -20,7 +20,10 @@ const twitterText =
   process.env.NEXT_PUBLIC_TWITTER ||
   "Exploring%20unforgettable%20moments%20at%20%23Mintbase%20%40Mintbase%20%40NEARProtocol%20%23BOS%20%23NEAR%0aMint%20yours%20here%3A%20https%3A%2F%2Fminsta.mintbase.xyz";
 
+const adminId = process.env.ADMIN_ID || "minsta.testnet";
+
 export const constants = {
+  adminId,
   appName,
   proxyContractAddress,
   legacyProxyAddresses,

@@ -6,11 +6,11 @@ import { generateRandomId } from "./generateRandomId";
 import { useReplicate } from "@/providers/replicate";
 import { constants } from "@/constants";
 
-interface ReferenceObject {
-  title: string;
-  description: string;
-  media: File;
-}
+type ReferenceObject = {
+  title?: string;
+  description?: string;
+  media?: File | string;
+};
 
 const useMintImage = () => {
   const [loading, setLoading] = useState(false);
@@ -153,7 +153,7 @@ const useMintImage = () => {
     });
   };
 
-  const mintImage = async (photo: string) => {
+  const mintImage = async (photo: string, title:string, description: string, tags: string[]) => {
     if (!activeAccountId) {
       setError("Active account ID is not set.");
       return;
@@ -166,9 +166,17 @@ const useMintImage = () => {
       const photoFile = convertBase64ToFile(photo);
       const replicatePhoto = await reduceImageSize(photo, 10); //10MB limit replicate
       const titleAndDescription = await getTitleAndDescription(replicatePhoto);
+      const originalTitle = title && title.trim() ? title : titleAndDescription.title;
+      const originalDescription = description && description.trim() ? description : titleAndDescription.description;
+      const originalTags = {
+        tag1: tags[0],
+        tag2: tags[1],
+        tag3: tags[2],
+        tag4: tags[3]
+      }
       const refObject = {
-        title: titleAndDescription.title,
-        description: titleAndDescription.description,
+        title: originalTitle,
+        description: originalDescription,
         media: photoFile,
       };
       const uploadedData = await uploadReferenceObject(refObject);
@@ -183,7 +191,55 @@ const useMintImage = () => {
     }
   };
 
-  return { mintImage, loading, error };
+  const mintGif = async (gif: File, title: string, description:string, tags: string[]) => {
+    if (!activeAccountId) {
+      setError("Active account ID is not set.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const wallet = await getWallet();
+      const photo = await fileToBase64(gif);
+      const photoFile = convertBase64ToFile(photo);
+      const replicatePhoto = await reduceImageSize(photo, 10); //10MB limit replicate
+      const titleAndDescription = await getTitleAndDescription(replicatePhoto);
+      const originalTitle = title && title.trim() ? title : titleAndDescription.title;
+      const originalDescription = description && description.trim() ? description : titleAndDescription.description;
+      const originalTags = {
+        tag1: tags[0],
+        tag2: tags[1],
+        tag3: tags[2],
+        tag4: tags[3]
+      }
+      const refObject = {
+        title: originalTitle,
+        description: originalDescription,
+        media: photoFile,
+      };
+      const uploadedData = await uploadReferenceObject(refObject);
+      const metadata = { reference: uploadedData?.id };
+      await performTransaction(wallet, metadata);
+    } catch (error: any) {
+      setError(
+        error?.message || "An error occurred during the minting process."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);  // Cast to string as `result` can be `string | ArrayBuffer`.
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  return { mintImage,mintGif, loading, error };
 };
 
 export default useMintImage;

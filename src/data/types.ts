@@ -5,6 +5,8 @@ export interface TokenData {
   media: string;
   metadata_id: string;
   title: string;
+  owner: String | null;
+  tags?: string[]
 }
 
 export interface TokenFeedData {
@@ -32,4 +34,32 @@ export interface FirstTokenProps {
   isLoading: boolean;
   firstTokenisBlocked: boolean;
   isFirstTokenError:boolean
+}
+
+// Added by john
+
+export interface SocialMedia {
+  name: string;
+  title: string;
+  path: string;
+  message: string;
+  enabled: boolean;
+}
+
+export interface HidePost {
+  accountId : string;
+  hiddedTokenIds: HideTokenId[];
+}
+
+export interface HideTokenId {
+  id: string;
+}
+
+export interface BlockUserType {
+  accountId : string;
+  blockedUsers: BlockedUser[];
+}
+
+export interface BlockedUser {
+  blockedUserId: string;
 }

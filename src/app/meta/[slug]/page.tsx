@@ -62,7 +62,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <title>My page title</title>
       </Head>
       {posts?.data?.nft_metadata?.[0]?.media && (
-        <MetaPage meta={posts} slug={params.slug} />
+        <MetaPage meta={posts} slug={params.slug} tokenId={posts?.data?.owners[0]?.id} />
       )}
     </main>
   );

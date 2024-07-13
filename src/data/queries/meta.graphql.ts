@@ -7,6 +7,7 @@ query v2_omnisite_GetMetadataStaticReferences($metadataId: String!) {
     media
     description
     nft_contract_id
+    extra
   }
     owners: nft_tokens(
       where: {
@@ -15,6 +16,7 @@ query v2_omnisite_GetMetadataStaticReferences($metadataId: String!) {
       }
       distinct_on: owner
     ) {
+      id: token_id
       owner
     }
 }
