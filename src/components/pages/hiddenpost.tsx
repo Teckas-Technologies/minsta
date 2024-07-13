@@ -28,10 +28,11 @@ export const HiddenPostPage = () => {
         if(toast) {
             setTimeout(()=> {
                 setToast(false);
+                setToastText("");
+                window.location.reload();
+                fetchHidedPosts(accountId);
             }, 5000)
-            if(activeAccountId) {
-                fetchHidedPosts(activeAccountId);
-            }
+            
         }
     }, [toast])
 
@@ -44,19 +45,21 @@ export const HiddenPostPage = () => {
         if(activeAccountId) {
             setAccountId(activeAccountId);
         }
-    }, [activeAccountId]);
+    }, [activeAccountId, accountId]);
 
     useEffect(() => {
         if(activeAccountId) {
             fetchHidedPosts(activeAccountId);
         }
-    }, [activeAccountId]);
+    }, [activeAccountId, accountId]);
 
     const fetchHidedPosts = async (accountId: string)=> {
-        const hiddenPosts = await fetchHiddenPost(accountId);
-        if (hiddenPosts?.hiddedTokenIds) {
-            const ids = hiddenPosts.hiddedTokenIds.map(token => token.id);
-            setHidePostIds(ids);
+        if(accountId) {
+            const hiddenPosts = await fetchHiddenPost(accountId);
+            if (hiddenPosts?.hiddedTokenIds) {
+                const ids = hiddenPosts.hiddedTokenIds.map(token => token.id);
+                setHidePostIds(ids);
+            }
         }
     }
 
