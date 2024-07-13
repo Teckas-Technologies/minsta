@@ -183,12 +183,17 @@ const useInfiniteScrollGQL = (
 
   const fetchHidedItems = async () => {
     // dispatch({ type: "RESET_HIDED_ITEMS" });
+    dispatch({ type: "FETCH_RESET" });
     dispatch({ type: "FETCH_START" });
     console.log("Hided Items ----->");
+
+    console.log("Account Id  >> ", activeAccount);
   
     const hidedPosts = await fetchHiddenPost(activeAccount);
   
     const idsList = hidedPosts?.hiddedTokenIds?.map(token => token.id) || [];
+
+    console.log("Hidden Ids  >> ", idsList);
   
     const variables = {
       limit: fetchNum,
@@ -200,6 +205,8 @@ const useInfiniteScrollGQL = (
       contractAddress: constants.tokenContractAddress,
       offset: (state.offset - 1) * fetchNum,
     };
+
+    console.log("Variables  >> ", variables);
   
     const hidedData = (await graphqlQLServiceNew<InfiniteScrollHook>({
       query: HIDE_POST,
@@ -207,6 +214,8 @@ const useInfiniteScrollGQL = (
     })) as InfiniteScrollHookResult;
   
     const { data } = hidedData;
+
+    console.log("Data  >> ", data);
   
     dispatch({ type: "SET_LOADING", payload: false });
     dispatch({ type: "SET_OFFSET", payload: state.offset + 1 });

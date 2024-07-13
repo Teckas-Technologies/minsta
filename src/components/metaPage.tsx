@@ -151,8 +151,9 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
                 }
               </div>
             }
+          {activeAccountId && 
           <button
-            className="absolute top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
+            className="absolute hidden top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
             onMouseEnter={() => toggleTooltip('hide', true)}
             onMouseLeave={() => toggleTooltip('hide', false)}
             onClick={(e) => {handleHidePost(tokenId, e)}}
@@ -162,12 +163,12 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
               className="fill-current"
               color="#fff"
               />
-          </button>
+          </button>}
           {showTooltip.hide && <div className="tooltip absolute top-[-1.8rem] left-2 bg-white px-2 py-1 rounded-md box-shadow">Hide</div>}
           {activeAccountId === constants.adminId && 
             <div>
               <button
-                  className="absolute top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"
+                  className="absolute hidden top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"
                   onMouseEnter={() => toggleTooltip('delete', true)}
                   onMouseLeave={() => toggleTooltip('delete', false)}
                   onClick={(e) => {console.log("Delete")}}

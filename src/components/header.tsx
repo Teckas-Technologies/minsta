@@ -100,14 +100,37 @@ const Header = () => {
     const handleIsAdmin = () => {
       if(activeAccountId === constants.adminId) {
         setIsAdmin(true);
-        console.log("Its a admin")
       } else {
         setIsAdmin(false);
-        console.log("Not a admin")
       }
     }
     handleIsAdmin();
-  },[isAdmin, isConnected, activeAccountId])
+  },[isAdmin, isConnected, activeAccountId]);
+
+  // const [darkMode, setDarkMode] = useState(() => {
+  //   if (typeof window !== 'undefined') {
+  //     return localStorage.getItem("dark") === "true";
+  //   }
+  //   return false;
+  // });
+
+  // useEffect(() => {
+  //   if (typeof window !== 'undefined') {
+  //     if (localStorage.getItem("dark") === null || localStorage.getItem("dark") === "undefined") {
+  //       localStorage.setItem("dark", "false");
+  //       setDarkMode(false);
+  //     }
+  //   }
+  // }, []);
+
+
+  // const toggleDarkModeNew = () => {
+  //   if (typeof window !== 'undefined') {
+  //     const newMode = !darkMode;
+  //     setDarkMode(newMode);
+  //     localStorage.setItem("dark", newMode.toString());
+  //   }
+  // }
 
 
 
