@@ -42,6 +42,9 @@ export const HomePage = () => {
     window.location.reload();
   }
 
+  // const darkMode = localStorage.getItem("dark");
+  // console.log("Dark Mode",darkMode);
+
   useEffect(()=> {
     if(toast) {
         setTimeout(()=> {
