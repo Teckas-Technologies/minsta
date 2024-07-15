@@ -96,6 +96,7 @@ const useInfiniteScrollGQL = (
   const [profilePageNew, setProfilePageNew] = useState(profilePage || false);
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
   const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
+  const [loadingFirst, setLoadingFirst] = useState(false);
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const fetchNum = isDesktop ? 8 : 10;
@@ -170,6 +171,7 @@ const useInfiniteScrollGQL = (
         payload: data?.token,
       });
     } else {
+      setLoadingFirst(true);
       dispatch({
         type: "FETCH_SUCCESS",
         payload: data?.token,
@@ -270,6 +272,10 @@ const useInfiniteScrollGQL = (
       // dispatch({ type: "FETCH_RESET" });
       fetchNextPage();
   }, [searchInput, activeAccount, hiddenPageNew]);
+
+  useEffect(()=>{
+    fetchNextPage();
+  },[loadingFirst]);
 
   useEffect(() => {
     if (error) {
