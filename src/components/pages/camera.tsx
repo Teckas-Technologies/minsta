@@ -4,6 +4,7 @@ import Webcam from "react-webcam";
 import { useCamera } from "@/hooks/useCamera";
 import InlineSVG from "react-inlinesvg";
 import { useDarkMode } from "@/context/DarkModeContext";
+import { useEffect, useState } from "react";
 
 export default function CameraPage() {
   const {
@@ -17,7 +18,16 @@ export default function CameraPage() {
     setCameraLoaded,
     capture,
   } = useCamera();
-  const { darkMode } = useDarkMode();
+  const [darkMode, setDarkMode] = useState<boolean>();
+  const {mode} = useDarkMode();
+
+  useEffect(()=> {
+    if(mode === "dark") {
+      setDarkMode(true);
+    } else{
+      setDarkMode(false);
+    }
+  }, [mode])
 
   if (picture) {
     return <Mint currentPhoto={picture} backStep={tryAgain} />;

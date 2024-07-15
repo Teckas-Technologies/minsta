@@ -1,8 +1,18 @@
 import { useDarkMode } from "@/context/DarkModeContext";
+import { useEffect, useState } from "react";
 
 export const AdminGiveawayDetails = () => {
 
-    const { darkMode } = useDarkMode();
+    const [darkMode, setDarkMode] = useState<boolean>();
+    const {mode} = useDarkMode();
+
+    useEffect(()=> {
+        if(mode === "dark") {
+        setDarkMode(true);
+        } else{
+        setDarkMode(false);
+        }
+    }, [mode]);
 
     return (
         <div className={darkMode ? "dark" : ""}>
