@@ -8,7 +8,7 @@ import { TokenData } from "@/data/types";
 import InlineSVG from "react-inlinesvg";
 import { useMbWallet } from "@mintbase-js/react";
 
-export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setToast, hiddenPage, activeId, profilePage}: any) => {
+export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setToast, dataItems, setDataItems, hiddenPage, activeId, profilePage}: any) => {
   const [mod, setMod] = useState(true);
   const ref = useRef<HTMLDivElement | null>(null);
   const entry = useIntersectionObserver(ref, {});
@@ -103,6 +103,12 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
     return filteredData;
   }, [items, blockedNfts, sort, search, hidepostids, activeId, profilePage, hiddenPage]);
 
+  useEffect(()=>{
+    if(memoizedData.length !== 0) {
+      setDataItems(true);
+    }
+  }, [items, memoizedData, dataItems])
+
 
   return (
     <>
@@ -113,16 +119,9 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
         hiddenPage && hidepostids?.length !== 0 ?  memoizedData?.map((token: any, index: number) => {
           return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} dark={dark} setToast={setToast} hiddenPage={hiddenPage}/>;
         }): 
-        hiddenPage && hidepostids?.length === 0 ?
-        <div className="w-full flex items-center gap-3">
-          <InlineSVG
-            src="/images/no_data.svg"
-            className="fill-current text-camera h-6 text-slate-800"
-          />
-          <h2>No Hidden Moments</h2>
-        </div> : ""}
+         ""}
       {
-        hiddenPage && hidepostids?.length === 0 ? "" : 
+        hiddenPage && hidepostids?.length === 0 || profilePage && memoizedData.length === 0  ? "" : 
         <div ref={ref}>
           {loadingItems?.map((item, i) => (
             <div className="md:aspect-square rounded overflow-x-hidden cursor-pointer sm:w-[19rem] md:w-[19rem] md:h-[19rem] xl:w-[19rem] xl:h-[19rem] relative" key={`${item}-${i}`}>
