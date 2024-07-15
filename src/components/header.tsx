@@ -12,7 +12,8 @@ import { useDarkMode } from "@/context/DarkModeContext";
 const Header = () => {
   const pathname = usePathname();
   const { activeAccountId, isConnected, selector, connect } = useMbWallet();
-  const { darkMode, toggleDarkMode } = useDarkMode();
+  // const { darkMode, toggleDarkMode } = useDarkMode();
+  const { mode, toggleMode } = useDarkMode();
   const { push } = useRouter();
   const { openModal } = useApp();
   const[pop,setPop] = useState(false);
@@ -132,6 +133,45 @@ const Header = () => {
   //   }
   // }
 
+  // const [mode, setMode] = useState<string | null>("");
+
+  // useEffect(() => {
+  //   if (typeof window !== 'undefined') {
+  //     const storedMode = localStorage.getItem('mode');
+  //     setMode(storedMode);
+  //     if(storedMode === null) {
+  //       setLight();
+  //     }
+  //   }
+  //   console.log("Mode >> ", mode);
+  // }, []);
+
+  // const setDark = () => {
+  //   if (typeof window !== 'undefined') {
+  //     localStorage.setItem('mode', 'dark');
+  //     setMode('dark');
+  //   }
+  // };
+
+  // const setLight = () => {
+  //   if (typeof window !== 'undefined') {
+  //     localStorage.setItem('mode', 'light');
+  //     setMode('light');
+  //   }
+  // };
+
+  // const toggleMode = () => {
+  //   if (mode === 'dark') {
+  //     setLight();
+  //     console.log("Dark >> ", mode)
+  //   } else if (mode === 'light') {
+  //     setDark();
+  //     console.log("Light >> ", mode)
+  //   } else {
+  //     setLight();
+  //   }
+  // };
+
 
 
   const headerButtonsNotHome = (onClick: ReactEventHandler) => (
@@ -150,8 +190,8 @@ const Header = () => {
       <div className="flex gap-4 items-center">
 
         <div className="dark-mode flex justify-center items-center">
-          <button onClick={toggleDarkMode} className="flex justify-center items-center">
-            {darkMode ? 
+          <button onClick={toggleMode} className="flex justify-center items-center">
+            {mode === "dark" ? 
                     <InlineSVG
                     src="/images/sun.svg"
                     className="fill-current w-6 h-6 font-xl cursor-pointer"
@@ -357,14 +397,14 @@ const Header = () => {
                   />
                 </div>
                 <button className="font-bold text-xl" onClick={() => push("/")}>
-                  {process.env.NEXT_PUBLIC_APP_TITLE || "Moments"}
+                  {process.env.NEXT_PUBLIC_APP_TITLE || "Moments I"}
                 </button>
               </div>
             </div>
             <div className="flex gap-4 items-center">
               <div className="dark-mode flex justify-center items-center">
-                <button onClick={toggleDarkMode} className="flex justify-center items-center">
-                  {darkMode ? 
+                <button onClick={toggleMode} className="flex justify-center items-center">
+                  {mode === "dark" ? 
                     <InlineSVG
                     src="/images/sun.svg"
                     className="fill-current w-6 h-6 font-xl cursor-pointer"

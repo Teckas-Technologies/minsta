@@ -2,7 +2,7 @@ import { useDarkMode } from "@/context/DarkModeContext";
 import useMintImage from "@/utils/useMint";
 import { useMbWallet } from "@mintbase-js/react";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import InlineSVG from "react-inlinesvg";
 
 export default function FileUploadPage() {
@@ -15,7 +15,16 @@ export default function FileUploadPage() {
     const [uploading, setUploading] = useState(false);
     const { push } = useRouter();
     const {connect, activeAccountId, isConnected } = useMbWallet();
-    const { darkMode } = useDarkMode();
+    const [darkMode, setDarkMode] = useState<boolean>();
+    const {mode} = useDarkMode();
+
+    useEffect(()=> {
+      if(mode === "dark") {
+        setDarkMode(true);
+      } else{
+        setDarkMode(false);
+      }
+    }, [mode])
 
     const addTag = () => {
         if (tag.trim() !== "" && tags.length < 4) {

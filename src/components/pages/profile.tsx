@@ -15,11 +15,20 @@ export const ProfilePage = () => {
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
     const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
     const {activeAccountId, connect, isConnected} = useMbWallet();
-    const { darkMode } = useDarkMode();
     let [grid, setGrid] = useState(1);
     const [owner, setOwner] = useState("")
     const [dataItems, setDataItems] = useState(false);
     const [newData, setNewData] = useState<InfiniteScrollHook | undefined>();
+    const [darkMode, setDarkMode] = useState<boolean>();
+    const {mode} = useDarkMode();
+
+    useEffect(()=> {
+        if(mode === "dark") {
+        setDarkMode(true);
+        } else{
+        setDarkMode(false);
+        }
+    }, [mode])
     
 
     // useEffect(()=> {
@@ -64,7 +73,7 @@ export const ProfilePage = () => {
             </div>
             <div className="account-copy">
                 <div className="accountc flex items-center gap-3">
-                    <h2>{activeAccountId}</h2>
+                    <h2 className="dark:text-white">{activeAccountId}</h2>
                     <CoptText text={owner}/>
                 </div>
             </div>

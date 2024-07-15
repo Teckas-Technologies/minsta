@@ -15,7 +15,16 @@ export const AdminPage = () => {
   const [giveawayDetails, setGiveawayDetails] = useState('');
   const [adminPage, setAdminPage] = useState("Leaderboard");
   const [adminMobileNav, setAdminMobileNav] = useState(false)
-  const { darkMode } = useDarkMode();
+  const [darkMode, setDarkMode] = useState<boolean>();
+  const {mode} = useDarkMode();
+
+  useEffect(()=> {
+    if(mode === "dark") {
+      setDarkMode(true);
+    } else{
+      setDarkMode(false);
+    }
+  }, [mode])
 
   useEffect(()=> {
     setAdminMobileNav(false)

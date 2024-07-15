@@ -1,6 +1,6 @@
 import { useApp } from "@/providers/app";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDarkMode } from "@/context/DarkModeContext";
 
 export function Mint({
@@ -15,7 +15,16 @@ export function Mint({
   const [description, setDescription] = useState("");
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const { darkMode } = useDarkMode();
+  const [darkMode, setDarkMode] = useState<boolean>();
+  const {mode} = useDarkMode();
+
+  useEffect(()=> {
+    if(mode === "dark") {
+      setDarkMode(true);
+    } else{
+      setDarkMode(false);
+    }
+  }, [mode])
 
   const addTag = () => {
     if (tag.trim() !== "" && tags.length < 4) {
