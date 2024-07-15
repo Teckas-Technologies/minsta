@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "../app/style.css"
 import { useLeaderBoardData } from '@/hooks/useLeaderboard';
 import { useDarkMode } from '@/context/DarkModeContext';
@@ -15,7 +15,16 @@ export const AdminLeaderBoard = () => {
     const [selectedLeaders, setSelectedLeaders] = useState<any>([]);
     const [leaderList, setLeaderList] = useState<Leaderboard[]>([]);
     const { leaderboard, activeAccountId, texts} = useLeaderBoardData();
-    const { darkMode } = useDarkMode();
+    const [darkMode, setDarkMode] = useState<boolean>();
+    const {mode} = useDarkMode();
+
+    useEffect(()=> {
+        if(mode === "dark") {
+        setDarkMode(true);
+        } else{
+        setDarkMode(false);
+        }
+    }, [mode]);
 
     const handleSelectLeader = (leader: any) => {
         if (selectedLeaders.includes(leader)) {

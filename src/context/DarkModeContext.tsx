@@ -1,21 +1,34 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-interface DarkModeContextType {
-  darkMode: boolean;
-  toggleDarkMode: () => void;
-}
+type DarkModeContextType = {
+  mode: string | null;
+  toggleMode: () => void;
+};
 
 const DarkModeContext = createContext<DarkModeContextType | undefined>(undefined);
 
 export const DarkModeProvider = ({ children }: { children: ReactNode }) => {
-  const [darkMode, setDarkMode] = useState(false);
+  const [mode, setMode] = useState<string | null>(null);
 
-  const toggleDarkMode = () => {
-    setDarkMode((prevMode) => !prevMode);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedMode = localStorage.getItem('mode');
+      setMode(storedMode ? storedMode : 'light');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mode) {
+      localStorage.setItem('mode', mode);
+    }
+  }, [mode]);
+
+  const toggleMode = () => {
+    setMode((prevMode) => (prevMode === 'dark' ? 'light' : 'dark'));
   };
 
   return (
-    <DarkModeContext.Provider value={{ darkMode, toggleDarkMode }}>
+    <DarkModeContext.Provider value={{ mode, toggleMode }}>
       {children}
     </DarkModeContext.Provider>
   );
