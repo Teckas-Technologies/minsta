@@ -15,7 +15,6 @@ export const HiddenPostPage = () => {
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
     const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
     const {activeAccountId, connect, isConnected} = useMbWallet();
-    const { darkMode } = useDarkMode();
     let [grid, setGrid] = useState(1);
     const [toast, setToast] = useState(false);
     const [toastText, setToastText] = useState("")
@@ -23,6 +22,17 @@ export const HiddenPostPage = () => {
     const [accountId, setAccountId] = useState("");
     const [dataItems, setDataItems] = useState(false);
     const {  fetchHiddenPost } = useFetchHiddenPost();
+
+    const [darkMode, setDarkMode] = useState<boolean>();
+    const {mode} = useDarkMode();
+
+    useEffect(()=> {
+        if(mode === "dark") {
+        setDarkMode(true);
+        } else{
+        setDarkMode(false);
+        }
+    }, [mode])
 
     useEffect(()=> {
         if(toast) {
@@ -100,9 +110,9 @@ export const HiddenPostPage = () => {
                 <div className="not-data flex items-center gap-3">
                     <InlineSVG
                         src="/images/no_data.svg"
-                        className="fill-current text-camera h-6 text-slate-800"
+                        className="fill-current text-camera h-6 text-slate-800 dark:text-white"
                     />
-                    <h2>No Mints!</h2>
+                    <h2 className="dark:text-white">No Mints!</h2>
                 </div>
             }
             <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>

@@ -7,13 +7,22 @@ import InlineSVG from "react-inlinesvg";
 
 export const BlockedUsersPage = () => {
     const {activeAccountId, connect, isConnected} = useMbWallet();
-    const { darkMode } = useDarkMode();
     const [showModal, setShowModal] = useState(false);
     const [selectedBlockedUsers, setSelectedBlockedUsers] = useState<any>([]);
     const { fetchBlockUser } = useFetchBlockUser();
     const { saveBlockUser } = useSaveBlockUser();
     const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
+    const [darkMode, setDarkMode] = useState<boolean>();
+    const {mode} = useDarkMode();
+
+    useEffect(()=> {
+        if(mode === "dark") {
+        setDarkMode(true);
+        } else{
+        setDarkMode(false);
+        }
+    }, [mode])
 
     useEffect(() => {
         if (activeAccountId) {

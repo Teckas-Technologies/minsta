@@ -6,10 +6,20 @@ import RewardsModal from "../RewardsModal";
 import { useLeaderBoardData } from "@/hooks/useLeaderboard";
 import Link from "next/link";
 import { useDarkMode } from "@/context/DarkModeContext";
+import { useEffect, useState } from "react";
 
 export const LeaderboardPage = () => {
   const { openModal, leaderboard, activeAccountId, texts } = useLeaderBoardData();
-  const { darkMode } = useDarkMode();
+  const [darkMode, setDarkMode] = useState<boolean>();
+  const {mode} = useDarkMode();
+
+  useEffect(()=> {
+    if(mode === "dark") {
+      setDarkMode(true);
+    } else{
+      setDarkMode(false);
+    }
+  }, [mode])
 
   const nfts: any = [];
   leaderboard?.forEach(({ count }) => {

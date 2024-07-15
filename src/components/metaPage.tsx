@@ -21,7 +21,6 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
   const {push} = useRouter();
   const [shareModal, setShareModal] = useState(false);
   const [toast, setToast] = useState(false);
-  const {darkMode} = useDarkMode();
   type MessageKeys = 'facebook' | 'twitter' | 'whatsapp';
   const toggleShareRef = useRef<HTMLDivElement | null>(null);
 
@@ -29,6 +28,17 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
   const { saveHidePost } = useSaveHidePost()
 
   const [showTooltip, setShowTooltip] = useState({ share: false, hide: false, delete: false });
+  const [darkMode, setDarkMode] = useState<boolean>();
+  const {mode} = useDarkMode();
+
+  useEffect(()=> {
+    console.log("Mode Home >> ", mode);
+    if(mode === "dark") {
+      setDarkMode(true);
+    } else{
+      setDarkMode(false);
+    }
+  }, [mode])
 
   const toggleTooltip = (tooltip: any, state: any) => {
     setShowTooltip((prevState) => ({ ...prevState, [tooltip]: state }));

@@ -25,18 +25,27 @@ export const HomePage = () => {
   const [searchText, setSearchText] = useState("");
   const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
   const { data, isLoading }: NFT = useFeedDesc();
+  const { fetchHiddenPost } = useFetchHiddenPost();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState("New to Old");
   let [grid, setGrid] = useState(1);
-  const {darkMode} = useDarkMode();
   const [toast, setToast] = useState(false);
   const [toastText, setToastText] = useState("");
   const [hidePostIds, setHidePostIds] = useState<string[]>([]);
   const [accountId, setAccountId] = useState("");
   const [search, setSearch] = useState("");
   const [dataItems, setDataItems] = useState(false);
+  const [darkMode, setDarkMode] = useState<boolean>();
+  const {mode} = useDarkMode();
 
-  const { fetchHiddenPost } = useFetchHiddenPost();
+  useEffect(()=> {
+    console.log("Mode Home >> ", mode);
+    if(mode === "dark") {
+      setDarkMode(true);
+    } else{
+      setDarkMode(false);
+    }
+  }, [mode])
 
   const handleCloseToast = () => {
     setToast(false);
