@@ -8,6 +8,7 @@ import { InfiniteScrollHook } from "@/data/types"
 import { useEffect, useState } from "react"
 import InlineSVG from "react-inlinesvg"
 import { useDarkMode } from "@/context/DarkModeContext"
+import { CoptText } from "../CopyText"
 
 export const ProfilePage = () => {
 
@@ -17,6 +18,7 @@ export const ProfilePage = () => {
     const { darkMode } = useDarkMode();
     let [grid, setGrid] = useState(1);
     const [owner, setOwner] = useState("")
+    const [dataItems, setDataItems] = useState(false);
     const [newData, setNewData] = useState<InfiniteScrollHook | undefined>();
     
 
@@ -60,8 +62,25 @@ export const ProfilePage = () => {
                     />
                 </div>
             </div>
+            <div className="account-copy">
+                <div className="accountc flex items-center gap-3">
+                    <h2>{activeAccountId}</h2>
+                    <CoptText text={owner}/>
+                </div>
+            </div>
+
+            {!dataItems && 
+                <div className="not-data flex items-center gap-3">
+                    <InlineSVG
+                        src="/images/no_data.svg"
+                        className="fill-current text-camera h-6 text-slate-800"
+                    />
+                    <h2>No Mints!</h2>
+                </div>
+            }
+            
             <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
-                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dark={darkMode} hiddenPage={false} activeId={owner} profilePage={true}/>
+                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dataItems={dataItems} setDataItems={setDataItems} dark={darkMode} hiddenPage={false} activeId={owner} profilePage={true}/>
             </DynamicGrid>
         </main>
         </div>

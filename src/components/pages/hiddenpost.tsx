@@ -21,7 +21,7 @@ export const HiddenPostPage = () => {
     const [toastText, setToastText] = useState("")
     const [hidePostIds, setHidePostIds] = useState<string[]>([]);
     const [accountId, setAccountId] = useState("");
-
+    const [dataItems, setDataItems] = useState(false);
     const {  fetchHiddenPost } = useFetchHiddenPost();
 
     useEffect(()=> {
@@ -96,10 +96,19 @@ export const HiddenPostPage = () => {
                     {/* </div>
                 </div>} */}
             </div>
+            {!dataItems && 
+                <div className="not-data flex items-center gap-3">
+                    <InlineSVG
+                        src="/images/no_data.svg"
+                        className="fill-current text-camera h-6 text-slate-800"
+                    />
+                    <h2>No Mints!</h2>
+                </div>
+            }
             <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
                 {/* {!newData?.token && <FirstToken {...firstTokenProps} />} */}
 
-                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } dark={darkMode} hidepostids={hidePostIds} setToast={setHandleToast} hiddenPage={true} activeId={accountId}/>
+                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } dark={darkMode} dataItems={dataItems} setDataItems={setDataItems} hidepostids={hidePostIds} setToast={setHandleToast} hiddenPage={true} activeId={accountId}/>
             </DynamicGrid>
 
             {toast && 
