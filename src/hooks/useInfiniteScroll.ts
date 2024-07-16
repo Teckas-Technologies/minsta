@@ -97,13 +97,17 @@ const useInfiniteScrollGQL = (
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
   const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
   const [loadingFirst, setLoadingFirst] = useState(false);
+  const [isFetchFirst, setIsFetchFirst] = useState(true);
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const fetchNum = isDesktop ? 8 : 10;
 
-  const searchRemover = ()=>{
-    setTimeout(()=>setSearchInput(""), 5000)
-  }
+  useEffect(()=>{
+    setActiveAccount(activeId);
+    if(profilePageNew){
+      setSearchInput(activeAccount);
+    }
+  }, [activeAccount, activeId])
 
   const fetchItemsAll = async () => {
     // dispatch({ type: "RESET_SEARCH_ITEMS" });
@@ -138,7 +142,7 @@ const useInfiniteScrollGQL = (
       owner: profilePageNew ? [] : blockedUsers,
       contractAddress: constants.tokenContractAddress,
       offset: (state.offset - 1) * fetchNum,
-      search: searchInput
+      search: profilePageNew ? activeAccount || searchInput : searchInput
     };
 
     console.log("Variables >> ", variables);
@@ -153,24 +157,40 @@ const useInfiniteScrollGQL = (
     console.log("Scroll Data >> ", data);
 
     dispatch({ type: "SET_LOADING", payload: false });
-    dispatch({ type: "SET_OFFSET", payload: state.offset + 1 });
-    dispatch({ type: "SET_CALLED_OFFSETS", payload: state.offset + 1 });
+    console.log("Is First >> ", isFetchFirst)
+    console.log("Offset >> ", state.offset)
+    if(isFetchFirst) {
+      setIsFetchFirst(false);
+      dispatch({ type: "SET_OFFSET", payload: state.offset });
+      dispatch({ type: "SET_CALLED_OFFSETS", payload: state.offset });
+      console.log("Offset New >> ", state.offset)
+    } 
+    if(!isFetchFirst) {
+      dispatch({ type: "SET_OFFSET", payload: state.offset + 1 });
+      dispatch({ type: "SET_CALLED_OFFSETS", payload: state.offset + 1 });
+      console.log("Offset New >> ", state.offset + 1)
+    }
     dispatch({
       type: "SET_TOTAL",
       payload: data?.mb_views_nft_tokens_aggregate?.aggregate?.count,
     });
 
+    console.log("Search Input >> ", searchInput)
+
     if(searchInput){
+      console.log("Entered search input")
       dispatch({
         type: "FETCH_SEARCH_SUCCESS",
         payload: data?.token,
       });
     } else if(!searchInput && activeAccount){
+      console.log("Entered not search input")
       dispatch({
         type: "BLOCK_FILTER_SUCCESS",
         payload: data?.token,
       });
     } else {
+      console.log("Entered common")
       setLoadingFirst(true);
       dispatch({
         type: "FETCH_SUCCESS",
@@ -185,7 +205,7 @@ const useInfiniteScrollGQL = (
 
   const fetchHidedItems = async () => {
     // dispatch({ type: "RESET_HIDED_ITEMS" });
-    dispatch({ type: "FETCH_RESET" });
+    // dispatch({ type: "FETCH_RESET" });
     dispatch({ type: "FETCH_START" });
     console.log("Hided Items ----->");
 
@@ -247,35 +267,9 @@ const useInfiniteScrollGQL = (
     }
   );
 
-  // useEffect(() => {
-  //     // setTimeout(fetchNextPage, 3000);
-  //     if(searchInput){
-  //       debouncedFetchSearchItems();
-  //     } else if (activeAccount || hiddenPageNew){
-  //       fetchNextPage();
-  //     }
-  // }, [searchInput, activeAccount, hiddenPageNew ]);
-
-  // useEffect(() => {
-  //   if (searchInput) {
-  //     fetchItemsAll();
-  //   } else if (!hiddenPageNew && searchInput !== "") {
-  //     // dispatch({ type: "RESET_SEARCH_ITEMS" });
-  //     // debouncedFetchSearchItems();
-  //   }
-  //   if(searchInput.length === 1){
-  //     // setTimeout(searchRemover, 5000)
-  //   }
-  // }, [searchInput]);
-
   useEffect(() => {
-      // dispatch({ type: "FETCH_RESET" });
       fetchNextPage();
-  }, [searchInput, activeAccount, hiddenPageNew]);
-
-  useEffect(()=>{
-    fetchNextPage();
-  },[loadingFirst]);
+  }, [searchInput, activeAccount, hiddenPageNew, profilePageNew, loadingFirst, isFetchFirst]);
 
   useEffect(() => {
     if (error) {
@@ -293,7 +287,7 @@ const useInfiniteScrollGQL = (
   const handleScroll = () => {
     const hasNewPage = activeAccount && !searchInput && !hiddenPageNew
     ? state.nonBlockItems.length < state.total
-    : searchInput && activeAccount
+    : searchInput && activeAccount || profilePageNew
     ? state.searchItems.length < state.total
     : hiddenPageNew 
     ? state.hidedItems.length < state.total
@@ -302,7 +296,6 @@ const useInfiniteScrollGQL = (
     if (!state.isLoading && isVisible && hasNewPage && !isFetchingNextPage) {
       const newOffset = state.offset + 1;
       if (!state.calledOffsets.includes(newOffset)) {
-        // setTimeout(fetchNextPage, 3000);
         fetchNextPage();
       }
     }
@@ -311,35 +304,27 @@ const useInfiniteScrollGQL = (
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [state.offset, isVisible]);
+  }, [state.offset, isVisible, activeAccount, state.items, state.searchItems, isFetchFirst, loadingFirst]);
 
   const resetItemList = () => {
     dispatch({ type: "FETCH_RESET" });
   };
 
-  const isMinthenInfiniteScrollNum = state.items.length < fetchNum;
+  
   const itemsToUse = activeAccount && searchInput === "" && !hiddenPageNew ? state.nonBlockItems : searchInput !== "" && !hiddenPageNew ? state.searchItems : hiddenPageNew ? state.hidedItems : state.items;
-
-  // if(activeAccount && searchInput === "" && !hiddenPageNew) {
-  //   console.log("<< Non Block Items >>")
-  // } else if(searchInput !== "" && !hiddenPageNew){
-  //   console.log("<< Search Items >>")
-  // } else if (hiddenPageNew) {
-  //   console.log("<< Hided Items >>")
-  // } else {
-  //   console.log("<< Items >>")
-  // }
+  const isMinthenInfiniteScrollNum = itemsToUse.length < fetchNum;
 
   return {
     items: itemsToUse,
+    isLoading: state.isLoading,
+    setIsFetchFirst,
     resetItemList,
     setSearchInput,
     setActiveAccount, 
     setHiddenPageNew,
     setProfilePageNew,
-    dispatch,
     loadingItems:
-      state.items.length < state.total && !isMinthenInfiniteScrollNum
+      itemsToUse.length < state.total && !isMinthenInfiniteScrollNum
         ? Array.from({ length: 1 }, (_) => ({ id: "" }))
         : null,
     total: state.total,

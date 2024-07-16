@@ -35,6 +35,7 @@ export const HomePage = () => {
   const [accountId, setAccountId] = useState("");
   const [search, setSearch] = useState("");
   const [dataItems, setDataItems] = useState(false);
+  const [itemsLoading, setItemsLoading] = useState(false);
   const [darkMode, setDarkMode] = useState<boolean>();
   const {mode} = useDarkMode();
 
@@ -189,18 +190,25 @@ export const HomePage = () => {
             </div>
           </div>
         </div>
-        {!dataItems && 
+        {/* {!dataItems && !itemsLoading && 
                 <div className="not-data flex items-center gap-3">
                     <InlineSVG
                         src="/images/no_data.svg"
-                        className="fill-current text-camera h-6 text-slate-800"
+                        className="fill-current text-camera h-6 text-slate-800 dark:text-white"
                     />
-                    <h2>No Mints!</h2>
+                    <h2 className="dark:text-white">No Moments!</h2>
                 </div>
+          } */}
+          {
+            itemsLoading && 
+            <div>
+              <div className="loader">
+              </div>
+            </div>
           }
         <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
 
-          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode} hidepostids={hidePostIds} dataItems={dataItems} setDataItems={setDataItems} setToast={setHandleToast} hiddenPage={false} activeId={accountId}/>
+          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode} hidepostids={hidePostIds} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setToast={setHandleToast} hiddenPage={false} profilePage={false} activeId={accountId}/>
 
         </DynamicGrid>
         {toast && 

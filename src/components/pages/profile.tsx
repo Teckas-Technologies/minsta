@@ -18,6 +18,7 @@ export const ProfilePage = () => {
     let [grid, setGrid] = useState(1);
     const [owner, setOwner] = useState("")
     const [dataItems, setDataItems] = useState(false);
+    const [itemsLoading, setItemsLoading] = useState(false);
     const [newData, setNewData] = useState<InfiniteScrollHook | undefined>();
     const [darkMode, setDarkMode] = useState<boolean>();
     const {mode} = useDarkMode();
@@ -78,18 +79,24 @@ export const ProfilePage = () => {
                 </div>
             </div>
 
-            {!dataItems && 
+            {!dataItems && !itemsLoading && 
                 <div className="not-data flex items-center gap-3">
                     <InlineSVG
                         src="/images/no_data.svg"
-                        className="fill-current text-camera h-6 text-slate-800"
+                        className="fill-current text-camera h-6 text-slate-800 dark:text-white"
                     />
-                    <h2>No Mints!</h2>
+                    <h2 className="dark:text-white">No Moments!</h2>
                 </div>
             }
-            
+            {
+                itemsLoading && 
+                <div>
+                <div className="loader">
+                </div>
+                </div>
+            }
             <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
-                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dataItems={dataItems} setDataItems={setDataItems} dark={darkMode} hiddenPage={false} activeId={owner} profilePage={true}/>
+                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dark={darkMode} hidepostids={[]} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} hiddenPage={false} activeId={owner} profilePage={true}/>
             </DynamicGrid>
         </main>
         </div>

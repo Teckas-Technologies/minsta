@@ -8,25 +8,36 @@ import { TokenData } from "@/data/types";
 import InlineSVG from "react-inlinesvg";
 import { useMbWallet } from "@mintbase-js/react";
 
-export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setToast, dataItems, setDataItems, hiddenPage, activeId, profilePage}: any) => {
+export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setToast, dataItems, setDataItems, setItemsLoading, hiddenPage, activeId, profilePage}: any) => {
   const [mod, setMod] = useState(true);
   const ref = useRef<HTMLDivElement | null>(null);
   const entry = useIntersectionObserver(ref, {});
   const isVisible = !!entry?.isIntersecting;
   const {activeAccountId} = useMbWallet();
 
-  const { items, loadingItems, total, error, setSearchInput, setActiveAccount, setHiddenPageNew, setProfilePageNew, dispatch } = useInfiniteScrollGQL("q_FETCH_FEED_ALL", isVisible, "", hiddenPage, activeId, profilePage);
+  const { items, isLoading, loadingItems, total, error, setIsFetchFirst, setSearchInput, setActiveAccount, setHiddenPageNew, setProfilePageNew } = useInfiniteScrollGQL("q_FETCH_FEED_ALL", isVisible, "", hiddenPage, activeId, profilePage);
 
 
   useEffect(() => {
-    if(search){
+    if(search && profilePage) {
       const searchText = search.trim();
-      setSearchInput("");
+      setSearchInput(searchText);
     } else {
       setSearchInput("");  
-      // dispatch({ type: "RESET_SEARCH_ITEMS" });
     }
-  }, [search, setSearchInput]);
+  }, [search]);
+
+
+  // useEffect(()=>{
+  //   if(profilePage){
+  //     setIsFetchFirst(false);
+  //     console.log("Profile Page",profilePage);
+  //   }
+  // }, []);
+
+  useEffect(()=>{
+    setItemsLoading(isLoading)
+  },[isLoading]);
 
   useEffect(() => {
     if(activeAccountId) {
