@@ -8,6 +8,7 @@ query v2_omnisite_GetMetadataStaticReferences($metadataId: String!) {
     description
     nft_contract_id
     extra
+    reference_blob
   }
     owners: nft_tokens(
       where: {

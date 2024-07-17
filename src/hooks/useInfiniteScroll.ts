@@ -82,12 +82,15 @@ const useInfiniteScrollGQL = (
   queryKey: string,
   isVisible: boolean,
   initialSearch?: string,
+  sort?: string,
+  setResult?: any,
   hiddenPage?: any,
   activeId?: any,
   profilePage?: any
 ) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [searchInput, setSearchInput] = useState("");
+  const [sortText, setSortText] = useState(sort || "");
   const queryClient = useQueryClient();
   const { fetchHiddenPost } = useFetchHiddenPost();
   const { fetchBlockUser } = useFetchBlockUser();
@@ -107,16 +110,17 @@ const useInfiniteScrollGQL = (
     if(profilePageNew){
       setSearchInput(activeAccount);
     }
-  }, [activeAccount, activeId])
+  }, [activeAccount, activeId]);
 
   const fetchItemsAll = async () => {
-    // dispatch({ type: "RESET_SEARCH_ITEMS" });
-    // dispatch({ type: "RESET_NON_BLOCK_ITEMS" });
-    // dispatch({ type: "RESET_ITEMS" });
-    // dispatch({ type: "FETCH_RESET" });
     dispatch({ type: "FETCH_START" });
 
     console.log("Fetch All Items ----->")
+
+    // if(searchInput){
+    //   dispatch({ type: "SET_OFFSET", payload: 0 });
+    //   dispatch({ type: "SET_CALLED_OFFSETS", payload: 0 });
+    // }
 
     const hidedPosts = await fetchHiddenPost(activeAccount);
     const user = await fetchBlockUser(activeAccount);
@@ -129,8 +133,10 @@ const useInfiniteScrollGQL = (
     console.log("Active Account >> ", activeAccount)
     console.log("Hided Ids List >> ", idsList);
     console.log("Blocked Users List >> ", blockedUsers)
-    console.log("Seearch Text >> ", searchInput);
-    console.log("Seearch Text Length >> ", searchInput.length);
+    console.log("Search Text >> ", searchInput);
+    console.log("Search Text Length >> ", searchInput.length);
+    console.log("Sort Text >> ", sortText)
+    console.log("Total >> ", state.total)
   
     const variables = {
       limit: fetchNum,
@@ -142,7 +148,8 @@ const useInfiniteScrollGQL = (
       owner: profilePageNew ? [] : blockedUsers,
       contractAddress: constants.tokenContractAddress,
       offset: (state.offset - 1) * fetchNum,
-      search: profilePageNew ? activeAccount || searchInput : searchInput
+      search: profilePageNew ? activeAccount || searchInput : searchInput,
+      order_by: { minted_timestamp: sort === "Old to New" ? "asc" : "desc" }
     };
 
     console.log("Variables >> ", variables);
@@ -160,37 +167,42 @@ const useInfiniteScrollGQL = (
     console.log("Is First >> ", isFetchFirst)
     console.log("Offset >> ", state.offset)
     if(isFetchFirst) {
+      console.log("First fetch entered!!!!!!!!!!")
       setIsFetchFirst(false);
       dispatch({ type: "SET_OFFSET", payload: state.offset });
       dispatch({ type: "SET_CALLED_OFFSETS", payload: state.offset });
-      console.log("Offset New >> ", state.offset)
     } 
     if(!isFetchFirst) {
+      console.log("Fetch entered !!!!!!!!!!")
       dispatch({ type: "SET_OFFSET", payload: state.offset + 1 });
       dispatch({ type: "SET_CALLED_OFFSETS", payload: state.offset + 1 });
-      console.log("Offset New >> ", state.offset + 1)
     }
+    console.log("Total New >> ", state.total)
+    console.log("Total Data >> ", data?.mb_views_nft_tokens_aggregate?.aggregate?.count)
     dispatch({
       type: "SET_TOTAL",
       payload: data?.mb_views_nft_tokens_aggregate?.aggregate?.count,
     });
 
-    console.log("Search Input >> ", searchInput)
+    if(data.token.length === 0){
+        setResult("End of the result!")
+    } else {
+      setResult("")
+    }
 
     if(searchInput){
-      console.log("Entered search input")
+      setLoadingFirst(true);
       dispatch({
         type: "FETCH_SEARCH_SUCCESS",
         payload: data?.token,
       });
     } else if(!searchInput && activeAccount){
-      console.log("Entered not search input")
+      setLoadingFirst(true);
       dispatch({
         type: "BLOCK_FILTER_SUCCESS",
         payload: data?.token,
       });
     } else {
-      console.log("Entered common")
       setLoadingFirst(true);
       dispatch({
         type: "FETCH_SUCCESS",
@@ -240,12 +252,27 @@ const useInfiniteScrollGQL = (
     console.log("Data  >> ", data);
   
     dispatch({ type: "SET_LOADING", payload: false });
-    dispatch({ type: "SET_OFFSET", payload: state.offset + 1 });
-    dispatch({ type: "SET_CALLED_OFFSETS", payload: state.offset + 1 });
+    if(isFetchFirst) {
+      setIsFetchFirst(false);
+      dispatch({ type: "SET_OFFSET", payload: state.offset });
+      dispatch({ type: "SET_CALLED_OFFSETS", payload: state.offset });
+    }
+    if(!isFetchFirst) {
+      dispatch({ type: "SET_OFFSET", payload: state.offset + 1 });
+      dispatch({ type: "SET_CALLED_OFFSETS", payload: state.offset + 1 });
+    }
+    console.log("Total New >> ", state.total)
+    console.log("Total Data >> ", data?.mb_views_nft_tokens_aggregate?.aggregate?.count)
     dispatch({
       type: "SET_TOTAL",
       payload: data?.mb_views_nft_tokens_aggregate?.aggregate?.count,
     });
+    if(data.token.length === 0){
+        setResult("End of the result!")
+    } else {
+      setResult("")
+    }
+    setLoadingFirst(true);
     dispatch({
       type: "HIDED_POST_SUCCESS",
       payload: data?.token,
@@ -268,8 +295,14 @@ const useInfiniteScrollGQL = (
   );
 
   useEffect(() => {
+    if(searchInput){
+      fetchItemsAll();
+    } else if(hiddenPageNew){
+      fetchHidedItems();
+    } else {
       fetchNextPage();
-  }, [searchInput, activeAccount, hiddenPageNew, profilePageNew, loadingFirst, isFetchFirst]);
+    }
+  }, [searchInput,sortText, activeAccount, hiddenPageNew, profilePageNew, loadingFirst, isFetchFirst, ]);
 
   useEffect(() => {
     if (error) {
@@ -286,12 +319,12 @@ const useInfiniteScrollGQL = (
 
   const handleScroll = () => {
     const hasNewPage = activeAccount && !searchInput && !hiddenPageNew
-    ? state.nonBlockItems.length < state.total
+    ? state.nonBlockItems.length < state.total + 8
     : searchInput && activeAccount || profilePageNew
-    ? state.searchItems.length < state.total
+    ? state.searchItems.length < state.total + 8
     : hiddenPageNew 
     ? state.hidedItems.length < state.total
-    : state.items.length < state.total;
+    : state.items.length < state.total + 8;
 
     if (!state.isLoading && isVisible && hasNewPage && !isFetchingNextPage) {
       const newOffset = state.offset + 1;
@@ -304,12 +337,11 @@ const useInfiniteScrollGQL = (
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [state.offset, isVisible, activeAccount, state.items, state.searchItems, isFetchFirst, loadingFirst]);
+  }, [state.offset, isVisible, activeAccount,sortText,searchInput, hiddenPageNew, profilePageNew,  state.items, state.searchItems, isFetchFirst, loadingFirst]);
 
   const resetItemList = () => {
     dispatch({ type: "FETCH_RESET" });
   };
-
   
   const itemsToUse = activeAccount && searchInput === "" && !hiddenPageNew ? state.nonBlockItems : searchInput !== "" && !hiddenPageNew ? state.searchItems : hiddenPageNew ? state.hidedItems : state.items;
   const isMinthenInfiniteScrollNum = itemsToUse.length < fetchNum;
@@ -320,11 +352,12 @@ const useInfiniteScrollGQL = (
     setIsFetchFirst,
     resetItemList,
     setSearchInput,
+    setSortText,
     setActiveAccount, 
     setHiddenPageNew,
     setProfilePageNew,
     loadingItems:
-      itemsToUse.length < state.total && !isMinthenInfiniteScrollNum
+      itemsToUse.length < state.total + 8 && !isMinthenInfiniteScrollNum
         ? Array.from({ length: 1 }, (_) => ({ id: "" }))
         : null,
     total: state.total,

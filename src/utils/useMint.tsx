@@ -168,16 +168,12 @@ const useMintImage = () => {
       const titleAndDescription = await getTitleAndDescription(replicatePhoto);
       const originalTitle = title && title.trim() ? title : titleAndDescription.title;
       const originalDescription = description && description.trim() ? description : titleAndDescription.description;
-      const originalTags = {
-        tag1: tags[0],
-        tag2: tags[1],
-        tag3: tags[2],
-        tag4: tags[3]
-      }
+
       const refObject = {
         title: originalTitle,
         description: originalDescription,
         media: photoFile,
+        tags: `${tags[0] ? tags[0] : ""}, ${tags[1] ? tags[1] : ""}, ${tags[2] ? tags[2] : ""}, ${tags[3] ? tags[3] : ""}`
       };
       const uploadedData = await uploadReferenceObject(refObject);
       const metadata = { reference: uploadedData?.id };
@@ -207,16 +203,11 @@ const useMintImage = () => {
       const titleAndDescription = await getTitleAndDescription(replicatePhoto);
       const originalTitle = title && title.trim() ? title : titleAndDescription.title;
       const originalDescription = description && description.trim() ? description : titleAndDescription.description;
-      const originalTags = {
-        tag1: tags[0],
-        tag2: tags[1],
-        tag3: tags[2],
-        tag4: tags[3]
-      }
       const refObject = {
         title: originalTitle,
         description: originalDescription,
         media: photoFile,
+        tags: `${tags[0] ? tags[0] : ""}, ${tags[1] ? tags[1] : ""}, ${tags[2] ? tags[2] : ""}, ${tags[3] ? tags[3] : ""}`
       };
       const uploadedData = await uploadReferenceObject(refObject);
       const metadata = { reference: uploadedData?.id };

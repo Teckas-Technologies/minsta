@@ -31,7 +31,7 @@ export const LeaderboardPage = () => {
   return (
     <div className={darkMode ? "dark" : ""}>
       <main className="pt-20 flex flex-col gap-6 items-center justify-center text-mainText bg-white dark:bg-slate-800">
-        <div className="dark:text-white">Leaderboard</div>
+        <div className="pt-3"><h3 className="dark:text-white title-font text-2xl">Leaderboard</h3></div>
         <div className="flex text-center gap-10">
           <ViewYourNfts />
           {constants.showRewards ? (

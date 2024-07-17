@@ -22,6 +22,7 @@ export const ProfilePage = () => {
     const [newData, setNewData] = useState<InfiniteScrollHook | undefined>();
     const [darkMode, setDarkMode] = useState<boolean>();
     const {mode} = useDarkMode();
+    const [result, setResult] = useState("");
 
     useEffect(()=> {
         if(mode === "dark") {
@@ -96,8 +97,14 @@ export const ProfilePage = () => {
                 </div>
             }
             <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
-                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dark={darkMode} hidepostids={[]} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} hiddenPage={false} activeId={owner} profilePage={true}/>
+                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dark={darkMode} hidepostids={[]} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setResult={setResult} hiddenPage={false} activeId={owner} profilePage={true}/>
             </DynamicGrid>
+            {
+                result && 
+                <div className="pb-5">
+                    <h2>{result}</h2>
+                </div>
+            }
         </main>
         </div>
     )

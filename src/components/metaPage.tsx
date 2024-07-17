@@ -108,7 +108,9 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
   //   }
   // }, [toast])
 
-  const tags = JSON.parse(meta?.data?.nft_metadata?.[0]?.extra);
+  const tags = meta?.data?.nft_metadata?.[0]?.reference_blob?.tags;
+
+  const tagsArray = tags?.split(',').map((tag: any) => tag.trim()).filter((tag: any) => tag.length > 0) || [];
 
   return (
     <div className={darkMode ? "dark" : ""}>
@@ -199,31 +201,31 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
           <span className="text-lg font-bold dark:text-white">Description:</span> {meta?.data?.nft_metadata?.[0]?.description}
         </h3>
         {
-          tags?.tag1 && <>
+          tagsArray[0] && <>
           <h2 className="text-lg pb-1 font-bold dark:text-white">Tags:</h2>
-        <div className={`meta-tags ${darkMode ? "box-shadow-dark" : "box-shadow"}  px-3 py-2 mb-2 rounded-lg flex gap-3 mb-3`}>
+        <div className={`meta-tags ${darkMode ? "box-shadow" : "box-shadow"}  px-3 py-2 mb-2 rounded-lg flex gap-3 mb-3`}>
           {
-            tags?.tag1 && 
+            tagsArray[0] && 
             <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
-              <h3 className="text-white">#{tags?.tag1}</h3>
+              <h3 className="text-white">#{tagsArray[0]}</h3>
             </div>
           }
           {
-            tags?.tag2 && 
+            tagsArray[1] && 
             <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
-              <h3 className="text-white">#{tags?.tag2}</h3>
+              <h3 className="text-white">#{tagsArray[1]}</h3>
             </div>
           }
           {
-            tags?.tag3 && 
+            tagsArray[2] && 
             <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
-              <h3 className="text-white">#{tags?.tag3}</h3>
+              <h3 className="text-white">#{tagsArray[2]}</h3>
             </div>
           }
           {
-            tags?.tag4 && 
+            tagsArray[3] && 
             <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
-              <h3 className="text-white">#{tags?.tag4}</h3>
+              <h3 className="text-white">#{tagsArray[3]}</h3>
             </div>
           }
         </div>

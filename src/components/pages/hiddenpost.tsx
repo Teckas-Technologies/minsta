@@ -23,6 +23,7 @@ export const HiddenPostPage = () => {
     const [dataItems, setDataItems] = useState(false);
     const [itemsLoading, setItemsLoading] = useState(false);
     const {  fetchHiddenPost } = useFetchHiddenPost();
+    const [result, setResult] = useState("");
 
     const [darkMode, setDarkMode] = useState<boolean>();
     const {mode} = useDarkMode();
@@ -56,13 +57,13 @@ export const HiddenPostPage = () => {
         if(activeAccountId) {
             setAccountId(activeAccountId);
         }
-    }, [activeAccountId, accountId]);
+    }, [activeAccountId]);
 
     useEffect(() => {
         if(activeAccountId) {
             fetchHidedPosts(activeAccountId);
         }
-    }, [activeAccountId, accountId]);
+    }, [activeAccountId]);
 
     const fetchHidedPosts = async (accountId: string)=> {
         if(accountId) {
@@ -126,8 +127,14 @@ export const HiddenPostPage = () => {
             <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
                 {/* {!newData?.token && <FirstToken {...firstTokenProps} />} */}
 
-                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } dark={darkMode} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} hidepostids={hidePostIds} setToast={setHandleToast} hiddenPage={true} activeId={accountId}/>
+                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } dark={darkMode} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} hidepostids={hidePostIds} setToast={setHandleToast} setResult={setResult} hiddenPage={true} profilePage={false} activeId={accountId}/>
             </DynamicGrid>
+            {
+                result && 
+                <div className="pb-5">
+                    <h2>{result}</h2>
+                </div>
+            }
 
             {toast && 
             <div id="toast-default" className="toast-container md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed ">

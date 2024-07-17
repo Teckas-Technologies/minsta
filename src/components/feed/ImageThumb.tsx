@@ -13,7 +13,7 @@ import { useSaveHidePost } from "@/hooks/db/HidePostHook";
 import { BlockUserType, HidePost } from "@/data/types";
 import { useSaveBlockUser } from "@/hooks/db/BlockUserHook";
 
-const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
+const ImageThumb = ({ token, index, dark, setToast, hiddenPage, profilePage }: any) => {
   const imageUrl = token?.media;
   const [error, setError] = useState(false);
   const { activeAccountId } = useMbWallet();
@@ -206,7 +206,7 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
             </div>
           }
           {
-            activeAccountId && 
+            activeAccountId && !profilePage && 
             <button
               className="absolute top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
               onMouseEnter={() => toggleTooltip('hide', true)}
@@ -227,7 +227,7 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage }: any) => {
             </button>
           }
           {showTooltip.hide && <div className="tooltip absolute top-[-1.8rem] left-2 bg-white px-2 py-1 rounded-md box-shadow">{hiddenPage ? "Unhide" : "Hide"}</div>}
-          {!hiddenPage && activeAccountId && 
+          {!hiddenPage && !profilePage && activeAccountId && 
           <div>
             <button
                 className="absolute top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"
