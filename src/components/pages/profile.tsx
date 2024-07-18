@@ -18,9 +18,11 @@ export const ProfilePage = () => {
     let [grid, setGrid] = useState(1);
     const [owner, setOwner] = useState("")
     const [dataItems, setDataItems] = useState(false);
+    const [itemsLoading, setItemsLoading] = useState(false);
     const [newData, setNewData] = useState<InfiniteScrollHook | undefined>();
     const [darkMode, setDarkMode] = useState<boolean>();
     const {mode} = useDarkMode();
+    const [result, setResult] = useState("");
 
     useEffect(()=> {
         if(mode === "dark") {
@@ -56,6 +58,13 @@ export const ProfilePage = () => {
         }
     }
 
+    useEffect(()=>{
+        if(!itemsLoading){
+            setTimeout(()=>setItemsLoading(true), 100)
+            setTimeout(()=>setItemsLoading(false), 3000)
+        }
+    },[])
+
     return (
         <div className={darkMode ? "dark" : ""}>
         <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start space-y-4 mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh]">
@@ -78,19 +87,31 @@ export const ProfilePage = () => {
                 </div>
             </div>
 
-            {!dataItems && 
+            {!dataItems && !itemsLoading && 
                 <div className="not-data flex items-center gap-3">
                     <InlineSVG
                         src="/images/no_data.svg"
-                        className="fill-current text-camera h-6 text-slate-800"
+                        className="fill-current text-camera h-6 text-slate-800 dark:text-white"
                     />
-                    <h2>No Mints!</h2>
+                    <h2 className="dark:text-white">No Moments!</h2>
                 </div>
             }
-            
+            {
+                itemsLoading && 
+                <div>
+                <div className="loader">
+                </div>
+                </div>
+            }
             <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
-                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dataItems={dataItems} setDataItems={setDataItems} dark={darkMode} hiddenPage={false} activeId={owner} profilePage={true}/>
+                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } search={owner} dark={darkMode} hidepostids={[]} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setResult={setResult} hiddenPage={false} activeId={owner} profilePage={true}/>
             </DynamicGrid>
+            {
+                result && 
+                <div className="pb-5">
+                    <h2 className="dark:text-white">{result}</h2>
+                </div>
+            }
         </main>
         </div>
     )
