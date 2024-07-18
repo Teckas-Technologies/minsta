@@ -58,6 +58,13 @@ export const ProfilePage = () => {
         }
     }
 
+    useEffect(()=>{
+        if(!itemsLoading){
+            setTimeout(()=>setItemsLoading(true), 100)
+            setTimeout(()=>setItemsLoading(false), 3000)
+        }
+    },[])
+
     return (
         <div className={darkMode ? "dark" : ""}>
         <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start space-y-4 mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh]">
@@ -102,7 +109,7 @@ export const ProfilePage = () => {
             {
                 result && 
                 <div className="pb-5">
-                    <h2>{result}</h2>
+                    <h2 className="dark:text-white">{result}</h2>
                 </div>
             }
         </main>

@@ -132,7 +132,7 @@ export const HiddenPostPage = () => {
             {
                 result && 
                 <div className="pb-5">
-                    <h2>{result}</h2>
+                    <h2 className="dark:text-white">{result}</h2>
                 </div>
             }
 

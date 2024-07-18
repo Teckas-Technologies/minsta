@@ -64,7 +64,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
         shareUrl = `https://telegram.me/share/url?url=${url}&text=${message}`;
         break;
       case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&t=${message}`;
         break;
       case 'whatsapp':
         shareUrl = `https://api.whatsapp.com/send?text=${message}%20${url}`;
@@ -77,8 +77,6 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
   }
 
   const handleHidePost = async (tokenId: any, e: any) => {
-    console.log("Slug >>> ", slug)
-    console.log("Token Id >>> ", tokenId)
     if(activeAccountId) {
       const data: HidePost = {
         accountId: activeAccountId?.toString(),
@@ -177,7 +175,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
               />
           </button>}
           {showTooltip.hide && <div className="tooltip absolute top-[-1.8rem] left-2 bg-white px-2 py-1 rounded-md box-shadow">Hide</div>}
-          {activeAccountId === constants.adminId && 
+          {activeAccountId && constants.adminId.includes(activeAccountId) && 
             <div>
               <button
                   className="absolute hidden top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"

@@ -20,7 +20,6 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
 
   useEffect(() => {
     if(search) {
-      console.log("Search from feedscroll",search);
       const searchText = search.trim();
       setSearchInput(searchText);
       if(!profilePage && !hiddenPage){
@@ -39,7 +38,6 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
     if(sort){
       resetItemList()
       setSortText(sort);
-      console.log("Sort Text From Feed scroll >> ", sort)
     }
   }, [sort])
 

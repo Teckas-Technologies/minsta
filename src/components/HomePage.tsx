@@ -41,7 +41,6 @@ export const HomePage = () => {
   const [result, setResult] = useState("");
 
   useEffect(()=> {
-    console.log("Mode Home >> ", mode);
     if(mode === "dark") {
       setDarkMode(true);
     } else{
@@ -53,8 +52,6 @@ export const HomePage = () => {
     setToast(false);
     window.location.reload();
   }
-
-  console.log("Result Home Page", result);
 
   useEffect(()=> {
     if(toast) {
@@ -100,6 +97,12 @@ export const HomePage = () => {
       setFilteredNFT(data);
     }
   }, [data]);
+
+  useEffect(()=>{
+    if(!searchText){
+      setSearch("");
+    }
+  },[searchText])
 
   const handleSearch = () => {
     if (searchText) {
@@ -220,7 +223,7 @@ export const HomePage = () => {
         {
           result && 
           <div className="">
-            <h2>{result}</h2>
+            <h2 className="dark:text-white">{result}</h2>
           </div>
         }
         {toast && 

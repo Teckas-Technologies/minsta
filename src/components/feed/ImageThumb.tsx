@@ -72,7 +72,7 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage, profilePage }: a
         shareUrl = `https://telegram.me/share/url?text=${message}&url=${url}`;
         break;
       case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${message}`;
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&t=${message}`;
         break;
       case 'whatsapp':
         shareUrl = `https://api.whatsapp.com/send?text=${message}%20${url}`;
