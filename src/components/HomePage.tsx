@@ -35,11 +35,12 @@ export const HomePage = () => {
   const [accountId, setAccountId] = useState("");
   const [search, setSearch] = useState("");
   const [dataItems, setDataItems] = useState(false);
+  const [itemsLoading, setItemsLoading] = useState(false);
   const [darkMode, setDarkMode] = useState<boolean>();
   const {mode} = useDarkMode();
+  const [result, setResult] = useState("");
 
   useEffect(()=> {
-    console.log("Mode Home >> ", mode);
     if(mode === "dark") {
       setDarkMode(true);
     } else{
@@ -51,9 +52,6 @@ export const HomePage = () => {
     setToast(false);
     window.location.reload();
   }
-
-  // const darkMode = localStorage.getItem("dark");
-  // console.log("Dark Mode",darkMode);
 
   useEffect(()=> {
     if(toast) {
@@ -100,6 +98,12 @@ export const HomePage = () => {
     }
   }, [data]);
 
+  useEffect(()=>{
+    if(!searchText){
+      setSearch("");
+    }
+  },[searchText])
+
   const handleSearch = () => {
     if (searchText) {
       setSearch(searchText);
@@ -126,6 +130,12 @@ export const HomePage = () => {
     setSelectedOption(option);
     setIsDropdownOpen(false);
   };
+
+  useEffect(()=>{
+    if(selectedOption) {
+      setSelectedOption(selectedOption)
+    }
+  },[selectedOption, handleOptionClick])
 
   return !totalLoading && !totalNfts ? (
     <div className={darkMode ? "dark" : ""}>
@@ -154,9 +164,9 @@ export const HomePage = () => {
                 </svg>
               </div>
               <input type="search" value={searchText} id="default-search" className={`block w-full p-1.5 ps-10 search-box border focus:border-sky-500 rounded-3xl outline-none`} placeholder="Search..." required onChange={(e) => setSearchText(e.target.value)} />
-              {/* <button className="text-white transition-all absolute end-2.5 bottom-0.5 bg-sky-400 hover:bg-white hover:border-solid border border-sky-400  hover:text-black focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-3xl text-sm px-4 py-1.5" onClick={handleSearch}>
+              <button className="text-white transition-all absolute end-2.5 bottom-0.5 bg-sky-400 hover:bg-white hover:border-solid border border-sky-400  hover:text-black focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-3xl text-sm px-4 py-1.5" onClick={handleSearch}>
                 Search
-              </button> */}
+              </button>
             </div>
             <div>
               <div className="relative">
@@ -189,20 +199,33 @@ export const HomePage = () => {
             </div>
           </div>
         </div>
-        {!dataItems && 
+         {/* {!dataItems && !itemsLoading && 
                 <div className="not-data flex items-center gap-3">
                     <InlineSVG
                         src="/images/no_data.svg"
-                        className="fill-current text-camera h-6 text-slate-800"
+                        className="fill-current text-camera h-6 text-slate-800 dark:text-white"
                     />
-                    <h2>No Mints!</h2>
+                    <h2 className="dark:text-white">No Moments!</h2>
                 </div>
+          }  */}
+          {
+            itemsLoading && 
+            <div>
+              <div className="loader">
+              </div>
+            </div>
           }
         <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
 
-          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={searchText} dark={darkMode} hidepostids={hidePostIds} dataItems={dataItems} setDataItems={setDataItems} setToast={setHandleToast} hiddenPage={false} activeId={accountId}/>
+          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={search} dark={darkMode} hidepostids={hidePostIds} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setToast={setHandleToast} setResult={setResult} hiddenPage={false} profilePage={false} activeId={accountId}/>
 
         </DynamicGrid>
+        {
+          result && 
+          <div className="">
+            <h2 className="dark:text-white">{result}</h2>
+          </div>
+        }
         {toast && 
          <div id="toast-default" className="toast-container md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed ">
             <div className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">

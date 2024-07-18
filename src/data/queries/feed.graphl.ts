@@ -213,7 +213,7 @@ export const FETCH_FEED_DESC = gql`
 `;
 
 export const HIDE_POST = gql`
-query minsta_search_token(
+  query minsta_search_token(
     $accountIds: [String!]!
     $contractAddress: String
     $limit: Int
@@ -240,7 +240,15 @@ query minsta_search_token(
       metadata_id
       owner
     }
-    mb_views_nft_tokens_aggregate(where: {minter: {_in: $accountIds}, nft_contract_id: {_eq: $contractAddress}, burned_timestamp: {_is_null: true}}) {
+    mb_views_nft_tokens_aggregate(
+    where: {
+      minter: {_in: $accountIds}, 
+      nft_contract_id: {_eq: $contractAddress}, 
+      burned_timestamp: {_is_null: true}
+      metadata_content_flag: {_is_null: true},
+      nft_contract_content_flag: {_is_null: true},
+      token_id: {_in: $hidePostIds}
+    }) {
       aggregate {
       count
       }
@@ -340,6 +348,7 @@ export const FETCH_FEED_ALL = gql`
     $hiddenIds: [String!]!
     $owner: [String!]!
     $search: String
+    $order_by: mb_views_nft_tokens_order_by!
   ) {
   token: mb_views_nft_tokens(
     where: {
@@ -355,11 +364,12 @@ export const FETCH_FEED_ALL = gql`
             { owner: { _iregex: $search } }
             { extra: { _iregex: $search } }
             { title: { _iregex: $search } }
+            { reference_blob: { _cast: { String: {_iregex: $search}}}}
           ]
         }
       ]
     }
-    order_by: { minted_timestamp: desc }
+    order_by: [$order_by]
     offset: $offset
     limit: $limit
   ) {
@@ -377,6 +387,20 @@ export const FETCH_FEED_ALL = gql`
       minter: { _in: $accountIds }
       nft_contract_id: { _eq: $contractAddress }
       burned_timestamp: { _is_null: true }
+      metadata_content_flag: { _is_null: true }
+      nft_contract_content_flag: { _is_null: true }
+      _and: [
+        { token_id: { _nin: $hiddenIds } }
+        { owner: { _nin: $owner } }
+        {
+          _or: [
+            { owner: { _iregex: $search } }
+            { extra: { _iregex: $search } }
+            { title: { _iregex: $search } }
+            { reference_blob: { _cast: { String: {_iregex: $search}}}}
+          ]
+        }
+      ]
     }
   ) {
     aggregate {
