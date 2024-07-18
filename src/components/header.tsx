@@ -110,72 +110,6 @@ const Header = () => {
     handleIsAdmin();
   },[isAdmin, isConnected, activeAccountId]);
 
-  // const [darkMode, setDarkMode] = useState(() => {
-  //   if (typeof window !== 'undefined') {
-  //     return localStorage.getItem("dark") === "true";
-  //   }
-  //   return false;
-  // });
-
-  // useEffect(() => {
-  //   if (typeof window !== 'undefined') {
-  //     if (localStorage.getItem("dark") === null || localStorage.getItem("dark") === "undefined") {
-  //       localStorage.setItem("dark", "false");
-  //       setDarkMode(false);
-  //     }
-  //   }
-  // }, []);
-
-
-  // const toggleDarkModeNew = () => {
-  //   if (typeof window !== 'undefined') {
-  //     const newMode = !darkMode;
-  //     setDarkMode(newMode);
-  //     localStorage.setItem("dark", newMode.toString());
-  //   }
-  // }
-
-  // const [mode, setMode] = useState<string | null>("");
-
-  // useEffect(() => {
-  //   if (typeof window !== 'undefined') {
-  //     const storedMode = localStorage.getItem('mode');
-  //     setMode(storedMode);
-  //     if(storedMode === null) {
-  //       setLight();
-  //     }
-  //   }
-  //   console.log("Mode >> ", mode);
-  // }, []);
-
-  // const setDark = () => {
-  //   if (typeof window !== 'undefined') {
-  //     localStorage.setItem('mode', 'dark');
-  //     setMode('dark');
-  //   }
-  // };
-
-  // const setLight = () => {
-  //   if (typeof window !== 'undefined') {
-  //     localStorage.setItem('mode', 'light');
-  //     setMode('light');
-  //   }
-  // };
-
-  // const toggleMode = () => {
-  //   if (mode === 'dark') {
-  //     setLight();
-  //     console.log("Dark >> ", mode)
-  //   } else if (mode === 'light') {
-  //     setDark();
-  //     console.log("Light >> ", mode)
-  //   } else {
-  //     setLight();
-  //   }
-  // };
-
-
-
   const headerButtonsNotHome = (onClick: ReactEventHandler) => (
     <div className="minsta-header flex gap-5 w-full justify-between px-4 lg:px-12 items-center">
       
@@ -399,11 +333,11 @@ const Header = () => {
                   />
                 </div>
                 <button className="font-bold text-xl" onClick={() => push("/")}>
-                  {process.env.NEXT_PUBLIC_APP_TITLE || "Moments I"}
+                  {process.env.NEXT_PUBLIC_APP_TITLE || "Moments"}
                 </button>
               </div>
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex md:gap-4 gap-1 items-center">
               <div className="dark-mode flex justify-center items-center">
                 <button onClick={toggleMode} className="flex justify-center items-center">
                   {mode === "dark" ? 
@@ -451,14 +385,14 @@ const Header = () => {
                 //   <button onClick={handleSignout} > Logout I</button>
                 // </div>
                 <div className="new relative" ref={headerAccountRef}>
-                  <div className="header-account bg-slate-700 flex items-center gap-3 px-3 rounded-3xl cursor-pointer" onClick={()=> setSubmenu(!subMenu)}>
+                  <div className="header-account bg-slate-700 flex items-center gap-1 md:gap3 px-3 rounded-3xl cursor-pointer" onClick={()=> setSubmenu(!subMenu)}>
                     <div className="profile-icon">
                         <InlineSVG
                           src="/images/profile.svg"
                           className="fill-current text-camera h-12"
                         />
                     </div>
-                    <div className="owner-name max-w-[4.5rem] overflow-hidden md:max-w-[8rem] md:overflow-hidden">
+                    <div className="owner-name max-w-[5rem] overflow-hidden md:max-w-[8rem] md:overflow-hidden">
                       <h2 className="text-white overflow-hidden text-ellipsis whitespace-nowrap">{activeAccountId}</h2>
                     </div>
                     <div className="profile-dropdown">

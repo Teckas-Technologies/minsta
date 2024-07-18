@@ -7,11 +7,21 @@ import { useLeaderBoardData } from "@/hooks/useLeaderboard";
 import Link from "next/link";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { useEffect, useState } from "react";
+import { CoptText } from "../CopyText";
+// import { Wallet, Social, Near } from '@near-wallet-selector/my-near-wallet'
+import * as nearApi from 'near-api-js'
 
 export const LeaderboardPage = () => {
   const { openModal, leaderboard, activeAccountId, texts } = useLeaderBoardData();
   const [darkMode, setDarkMode] = useState<boolean>();
   const {mode} = useDarkMode();
+  const {Near } = nearApi
+
+  // const greeting = nearApi.Near.view("fungible_rhmor.testnet", "get_greeting", {});
+
+  // if (greeting === null) return "Loading...";
+
+  // console.log( `The contract says: ${greeting}`);
 
   useEffect(()=> {
     if(mode === "dark") {
@@ -27,6 +37,15 @@ export const LeaderboardPage = () => {
   });
 
   const sum = nfts?.reduce((x: number, y: number) => x + y, 0);
+
+  const item = (blockHeight:any) => ({ type: 'social', path: 'fungible_rhmor.testnet/post/main', blockHeight });
+
+  // retrieve indexed posts by influencer.testnet
+  // const idx_posts = Social.index(
+  //   'post', 'main', { accountId: ['influencer.testnet'] }
+  // );
+
+  console.log("Item >> ", item)
 
   return (
     <div className={darkMode ? "dark" : ""}>
@@ -54,9 +73,11 @@ export const LeaderboardPage = () => {
             const isCurrentUser = account === activeAccountId;
             const isFirst = index === 0;
             return (
+              <div className="flex gap-2 items-center">
+              <CoptText text={account}/>
               <Link
                 key={`${account}-${index}`}
-                className={`w-full h-16 flex p-4 items-center justify-between rounded-xl bg-cardOne ${
+                className={`w-full h-16 flex p-4 items-center justify-between rounded-xl bg-cardOne max-w-[100%] overflow-hidden ${
                   isCurrentUser ? "border-2 border-cardTwo" : ""
                 }`}
                 target="_blank"
@@ -75,7 +96,7 @@ export const LeaderboardPage = () => {
                       🔥
                     </span>
                   )}
-                  <p className="w-full truncate">{account}</p>
+                  <p className="w-[90%] truncate">{account}</p>
                 </div>
                 <div>
                   <div className="rounded-full bg-mainBg text-leaderboardText h-10 w-10 flex items-center justify-center">
@@ -83,6 +104,7 @@ export const LeaderboardPage = () => {
                   </div>
                 </div>
               </Link>
+              </div>
             );
           })}
         </div>

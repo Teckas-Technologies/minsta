@@ -108,9 +108,9 @@ const ImageThumb = ({ token, index, dark, setToast, hiddenPage, profilePage }: a
     }
     await saveHidePost(data).then(()=>{
       if(unhide){
-        setToast("Moment Unhided Successfully!", true);
+        setToast("Moment Unhidden Successfully!", true);
       } else {
-        setToast("Moment Hided Successfully!", true);
+        setToast("Moment Hidden Successfully!", true);
       }
     })
   }

@@ -96,7 +96,7 @@ export const HiddenPostPage = () => {
                 <div className="md:hidden flex items-center justify-center" onClick={()=> { handleGrid()}}>
                     <InlineSVG
                     src="/images/grid.svg"
-                    className="fill-current w-6 h-6 font-xl cursor-pointer"
+                    className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
                     color="#222f3e"
                     />
                 </div>
