@@ -8,25 +8,43 @@ import { TokenData } from "@/data/types";
 import InlineSVG from "react-inlinesvg";
 import { useMbWallet } from "@mintbase-js/react";
 
-export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setToast, dataItems, setDataItems, hiddenPage, activeId, profilePage}: any) => {
+export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setToast,setResult, dataItems, setDataItems, setItemsLoading, hiddenPage, activeId, profilePage}: any) => {
   const [mod, setMod] = useState(true);
   const ref = useRef<HTMLDivElement | null>(null);
   const entry = useIntersectionObserver(ref, {});
   const isVisible = !!entry?.isIntersecting;
   const {activeAccountId} = useMbWallet();
 
-  const { items, loadingItems, total, error, setSearchInput, setActiveAccount, setHiddenPageNew, setProfilePageNew, dispatch } = useInfiniteScrollGQL("q_FETCH_FEED_ALL", isVisible, "", hiddenPage, activeId, profilePage);
+  const { items, isLoading, loadingItems, total, error, setIsFetchFirst, setSearchInput,setSortText, resetItemList, setActiveAccount, setHiddenPageNew, setProfilePageNew } = useInfiniteScrollGQL("q_FETCH_FEED_ALL", isVisible, search, sort, setResult, hiddenPage, activeId, profilePage);
 
 
   useEffect(() => {
-    if(search){
+    if(search) {
       const searchText = search.trim();
-      setSearchInput("");
+      setSearchInput(searchText);
+      if(!profilePage && !hiddenPage){
+        resetItemList();
+      }
     } else {
       setSearchInput("");  
-      // dispatch({ type: "RESET_SEARCH_ITEMS" });
+      if(!profilePage && !hiddenPage){
+        resetItemList();
+        setSortText("New to Old");
+      }
     }
-  }, [search, setSearchInput]);
+  }, [search]);
+
+  useEffect(()=> {
+    if(sort){
+      resetItemList()
+      setSortText(sort);
+    }
+  }, [sort])
+
+
+  useEffect(()=>{
+    setItemsLoading(isLoading)
+  },[isLoading]);
 
   useEffect(() => {
     if(activeAccountId) {
@@ -74,19 +92,19 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
       });
     
       // Search 
-    if (search) {
-        filteredData = filteredData?.filter((token: TokenData) => {
-          const title = token.title ? token.title.toLowerCase() : '';
-          const description = token.description ? token.description.toLowerCase() : '';
-          const owner = token.owner ? token.owner.toLowerCase() : '';
-          const tags = token.tags ? token.tags.toString().toLowerCase() : "";
+    // if (search) {
+    //     filteredData = filteredData?.filter((token: TokenData) => {
+    //       const title = token.title ? token.title.toLowerCase() : '';
+    //       const description = token.description ? token.description.toLowerCase() : '';
+    //       const owner = token.owner ? token.owner.toLowerCase() : '';
+    //       const tags = token.tags ? token.tags.toString().toLowerCase() : "";
       
-          return title.includes(search.toLowerCase()) ||
-                 description.includes(search.toLowerCase()) ||
-                 owner.includes(search.toLowerCase()) || 
-                 tags.includes(search.toLowerCase());
-        });
-    }
+    //       return title.includes(search.toLowerCase()) ||
+    //              description.includes(search.toLowerCase()) ||
+    //              owner.includes(search.toLowerCase()) || 
+    //              tags.includes(search.toLowerCase());
+    //     });
+    // }
 
     // Filter blocked NFTs
     if (blockedNfts && blockedNfts.length) {
@@ -94,11 +112,11 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
     }
 
     // Sort data
-    if (sort === "Old to New") {
-      filteredData?.sort((a: TokenData, b:TokenData) => (a.createdAt > b.createdAt ? 1 : -1));
-    } else if (sort === "New to Old") {
-      filteredData?.sort((a: TokenData, b:TokenData) => (a.createdAt < b.createdAt ? 1 : -1));
-    }
+    // if (sort === "Old to New") {
+    //   filteredData?.sort((a: TokenData, b:TokenData) => (a.createdAt > b.createdAt ? 1 : -1));
+    // } else if (sort === "New to Old") {
+    //   filteredData?.sort((a: TokenData, b:TokenData) => (a.createdAt < b.createdAt ? 1 : -1));
+    // }
 
     return filteredData;
   }, [items, blockedNfts, sort, search, hidepostids, activeId, profilePage, hiddenPage]);
@@ -114,10 +132,10 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
     <>
       {!hiddenPage && memoizedData?.length > 0 ? 
         memoizedData?.map((token: any, index: number) => {
-          return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} dark={dark} setToast={setToast} hiddenPage={hiddenPage}/>;
+          return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} dark={dark} setToast={setToast} hiddenPage={hiddenPage} profilePage={profilePage}/>;
         }) : 
         hiddenPage && hidepostids?.length !== 0 ?  memoizedData?.map((token: any, index: number) => {
-          return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} dark={dark} setToast={setToast} hiddenPage={hiddenPage}/>;
+          return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} dark={dark} setToast={setToast} hiddenPage={hiddenPage} profilePage={profilePage}/>;
         }): 
          ""}
       {

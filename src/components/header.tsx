@@ -99,10 +99,12 @@ const Header = () => {
 
   useEffect(()=>{
     const handleIsAdmin = () => {
-      if(activeAccountId === constants.adminId) {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
+      if(activeAccountId){
+        if(constants.adminId.includes(activeAccountId)) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
       }
     }
     handleIsAdmin();

@@ -57,7 +57,7 @@ export function Mint({
           {/* <Spinner /> */}
           <div className="loader"></div>
           <br />
-          <h1 className="text-xl sm:text-2xl font-semibold mb-4 text-mainText text-center">
+          <h1 className="text-xl sm:text-2xl font-semibold mb-4 text-mainText text-center dark:text-white">
             Uploading your image...
           </h1>
         </>
