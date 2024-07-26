@@ -13,6 +13,9 @@ import { InfiniteScrollHook } from "@/data/types";
 import InlineSVG from "react-inlinesvg";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { useFetchHiddenPost } from "@/hooks/db/HidePostHook";
+import { useGrid } from "@/context/GridContext";
+import { useMediaQuery } from "usehooks-ts";
+import { useBack } from "@/context/BackContext";
 
 interface NFT {
   data: InfiniteScrollHook | undefined;
@@ -28,7 +31,6 @@ export const HomePage = () => {
   const { fetchHiddenPost } = useFetchHiddenPost();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState("New to Old");
-  let [grid, setGrid] = useState(1);
   const [toast, setToast] = useState(false);
   const [toastText, setToastText] = useState("");
   const [hidePostIds, setHidePostIds] = useState<string[]>([]);
@@ -38,7 +40,11 @@ export const HomePage = () => {
   const [itemsLoading, setItemsLoading] = useState(false);
   const [darkMode, setDarkMode] = useState<boolean>();
   const {mode} = useDarkMode();
+  const { grid, toggleGrid} = useGrid();
   const [result, setResult] = useState("");
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const router = useRouter();
+  const { back, toggleBack } = useBack();
 
   useEffect(()=> {
     if(mode === "dark") {
@@ -83,7 +89,7 @@ export const HomePage = () => {
       }
   }
 
-  const router = useRouter();
+  
   const handleLetsGoBtn = () => {
     if (!isConnected) {
       connect();
@@ -101,25 +107,50 @@ export const HomePage = () => {
   useEffect(()=>{
     if(!searchText){
       setSearch("");
+      toggleBack(false)
     }
   },[searchText])
 
-  const handleSearch = () => {
-    if (searchText) {
-      setSearch(searchText);
-    } else {
-      setSearch("")
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const search = searchParams.get("search") || "";
+    if (search) {
+      setSearchText(search);
+      setSearch(search);
     }
+  }, []);
+
+  const updateQueryParam = (key: string, value: string) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (value) {
+      searchParams.set(key, value);
+    } else {
+      searchParams.delete(key);
+    }
+    const newRelativePathQuery = `${window.location.pathname}?${searchParams.toString()}`;
+    router.push(newRelativePathQuery);
   };
 
-  const handleGrid = () => {
-    if(grid === 1) {
-      setGrid(2)
-    } else if(grid === 2) {
-      setGrid(3)
-    } else if(grid === 3){
-      setGrid(1)
+  const handleSearch = () => {
+    setSearch(searchText);
+    updateQueryParam("search", searchText);
+    toggleBack(true)
+  };
+
+  const handleClearSearch = () => {
+    setSearch(""); 
+    setSearchText("");
+    updateQueryParam("search", "");
+  };
+
+  useEffect(()=>{
+    if(!back){
+      handleClearSearch
     }
+  }, [back])
+
+  if(!back){
+    handleClearSearch
   }
 
   const handleDropdownClick = () => {
@@ -139,9 +170,9 @@ export const HomePage = () => {
 
   return !totalLoading && !totalNfts ? (
     <div className={darkMode ? "dark" : ""}>
-      <main className="flex flex-col items-center justify-center h-screen">
-        <p className="text-mainText">Nothing here yet 👀</p>
-        <button className="gradientButton w-auto text-primaryBtnText rounded px-8 py-2 mt-4" onClick={handleLetsGoBtn}>
+      <main className="flex flex-col items-center justify-center h-screen dark:bg-slate-800">
+        <p className="text-mainText dark:text-white">Nothing here yet 👀</p>
+        <button className="gradientButton w-auto text-primaryBtnText rounded px-8 py-2 mt-4 dark:text-white" onClick={handleLetsGoBtn}>
           Let&apos;s Go
         </button>
       </main>
@@ -151,7 +182,7 @@ export const HomePage = () => {
       <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start space-y-4 mt-5 bg-slate-50 dark:bg-slate-800 min-h-[100vh] relative">
         <div className="max-w-md flex flex-col ml-auto mt-20 justify-center mb-5">
           <div className="flex space-x-2 items-center">
-            <div className="md:hidden" onClick={handleGrid}>
+            <div className="md:hidden" onClick={toggleGrid}>
               <InlineSVG
                 src="/images/grid.svg"
                 className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
@@ -159,12 +190,21 @@ export const HomePage = () => {
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 start-0 flex items-center ps-3 cursor-pointer justify-center">
-                <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                {/* <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                </svg>
+                </svg> */}
+                {!searchText ? <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                </svg> : 
+                <div onClick={handleClearSearch}>
+                  <InlineSVG
+                    src="/images/close.svg"
+                    className="fill-current w-4 h-4 text-sky-500 font-xl cursor-pointer"
+                    />
+                </div>}
               </div>
               <input type="search" value={searchText} id="default-search" className={`block w-full p-1.5 ps-10 search-box border focus:border-sky-500 rounded-3xl outline-none`} placeholder="Search..." required onChange={(e) => setSearchText(e.target.value)} />
-              <button className="text-white transition-all absolute end-2.5 bottom-0.5 bg-sky-400 hover:bg-white hover:border-solid border border-sky-400  hover:text-black focus:ring-4 focus:outline-none focus:ring-slate-300 font-medium rounded-3xl text-sm px-4 py-1.5" onClick={handleSearch}>
+              <button className="text-white transition-all absolute end-1 bottom-0.5 bg-sky-400 hover:bg-white hover:border-solid border border-sky-400  hover:text-black focus:ring-1 focus:outline-none focus:ring-slate-300 font-medium rounded-3xl text-sm px-3 py-1.5" onClick={handleSearch}>
                 Search
               </button>
             </div>
@@ -174,7 +214,7 @@ export const HomePage = () => {
                   <span className="flex items-center">
                     <span className="ml-3 block truncate">{selectedOption}</span>
                   </span>
-                  <span className="pointer-events-none absolute inset-y-0 right-0 ml-3 flex items-center pr-2">
+                  <span className="pointer-events-none absolute inset-y-0 right-0 ml-2 flex items-center pr-2">
                     <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path fillRule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clipRule="evenodd" />
                     </svg>
@@ -215,9 +255,9 @@ export const HomePage = () => {
               </div>
             </div>
           }
-        <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
+        <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid? grid : "1")}>
 
-          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} sort={selectedOption} search={search} dark={darkMode} hidepostids={hidePostIds} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setToast={setHandleToast} setResult={setResult} hiddenPage={false} profilePage={false} activeId={accountId}/>
+          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} grid={parseInt(grid && !isDesktop ? grid : "1")} sort={selectedOption} search={search} dark={darkMode} hidepostids={hidePostIds} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setToast={setHandleToast} setResult={setResult} hiddenPage={false} profilePage={false} activeId={accountId}/>
 
         </DynamicGrid>
         {

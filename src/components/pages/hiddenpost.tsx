@@ -9,20 +9,21 @@ import { DynamicGrid } from "../DynamicGrid";
 import { FirstToken } from "../FirstToken";
 import { FeedScroll } from "../feed/feedscroll";
 import { useFetchHiddenPost } from "@/hooks/db/HidePostHook";
+import { useGrid } from "@/context/GridContext";
 
 export const HiddenPostPage = () => {
     
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
     const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
     const {activeAccountId, connect, isConnected} = useMbWallet();
-    let [grid, setGrid] = useState(1);
+    const { grid, toggleGrid} = useGrid();
     const [toast, setToast] = useState(false);
     const [toastText, setToastText] = useState("")
     const [hidePostIds, setHidePostIds] = useState<string[]>([]);
     const [accountId, setAccountId] = useState("");
     const [dataItems, setDataItems] = useState(false);
     const [itemsLoading, setItemsLoading] = useState(false);
-    const {  fetchHiddenPost } = useFetchHiddenPost();
+    const { fetchHiddenPost } = useFetchHiddenPost();
     const [result, setResult] = useState("");
 
     const [darkMode, setDarkMode] = useState<boolean>();
@@ -75,17 +76,6 @@ export const HiddenPostPage = () => {
         }
     }
 
-    const handleGrid = () => {
-        console.log("Grid :", grid)
-        if(grid === 1) {
-          setGrid(2)
-        } else if(grid === 2) {
-          setGrid(3)
-        } else if(grid === 3){
-          setGrid(1)
-        }
-    }
-
     return (
         <div className={darkMode ? "dark" : ""}>
         <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start space-y-4 mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh]">
@@ -93,7 +83,7 @@ export const HiddenPostPage = () => {
                 <h2 className="title-font text-3xl dark:text-white underline underline-offset-4">Hidden Moments</h2>
             </div>
             <div className="max-w-md flex gap-3 pr-3 iems-center flex ml-auto justify-center mb-5">
-                <div className="md:hidden flex items-center justify-center" onClick={()=> { handleGrid()}}>
+                <div className="md:hidden flex items-center justify-center" onClick={toggleGrid}>
                     <InlineSVG
                     src="/images/grid.svg"
                     className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
@@ -124,10 +114,10 @@ export const HiddenPostPage = () => {
                 </div>
                 </div>
             }
-            <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={grid}>
+            <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid? grid : "1")}>
                 {/* {!newData?.token && <FirstToken {...firstTokenProps} />} */}
 
-                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } dark={darkMode} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} hidepostids={hidePostIds} setToast={setHandleToast} setResult={setResult} hiddenPage={true} profilePage={false} activeId={accountId}/>
+                <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : [] } grid={parseInt(grid? grid : "1")} dark={darkMode} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} hidepostids={hidePostIds} setToast={setHandleToast} setResult={setResult} hiddenPage={true} profilePage={false} activeId={accountId}/>
             </DynamicGrid>
             {
                 result && 

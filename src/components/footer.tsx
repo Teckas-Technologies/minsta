@@ -5,10 +5,11 @@ import { constants } from "@/constants";
 import { useMbWallet } from "@mintbase-js/react";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { ReactEventHandler, useRef, useState } from "react";
+import { ReactEventHandler, useEffect, useRef, useState } from "react";
 import InlineSVG from "react-inlinesvg";
 import { useApp } from "@/providers/app";
 import useMintImage from "@/utils/useMint";
+import { useDarkMode } from "@/context/DarkModeContext";
 
 export const FooterButton = ({ onClick }: { onClick: ReactEventHandler }) => {
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -16,10 +17,20 @@ export const FooterButton = ({ onClick }: { onClick: ReactEventHandler }) => {
   const { push } = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [darkMode, setDarkMode] = useState<boolean>();
+  const {mode} = useDarkMode();
 
   const {connect, activeAccountId, isConnected } = useMbWallet();
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+
+  useEffect(()=> {
+    if(mode === "dark") {
+    setDarkMode(true);
+    } else{
+    setDarkMode(false);
+    }
+  }, [mode])
 
   const addTag = () => {
     if (tag.trim() !== "" && tags.length < 4) {
@@ -151,8 +162,18 @@ const Footer = () => {
   const pathname = usePathname();
   const { push } = useRouter();
   const { isConnected } = useMbWallet();
+  const [darkMode, setDarkMode] = useState<boolean>();
+  const {mode} = useDarkMode();
 
   const { takePicture, openModal } = useApp();
+
+  useEffect(()=> {
+    if(mode === "dark") {
+    setDarkMode(true);
+    } else{
+    setDarkMode(false);
+    }
+  }, [mode])
 
   const renderFooterButtons = () => {
     const { isClosed } = constants;
@@ -160,7 +181,8 @@ const Footer = () => {
     switch (pathname) {
       case "/":
         return !isClosed ? (
-          <footer className="fixed bottom-0 left-0 flex w-full items-end justify-center bg-primary h-16">
+          <div className={darkMode ? "dark" : ""}>
+          <footer className="fixed bottom-0 left-0 flex w-full items-end justify-center bg-primary h-16 dark:bg-slate-800">
             <div className="camera">
               <FooterButton
                 onClick={
@@ -169,10 +191,12 @@ const Footer = () => {
               />
             </div>
           </footer>
+          </div>
         ) : null;
       case "/leaderboard":
         return !isClosed ? (
-          <footer className="fixed bottom-0 left-0 flex w-full items-end justify-center bg-primary h-16">
+          <div className={darkMode ? "dark" : ""}>
+          <footer className="fixed bottom-0 left-0 flex w-full items-end justify-center bg-primary h-16 dark:bg-slate-800">
             <FooterButton
               onClick={
                 isConnected ? () => push("/camera") : () => openModal("default")
@@ -180,6 +204,7 @@ const Footer = () => {
             />
             
           </footer>
+          </div>
         ) : null;
       case "/camera":
         return null;

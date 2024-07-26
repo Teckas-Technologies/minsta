@@ -3,10 +3,11 @@ import { CopyToClipboard } from 'react-copy-to-clipboard'
 import InlineSVG from 'react-inlinesvg';
 
 interface props {
-    text: string
+    text: string;
+    profilePage: boolean;
 }
 
-export const CoptText = ({text}: props) => {
+export const CoptText = ({text, profilePage}: props) => {
     const [copied, setCopied] = useState(false);
     const [pop, setPop] = useState(false)
 
@@ -26,13 +27,13 @@ export const CoptText = ({text}: props) => {
                 text={text}
                 onCopy={handleCopy}
             >
-                <button className='flex items-center gap-2 bg-slate-200 py-2 px-3 rounded-md relative'>
+                <button className={`flex items-center ${profilePage ? '' : 'gap-2 bg-slate-200 py-2 px-3'}  rounded-md relative`}>
                     <InlineSVG
                         src="/images/copy.svg"
-                        className="fill-current h-6 text-slate-800"
+                        className={`fill-current h-6 ${profilePage ? 'dark:text-slate-800 text-white' : 'text-slate-800 dark:text-white-500'}`}
                     />
                     {
-                    pop && <div className='absolute bg-white top-[101%] left-[-27%] p-1 rounded-md'>
+                    pop && <div className={`absolute bg-white ${!profilePage ? 'top-[101%] left-[-27%]' : 'left-[102%]'} p-1 rounded-md`}>
                         <p className='text-slate-900'>Copied!</p>
                     </div>
                     }

@@ -63,7 +63,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
         shareUrl = `https://telegram.me/share/url?url=${url}&text=${message}`;
         break;
       case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&t=${message}`;
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${message}`;
         break;
       case 'whatsapp':
         shareUrl = `https://api.whatsapp.com/send?text=${message}%20${url}`;
@@ -108,6 +108,13 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
   const tags = meta?.data?.nft_metadata?.[0]?.reference_blob?.tags;
 
   const tagsArray = tags?.split(',').map((tag: any) => tag.trim()).filter((tag: any) => tag.length > 0) || [];
+
+  const getProfileUrl = () => {
+    if (typeof window !== "undefined") {
+      return `${window.location.origin}/profile/?accountId=${meta?.data?.owners?.[0]?.owner}`;
+    }
+    return "#";
+  };
 
   return (
     <div className={darkMode ? "dark" : ""}>
@@ -203,7 +210,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
         <div className={`meta-tags ${darkMode ? "box-shadow" : "box-shadow"}  px-3 py-2 mb-2 rounded-lg flex gap-3 mb-3`}>
           {
             tagsArray[0] && 
-            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
+            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`} onClick={()=>push(`/?search=${tagsArray[0]}`)}>
               <h3 className="text-white">#{tagsArray[0]}</h3>
             </div>
           }
@@ -228,7 +235,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
         </div>
           </>
         }
-        <p className="text-[14px] text-mainText dark:text-white">
+        {/* <p className="text-[14px] text-mainText dark:text-white">
           {" "}
           Owner:{" "}
           <Link
@@ -239,6 +246,11 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
             {" "}
             {meta?.data?.owners?.[0]?.owner}{" "}
           </Link>
+        </p> */}
+        <p className="text-[14px] text-mainText dark:text-white cursor-pointer" onClick={()=> push(`/profile/?accountId=${meta?.data?.owners?.[0]?.owner}`)}>
+          {" "}
+          Owner:{" "}
+          {meta?.data?.owners?.[0]?.owner}{" "}
         </p>
         <p className="text-[14px] text-mainText mb-4 dark:text-white">
           {" "}
