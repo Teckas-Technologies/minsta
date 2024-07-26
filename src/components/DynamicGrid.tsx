@@ -11,7 +11,7 @@ interface GridProps {
   nColsXXXl?: number;
   nGap?: number;
   nGapMobile?: number;
-  grid:number
+  grid:number | null
 }
 
 export const DynamicGrid = ({

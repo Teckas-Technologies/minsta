@@ -7,11 +7,14 @@ import { useLeaderBoardData } from "@/hooks/useLeaderboard";
 import Link from "next/link";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { useEffect, useState } from "react";
+import { CoptText } from "../CopyText";
+import { useRouter } from "next/navigation";
 
 export const LeaderboardPage = () => {
   const { openModal, leaderboard, activeAccountId, texts } = useLeaderBoardData();
   const [darkMode, setDarkMode] = useState<boolean>();
   const {mode} = useDarkMode();
+  const { push } = useRouter()
 
   useEffect(()=> {
     if(mode === "dark") {
@@ -30,7 +33,7 @@ export const LeaderboardPage = () => {
 
   return (
     <div className={darkMode ? "dark" : ""}>
-      <main className="pt-20 flex flex-col gap-6 items-center justify-center text-mainText bg-white dark:bg-slate-800">
+      <main className="pt-20 flex flex-col gap-6 items-center justify-start min-h-[100vh] text-mainText bg-white dark:bg-slate-800">
         <div className="pt-3"><h3 className="dark:text-white title-font text-2xl">Leaderboard</h3></div>
         <div className="flex text-center gap-10">
           <ViewYourNfts />
@@ -54,15 +57,18 @@ export const LeaderboardPage = () => {
             const isCurrentUser = account === activeAccountId;
             const isFirst = index === 0;
             return (
-              <Link
+              <div key={`${account}-${index}`} className="flex gap-2 items-center">
+              <CoptText key={`${account}-${index}`} text={account} profilePage={false}/>
+              <p
                 key={`${account}-${index}`}
-                className={`w-full h-16 flex p-4 items-center justify-between rounded-xl bg-cardOne ${
+                onClick={()=>push(`/profile/?accountId=${account}`)}
+                className={`w-full h-16 flex p-4 items-center justify-between rounded-xl bg-cardOne max-w-[100%] overflow-hidden cursor-pointer ${
                   isCurrentUser ? "border-2 border-cardTwo" : ""
                 }`}
-                target="_blank"
-                rel="noopener noreferrer"
-                passHref
-                href={`${constants.mintbaseBaseUrl}/human/${account}/owned/0`}
+                // target="_blank"
+                // rel="noopener noreferrer"
+                // passHref
+                // href={`${constants.mintbaseBaseUrl}/human/${account}/owned/0`}
               >
                 <div className="flex w-5/6 md:w-full">
                   {isCurrentUser && (
@@ -75,14 +81,15 @@ export const LeaderboardPage = () => {
                       🔥
                     </span>
                   )}
-                  <p className="w-full truncate">{account}</p>
+                  <p className="w-[90%] truncate">{account}</p>
                 </div>
                 <div>
                   <div className="rounded-full bg-mainBg text-leaderboardText h-10 w-10 flex items-center justify-center">
                     {count}
                   </div>
                 </div>
-              </Link>
+              </p>
+              </div>
             );
           })}
         </div>

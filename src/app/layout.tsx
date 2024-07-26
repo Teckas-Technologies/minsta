@@ -9,6 +9,8 @@ import Navigation from "@/components/navigation";
 import Modal from "@/components/modal";
 import MintingClosed from "@/components/MintingClosed";
 import { DarkModeProvider } from "@/context/DarkModeContext";
+import { GridProvider } from "@/context/GridContext";
+import { BackProvider } from "@/context/BackContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
@@ -25,17 +27,21 @@ export default function RootLayout({
         className={`${inter.className} flex min-h-screen flex-col items-center justify-between overflow-x-hidden`}
       >
         <div className="flex flex-col min-h-screen relative bg-mainBg w-screen">
-        <DarkModeProvider>
-          <Providers>
-            <Navigation>
-              <Header />
-              <Footer />
-            </Navigation>
-            <MintingClosed />
-            {children}
-            <Modal></Modal>
-          </Providers>
-        </DarkModeProvider>
+          <BackProvider>
+            <GridProvider>
+              <DarkModeProvider>
+                <Providers>
+                  <Navigation>
+                    <Header />
+                    <Footer />
+                  </Navigation>
+                  <MintingClosed />
+                  {children}
+                  <Modal></Modal>
+                </Providers>
+              </DarkModeProvider>
+            </GridProvider>
+          </BackProvider>
         </div>
       </body>
     </html>

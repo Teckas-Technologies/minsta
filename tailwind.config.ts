@@ -36,9 +36,17 @@ const config: Config = {
       gradientColorStopPositions: {
         33: "33%",
       },
+      textAlign: {
+        'justify': 'justify',
+      },
+      lineClamp: {
+        3: '3',
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/line-clamp'),
+  ],
   darkMode: "class"
 };
 export default config;
