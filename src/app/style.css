@@ -3,6 +3,9 @@
 
 *{
     scrollbar-width: none;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
 }
 .minsta-header{
     background-color: #222f3e;

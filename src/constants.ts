@@ -1,3 +1,4 @@
+import { Network } from "@wpdas/naxios";
 require("dotenv").config();
 
 const appName: string = process.env.NEXT_PUBLIC_APP_TITLE || "MINTBASE";
@@ -22,7 +23,15 @@ const twitterText =
 
 const adminId = process.env.ADMIN_ID || ["fungible_rhmor.testnet", "minsta.testnet", "chloe.mintbus.near"];
 
+const SOCIAL_DB_CONTRACT_ID = "v1.social08.testnet";
+const CONTRACT_ID = "v1.social08.testnet"
+
+export const NETWORK = ("testnet") as Network;
+
 export const constants = {
+  SOCIAL_DB_CONTRACT_ID,
+  CONTRACT_ID,
+  NETWORK,
   adminId,
   appName,
   proxyContractAddress,

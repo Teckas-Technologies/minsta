@@ -5,6 +5,11 @@ import "../style/global.css";
 
 const heebo = Heebo({ subsets: ["latin"] });
 
+interface Generate {
+  title: string;
+  description: string
+}
+
 export const AppContext = createContext<{
   cameraRef: React.MutableRefObject<any> | undefined;
   setCameraRef: (ref: React.MutableRefObject<any> | undefined) => void;
@@ -14,7 +19,9 @@ export const AppContext = createContext<{
   closeModal: () => void;
   isMainModalOpen: boolean;
   isRewardsModalOpen: boolean;
-  mintImage: (photo: string, title:string, description: string,  tags: string[]) => void;
+  mintImage: (photo: File, title:string, description: string,  tags: string[]) => void;
+  reduceImageSize: (photo: string, num: number) => Promise<string>;
+  getTitleAndDescription: (photo: string) => Promise<Generate>;
   isLoading: boolean;
 }>({
   cameraRef: undefined,
@@ -25,7 +32,11 @@ export const AppContext = createContext<{
   closeModal: () => null,
   isMainModalOpen: false,
   isRewardsModalOpen: false,
-  mintImage: (photo: string, title:string, description: string, tags: string[]) => null,
+  mintImage: (photo: File, title:string, description: string, tags: string[]) => null,
+  reduceImageSize: (photo: string, num: number) => Promise.resolve(""),
+  getTitleAndDescription: async (photo: string) => {
+    return { title: "", description: "" };
+  },
   isLoading: false,
 });
 
@@ -38,7 +49,9 @@ interface IAppConsumer {
   closeModal: () => void;
   isMainModalOpen: boolean;
   isRewardsModalOpen: boolean;
-  mintImage: (photo: string, title:string, description: string, tags: string[]) => void;
+  mintImage: (photo: File, title:string, description: string, tags: string[]) => void;
+  reduceImageSize: (photo: string, num: number) => Promise<string>;
+  getTitleAndDescription: (photo: string) => Promise<Generate>;
   isLoading: false;
 }
 
@@ -51,7 +64,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [isMainModalOpen, setMainModalOpen] = useState(false);
   const [isRewardsModalOpen, setRewardsModalOpen] = useState(false);
 
-  const { mintImage, loading, error } = useMintImage();
+  const { mintImage, reduceImageSize, getTitleAndDescription, loading, error } = useMintImage();
 
   const handleOpenModal = (modalType: string) => {
     if (modalType === "default") {
@@ -93,6 +106,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           isMainModalOpen,
           isRewardsModalOpen,
           mintImage: mintImage,
+          reduceImageSize: reduceImageSize,
+          getTitleAndDescription: getTitleAndDescription,
           isLoading: loading,
         }}
       >
