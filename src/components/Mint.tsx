@@ -46,6 +46,8 @@ export function Mint({
 
   const src = cloudImage?.toURL() || currentPhoto;
 
+  console.log("SRC", src)
+
   useEffect(() => {
     if (mode === "dark") {
       setDarkMode(true);
@@ -98,10 +100,29 @@ export function Mint({
 
   console.log("Current Photo >> ", currentPhoto)
 
+  function isBase64(str: string) {
+    try {
+      return btoa(atob(str)) === str;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  async function urlToFile(url: string, filename: string, mimeType: string) {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: mimeType });
+  }
+
   const handleUpload = async () => {
     setPreview(false);
-    if (currentPhoto) {
-      const photoFile = convertBase64ToFile(currentPhoto);
+    if (src) {
+      let photoFile;
+      if (isBase64(src)) {
+        photoFile = convertBase64ToFile(src);
+      } else {
+        photoFile = await urlToFile(src, 'photo.jpg', 'image/jpeg');
+      }
       mintImage(photoFile, title, description, tags);
       setTitle("");
       setDescription("");
@@ -126,9 +147,22 @@ export function Mint({
             </div>
           </>
         ) : (<>
-          <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col scroll gap-4 mb-2`}>
-            <div className="scroll-div h-auto scroll">
+          {!preview && <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 mb-2`}>
+            <div className="scroll-div h-auto">
               <Image src={src} alt="image" width={468} height={468} className="photo-img" />
+              <h2 className="title-font text-lg text-center dark:text-white mt-2 mb-1">Effects</h2>
+              <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} flex gap-2 overflow-x-scroll w-full h-[9.5rem] mb-2 p-2 mx-1`}>
+                {ART_FILTERS.map((art: any, i: any) => (
+                  <div key={i} className={`art-box ${darkMode ? "box-shadow-dark" : "box-shadow"} w-24 h-full flex flex-col p-2 items-center rounded-md`} onClick={() => setFilter(art)}>
+                    <div className="im flex justify-center w-24 h-[80%]">
+                      <img src={cloudinary.image('minsta thumb/ibshxb1i1c6qte2boxey').resize(Resize.fill().width(200).height(200)).effect(Effect.artisticFilter(art)).toURL()} alt="" className="w-[80%] h-full rounded-md object-cover" />
+                    </div>
+                    <div className="text w-24 h-[20%] flex justify-center items-center">
+                      <h4 className="dark:text-white text-center">{art}</h4>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               <div className="tags pb-2 pt-2 px-2">
                 {!generating ? <>
@@ -176,8 +210,8 @@ export function Mint({
                 Preview
               </button>
             </div>
-          </div>
-          <h2 className="title-font text-lg dark:text-white mt-2 mb-1">Filters</h2>
+          </div>}
+          {/* <h2 className="title-font text-lg dark:text-white mt-2 mb-1">Filters</h2>
           <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} flex gap-2 overflow-x-scroll w-full md:w-[50%] h-[9.5rem] mb-2 p-2`}>
             {ART_FILTERS.map((art: any, i: any) => (
               <div key={i} className={`art-box ${darkMode ? "box-shadow-dark" : "box-shadow"} w-24 h-full flex flex-col p-2 items-center rounded-md`} onClick={() => setFilter(art)}>
@@ -189,7 +223,7 @@ export function Mint({
                 </div>
               </div>
             ))}
-          </div>
+          </div> */}
 
 
         </>
