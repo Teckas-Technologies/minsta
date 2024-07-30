@@ -35,6 +35,8 @@ export const ProfilePage = () => {
     const [description, setDescription] = useState<string>("");
     const [services, setServices] = useState<string>("");
     const [edit, setEdit] = useState(false);
+    const [desMore, setDesmore] = useState(false);
+    const [serviceMore, setServicemore] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -216,7 +218,21 @@ export const ProfilePage = () => {
                         </div>}
                     {profile?.description && !edit && <div>
                         <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Description</h2>
-                        <p className="text-justify content dark:text-white" dangerouslySetInnerHTML={{ __html: preprocessHTMLContent(description) }}></p>
+                        <p className={`text-justify content dark:text-white ${!desMore ? "line-clamp-2" : ""}`} dangerouslySetInnerHTML={{ __html: preprocessHTMLContent(description) }}></p>
+                        <button className={`btn my-1 flex gap-2 items-center ${!desMore ? "success-btn" : "delete-btn"}`} onClick={()=> setDesmore(!desMore)}>
+                            {!desMore ? "Show More" : "Show Less"} 
+                            {!desMore ? 
+                                <InlineSVG
+                                    src="/images/arrow_right.svg"
+                                    className="fill-current w-6 h-6 text-white font-xl cursor-pointer"
+                                    color="#222f3e"
+                                /> : 
+                                <InlineSVG
+                                    src="/images/arrow_up.svg"
+                                    className="fill-current w-6 h-5 text-white font-xl cursor-pointer"
+                                    color="#222f3e"
+                                />} 
+                        </button>
                     </div>}
                     {profile?.tags && !edit && <div>
                         <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Tags</h2>
@@ -232,12 +248,26 @@ export const ProfilePage = () => {
                     </div>}
                     {profile?.services && !edit && <div>
                         <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Services</h2>
-                        <p className="text-justify content dark:text-white" dangerouslySetInnerHTML={{ __html: preprocessHTMLContent(services) }}></p>
+                        <p className={`text-justify content dark:text-white ${!serviceMore ? "line-clamp-1" : ""}`} dangerouslySetInnerHTML={{ __html: preprocessHTMLContent(services) }}></p>
+                        <button className={`btn my-1 flex gap-2 items-center ${!serviceMore ? "success-btn" : "delete-btn"}`} onClick={()=> setServicemore(!serviceMore)}>
+                            {!serviceMore ? "Show More" : "Show Less"} 
+                            {!serviceMore ? 
+                                <InlineSVG
+                                    src="/images/arrow_right.svg"
+                                    className="fill-current w-6 h-6 text-white font-xl cursor-pointer"
+                                    color="#222f3e"
+                                /> : 
+                                <InlineSVG
+                                    src="/images/arrow_up.svg"
+                                    className="fill-current w-6 h-5 text-white font-xl cursor-pointer"
+                                    color="#222f3e"
+                                />} 
+                        </button>
                     </div>}
                 </div> 
                  {!edit && <h4 className={`title-font dark:text-white text-2xl font-lg ${profile ? 'mt-11' : 'mt-1'}  underline underline-offset-4`}>Moments</h4>}
                 {
-                    itemsLoading &&
+                    itemsLoading && !result &&
                     <div className="mt-5 h-[50px]">
                         <div className="loader">
                         </div>
