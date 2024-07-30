@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: { domains: ["arweave.net", 'image-cache-service-z3w7d7dnea-ew.a.run.app', 'ipfs.near.social'] },
+  images: { domains: ["arweave.net", 'image-cache-service-z3w7d7dnea-ew.a.run.app', 'ipfs.near.social', 'res.cloudinary.com'] },
  webpack(config) {
     // eslint-disable-next-line no-param-reassign
     config.resolve.fallback = {
