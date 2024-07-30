@@ -3,7 +3,6 @@ import InlineSVG from "react-inlinesvg"
 import { CoptText } from "./CopyText"
 import Link from "next/link"
 import { NEARSocialUserProfile } from "@/contracts/social"
-import { useMbWallet } from "@mintbase-js/react"
 import { useState } from "react"
 
 interface props {
@@ -13,7 +12,6 @@ interface props {
 }
 
 export const ProfileCard = ({profile, images, accountId}: props) => {
-    const {activeAccountId} = useMbWallet();
     const [animation, setAnimation] = useState(false);
 
     return (
