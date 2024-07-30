@@ -10,7 +10,7 @@ import Modal from "@/components/modal";
 import MintingClosed from "@/components/MintingClosed";
 import { DarkModeProvider } from "@/context/DarkModeContext";
 import { GridProvider } from "@/context/GridContext";
-import { BackProvider } from "@/context/BackContext";
+import { AppProvider, BackProvider } from "@/context/BackContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
@@ -21,27 +21,29 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
       </head>
       <body
         className={`${inter.className} flex min-h-screen flex-col items-center justify-between overflow-x-hidden`}
       >
         <div className="flex flex-col min-h-screen relative bg-mainBg w-screen">
-          <BackProvider>
-            <GridProvider>
-              <DarkModeProvider>
-                <Providers>
-                  <Navigation>
-                    <Header />
-                    <Footer />
-                  </Navigation>
-                  <MintingClosed />
-                  {children}
-                  <Modal></Modal>
-                </Providers>
-              </DarkModeProvider>
-            </GridProvider>
-          </BackProvider>
+          <AppProvider>
+            <BackProvider>
+              <GridProvider>
+                <DarkModeProvider>
+                  <Providers>
+                    <Navigation>
+                      <Header />
+                      <Footer />
+                    </Navigation>
+                    <MintingClosed />
+                    {children}
+                    <Modal></Modal>
+                  </Providers>
+                </DarkModeProvider>
+              </GridProvider>
+            </BackProvider>
+          </AppProvider>
         </div>
       </body>
     </html>
