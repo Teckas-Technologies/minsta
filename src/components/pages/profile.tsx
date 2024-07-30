@@ -41,25 +41,25 @@ export const ProfilePage = () => {
         if (accountId) {
             const fetchProfile = async () => {
                 try {
-                    // const profileData = await getSocialProfile({ accountId: accountId });
-                    // const followingData = await getFollowing({ accountId: accountId });
-                    // const followersData = await getFollowers({ accountId: accountId });
-                    // setProfile(profileData);
-                    // setFollowing(followingData.total);
-                    // setFollowers(followersData.total);
-                    // if (profileData) {
-                    //     const image = getImage({
-                    //         image: profileData?.image,
-                    //         type: "image",
-                    //     });
-                    //     const backgroundImage = getImage({
-                    //         image: profileData?.backgroundImage,
-                    //         type: "backgroundImage",
-                    //     });
+                    const profileData = await getSocialProfile({ accountId: accountId });
+                    const followingData = await getFollowing({ accountId: accountId });
+                    const followersData = await getFollowers({ accountId: accountId });
+                    setProfile(profileData);
+                    setFollowing(followingData.total);
+                    setFollowers(followersData.total);
+                    if (profileData) {
+                        const image = getImage({
+                            image: profileData?.image,
+                            type: "image",
+                        });
+                        const backgroundImage = getImage({
+                            image: profileData?.backgroundImage,
+                            type: "backgroundImage",
+                        });
 
-                    //     const images = await Promise.all([image, backgroundImage]);
-                    //     setImages(images)
-                    // }
+                        const images = await Promise.all([image, backgroundImage]);
+                        setImages(images)
+                    }
                     // console.log("Profile >> ", profileData)
                     // console.log("Following >> ", following)
                     // console.log("Followers >> ", followers)
@@ -166,15 +166,15 @@ export const ProfilePage = () => {
                     <div className="page-title mt-20">
                         <h2 className="title-font text-3xl dark:text-white underline underline-offset-4">{edit ? 'Edit Profile' : 'Profile'}</h2>
                     </div>
-                    {/* {!edit ? */}
+                     {!edit ? 
                         <div className="max-w-md flex gap-3 iems-center flex ml-auto mr-5 justify-center">
-                            {/* {accountId === activeAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={() => setEdit(true)}>
+                            {accountId === activeAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={() => setEdit(true)}>
                                 <InlineSVG
                                     src="/images/pencil.svg"
                                     className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
                                     color="#222f3e"
                                 />
-                            </div>} */}
+                            </div>} 
                             <div className="md:hidden flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={toggleGrid}>
                                 <InlineSVG
                                     src="/images/grid.svg"
@@ -182,9 +182,9 @@ export const ProfilePage = () => {
                                     color="#222f3e"
                                 />
                             </div>
-                        </div> 
-                        {/* <EditProfile setEdit={setEdit} />} */}
-                    {/* {profile && images && !edit && <ProfileCard profile={profile} images={images} accountId={accountId} />} */}
+                        </div> :
+                        <EditProfile setEdit={setEdit} />}
+                     {profile && images && !edit && <ProfileCard profile={profile} images={images} accountId={accountId} />} 
                 </div>
 
                 {/* {!dataItems && !itemsLoading && 
@@ -197,7 +197,7 @@ export const ProfilePage = () => {
                 </div>
             }
              */}
-                {/* <div className={`profile-content w-full md:px-[20rem] ${profile?.name ? 'md:mt-[15%] mt-[55%]' : 'md:mt-1 mt-2'}`}>
+                <div className={`profile-content w-full md:px-[20rem] ${profile?.name ? 'md:mt-[15%] mt-[55%]' : 'md:mt-1 mt-2'}`}>
                     {profile && followers !== null && following !== null && !edit &&
                         <div className="flex justify-center">
                             <div className="flex items-center w-[70%] md:w-[20rem] justify-center gap-3 m-2 py-2 rounded-lg border-1 border border-sky-500">
@@ -234,8 +234,8 @@ export const ProfilePage = () => {
                         <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Services</h2>
                         <p className="text-justify content dark:text-white" dangerouslySetInnerHTML={{ __html: preprocessHTMLContent(services) }}></p>
                     </div>}
-                </div> */}
-                {/* {!edit && <h4 className={`title-font dark:text-white text-2xl font-lg ${profile ? 'mt-11' : 'mt-1'}  underline underline-offset-4`}>Moments</h4>} */}
+                </div> 
+                 {!edit && <h4 className={`title-font dark:text-white text-2xl font-lg ${profile ? 'mt-11' : 'mt-1'}  underline underline-offset-4`}>Moments</h4>}
                 {
                     itemsLoading &&
                     <div className="mt-5 h-[50px]">

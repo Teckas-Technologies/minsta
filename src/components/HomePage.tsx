@@ -15,7 +15,7 @@ import { useDarkMode } from "@/context/DarkModeContext";
 import { useFetchHiddenPost } from "@/hooks/db/HidePostHook";
 import { useGrid } from "@/context/GridContext";
 import { useMediaQuery } from "usehooks-ts";
-import { useBack } from "@/context/BackContext";
+import { useAppContext, useBack } from "@/context/BackContext";
 
 interface NFT {
   data: InfiniteScrollHook | undefined;
@@ -120,6 +120,20 @@ export const HomePage = () => {
     }
   }, []);
 
+  const { triggerBackAction, onNewButtonClickHandled } : any = useAppContext();
+
+  useEffect(() => {
+    if (triggerBackAction) {
+      handleNewButtonClick();
+      onNewButtonClickHandled();
+    }
+  }, [triggerBackAction]);
+
+  const handleNewButtonClick = () => {
+    handleClearSearch();
+  };
+  
+
   const updateQueryParam = (key: string, value: string) => {
     const searchParams = new URLSearchParams(window.location.search);
     if (value) {
@@ -142,16 +156,6 @@ export const HomePage = () => {
     setSearchText("");
     updateQueryParam("search", "");
   };
-
-  useEffect(()=>{
-    if(!back){
-      handleClearSearch
-    }
-  }, [back])
-
-  if(!back){
-    handleClearSearch
-  }
 
   const handleDropdownClick = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -190,10 +194,10 @@ export const HomePage = () => {
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 start-0 flex items-center ps-3 cursor-pointer justify-center">
-                {/* <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                </svg> */}
-                {!searchText ? <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                </svg>
+                {/* {!searchText ? <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                 </svg> : 
                 <div onClick={handleClearSearch}>
@@ -201,7 +205,7 @@ export const HomePage = () => {
                     src="/images/close.svg"
                     className="fill-current w-4 h-4 text-sky-500 font-xl cursor-pointer"
                     />
-                </div>}
+                </div>} */}
               </div>
               <input type="search" value={searchText} id="default-search" className={`block w-full p-1.5 ps-10 search-box border focus:border-sky-500 rounded-3xl outline-none`} placeholder="Search..." required onChange={(e) => setSearchText(e.target.value)} />
               <button className="text-white transition-all absolute end-1 bottom-0.5 bg-sky-400 hover:bg-white hover:border-solid border border-sky-400  hover:text-black focus:ring-1 focus:outline-none focus:ring-slate-300 font-medium rounded-3xl text-sm px-3 py-1.5" onClick={handleSearch}>

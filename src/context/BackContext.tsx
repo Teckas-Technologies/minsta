@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { createContext, useContext, useState, ReactNode } from "react";
 
 type BackContextType = {
@@ -28,3 +29,32 @@ export const useBack = (): BackContextType => {
     }
     return context;
   };
+
+interface AppContextType {
+  triggerBackAction: boolean;
+  onBackButtonClick: () => void;
+  onNewButtonClickHandled: () => void;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+export const useAppContext = () => useContext(AppContext);
+
+export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const [triggerBackAction, setTriggerBackAction] = useState(false);
+
+  const onBackButtonClick = useCallback(() => {
+    setTriggerBackAction(true);
+  }, []);
+
+  const onNewButtonClickHandled = () => {
+    setTriggerBackAction(false);
+  };
+
+  return (
+    <AppContext.Provider value={{ triggerBackAction, onBackButtonClick, onNewButtonClickHandled }}>
+      {children}
+    </AppContext.Provider>
+  );
+};
+

@@ -8,7 +8,7 @@ import '../app/style.css'
 import { constants } from "@/constants";
 import Link from "next/link";
 import { useDarkMode } from "@/context/DarkModeContext";
-import { useBack } from "@/context/BackContext";
+import { useAppContext, useBack } from "@/context/BackContext";
 
 const Header = () => {
   const pathname = usePathname();
@@ -99,7 +99,7 @@ const Header = () => {
   }
 
   useEffect(() => {
-    if (window.location.origin === "https://minsta.org") {
+    if (process.env.NEXT_PUBLIC_NETWORK === "mainnet") {
       SetColor('green')
     } else {
       SetColor('yellow')
@@ -136,7 +136,13 @@ const Header = () => {
     router.push(newRelativePathQuery);
   };
 
+  const { onBackButtonClick } : any = useAppContext();
+  const handleBackClick = () => {
+    onBackButtonClick();
+  };
+  
   const handleClearSearch = () => {
+    handleBackClick();
     updateQueryParam("search", "");
     toggleBack(false)
   };
@@ -357,19 +363,18 @@ const Header = () => {
           <div className="minsta-header flex w-full gap-5 justify-between px-4 lg:px-12  items-center">
             <div>
               <div className="dashboard-menu">
-                <div className="hamburger" onClick={() => setIsOpen(!isOpen)}>
+                {!back && <div className="hamburger" onClick={() => setIsOpen(!isOpen)}>
                   <InlineSVG
                     src="/images/menu.svg"
                     className="fill-current text-camera h-12"
                   />
-                </div>
-                <button className="h-8 w-auto text-headerText font-bold text-xl flex items-center gap-3" onClick={() => push("/")}>
-                  {/* {back && <InlineSVG
+                </div>}
+                <button className="h-8 w-auto text-headerText border-none outline-none font-bold text-xl flex items-center gap-3" onClick={() => {back ? handleClearSearch() : push("/")}}>
+                  {back && <InlineSVG
                     src="/images/arrow_back.svg"
                     className="fill-current text-headerText"
-                    onClick={handleClearSearch}
                     style={{ color: "#fff" }}
-                  />} */}
+                  />}
                   <h2>{process.env.NEXT_PUBLIC_APP_TITLE || "Moments"}</h2>
                 </button>
               </div>
