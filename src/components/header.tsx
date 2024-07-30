@@ -99,7 +99,7 @@ const Header = () => {
   }
 
   useEffect(() => {
-    if (window.location.origin === "https://minsta.org") {
+    if (process.env.NEXT_PUBLIC_NETWORK === "mainnet") {
       SetColor('green')
     } else {
       SetColor('yellow')
