@@ -1,7 +1,6 @@
 import { useMbWallet } from "@mintbase-js/react";
 import { uploadReference } from "@mintbase-js/storage";
 import { useState } from "react";
-import { convertBase64ToFile } from "./base64ToFile";
 import { generateRandomId } from "./generateRandomId";
 import { useReplicate } from "@/providers/replicate";
 import { constants } from "@/constants";
