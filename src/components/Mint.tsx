@@ -121,7 +121,7 @@ export function Mint({
       if (isBase64(src)) {
         photoFile = convertBase64ToFile(src);
       } else {
-        photoFile = await urlToFile(src, 'photo.jpg', 'image/jpeg');
+        photoFile = await urlToFile(src, 'image/jpeg', 'image/jpeg');
       }
       mintImage(photoFile, title, description, tags);
       setTitle("");
