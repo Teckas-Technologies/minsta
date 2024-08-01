@@ -36,11 +36,12 @@ export function Mint({
   const [generating, setGenerating] = useState(false);
   const [preview, setPreview] = useState(false);
   const [cldData, setCldData] = useState<any>();
-  const [filter, setFilter] = useState()
+  const [filter, setFilter] = useState<string | null>(null)
+  const [toggleFilter, setToggleFilter] = useState(false);
 
   const cloudImage = cldData?.public_id && cloudinary.image(cldData?.public_id);
 
-  if (cloudImage && filter) {
+  if (cloudImage && filter && toggleFilter) {
     cloudImage.effect(`e_art:${filter}`)
   }
 
@@ -130,6 +131,16 @@ export function Mint({
     }
   }
 
+  const handleFilterClick = (selectedFilter: string) => {
+    if (filter === selectedFilter && toggleFilter) {
+      setToggleFilter(false);
+      setFilter(null);
+    } else {
+      setToggleFilter(true);
+      setFilter(selectedFilter);
+    }
+  };
+
   return (
     <div className={darkMode ? "dark" : ""}>
       <main className="h-[100Vh] relative w-[100%] px-4 flex flex-col items-center scroll photo-main dark:bg-slate-800">
@@ -153,8 +164,8 @@ export function Mint({
               <h2 className="title-font text-lg text-center dark:text-white mt-2 mb-1">Effects</h2>
               <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} flex gap-2 overflow-x-scroll w-full h-[9.5rem] mb-2 p-2 mx-1`}>
                 {ART_FILTERS.map((art: any, i: any) => (
-                  <div key={i} className={`art-box ${darkMode ? "box-shadow-dark" : "box-shadow"} w-24 h-full flex flex-col p-2 items-center rounded-md`} onClick={() => setFilter(art)}>
-                    <div className="im flex justify-center w-24 h-[80%]">
+                  <div key={i} className={`art-box ${darkMode ? "box-shadow-dark" : "box-shadow"} w-24 h-full flex flex-col p-2 items-center rounded-md`} onClick={() => handleFilterClick(art)}>
+                    <div className="im relative flex justify-center w-24 h-[80%]">
                       <img src={cloudinary.image('minsta thumb/ibshxb1i1c6qte2boxey').resize(Resize.fill().width(200).height(200)).effect(Effect.artisticFilter(art)).toURL()} alt="" className="w-[80%] h-full rounded-md object-cover" />
                     </div>
                     <div className="text w-24 h-[20%] flex justify-center items-center">
@@ -211,21 +222,6 @@ export function Mint({
               </button>
             </div>
           </div>}
-          {/* <h2 className="title-font text-lg dark:text-white mt-2 mb-1">Filters</h2>
-          <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} flex gap-2 overflow-x-scroll w-full md:w-[50%] h-[9.5rem] mb-2 p-2`}>
-            {ART_FILTERS.map((art: any, i: any) => (
-              <div key={i} className={`art-box ${darkMode ? "box-shadow-dark" : "box-shadow"} w-24 h-full flex flex-col p-2 items-center rounded-md`} onClick={() => setFilter(art)}>
-                <div className="im flex justify-center w-24 h-[80%]">
-                  <img src={cloudinary.image('minsta thumb/ibshxb1i1c6qte2boxey').resize(Resize.fill().width(200).height(200)).effect(Effect.artisticFilter(art)).toURL()} alt="" className="w-[80%] h-full rounded-md object-cover" />
-                </div>
-                <div className="text w-24 h-[20%] flex justify-center items-center">
-                  <h4 className="dark:text-white text-center">{art}</h4>
-                </div>
-              </div>
-            ))}
-          </div> */}
-
-
         </>
         )}
         {preview && <div className="preview absolute top-0 left-0 min-h-[100vh] h-[100%] right-0 bg-sky-100 dark:bg-slate-800 flex items-center justify-center pt-[15rem] pb-[10rem]">
