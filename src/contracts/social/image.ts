@@ -122,13 +122,13 @@ export const getImage = async ({
       return `https://ipfs.near.social/ipfs/${socialImage.ipfs_cid}`;
     } else {
       return fallbackurl ?? type === "image"
-        ? "/assets/images/profile-image.png"
-        : "/assets/images/profile-banner.png";
+        ? "/images/contact.jpg"
+        : "/images/contact.jpg";
     }
   } catch (err) {
     console.log("error fetching image ", err);
     return fallbackurl ?? type === "image"
-      ? "/assets/images/profile-image.png"
-      : "/assets/images/profile-banner.png";
+      ? "/images/contact.jpg"
+      : "/images/contact.jpg";
   }
 };
