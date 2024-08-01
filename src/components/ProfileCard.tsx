@@ -70,56 +70,32 @@ export const ProfileCard = ({ profile, dbProfile, images, accountId }: props) =>
                             <span className="card__social-text">My social networks</span>
 
                             <ul className="card__social-list">
-                                {(dbProfile?.linkTree?.twitter && dbProfile?.linkTree?.twitter !== undefined) ?
+                                {(dbProfile?.linkTree?.twitter && dbProfile?.linkTree?.twitter !== undefined) &&
                                     <Link href={`${dbProfile?.linkTree?.twitter?.includes("https://x.com/") ? dbProfile?.linkTree?.twitter : `https://x.com/${dbProfile?.linkTree?.twitter}`}`} className="card__social-link bg-slate-800">
                                         <InlineSVG
                                             src="/images/twitter_x.svg"
                                             className="fill-current w-6 h-6 text-white font-xl cursor-pointer"
                                             color="#222f3e"
                                         />
-                                    </Link> :
-                                    <Link href={`${profile?.linktree?.twitter?.includes("https://x.com/") ? profile?.linktree?.twitter : `https://x.com/${profile?.linktree?.twitter}`}`} className="card__social-link bg-slate-800">
-                                        <InlineSVG
-                                            src="/images/twitter_x.svg"
-                                            className="fill-current w-6 h-6 text-white font-xl cursor-pointer"
-                                            color="#222f3e"
-                                        />
                                     </Link>
-
                                 }
-                                {(dbProfile?.linkTree?.telegram && dbProfile?.linkTree?.telegram !== undefined) ?
+                                {(dbProfile?.linkTree?.telegram && dbProfile?.linkTree?.telegram !== undefined) &&
                                     <Link href={`${dbProfile?.linkTree?.telegram?.includes("https://t.me/") ? dbProfile?.linkTree?.telegram : `https://t.me/${dbProfile?.linkTree?.telegram}`}`} className="card__social-link bg-slate-800">
                                         <InlineSVG
                                             src="/images/telegram.svg"
                                             className="fill-current w-6 h-6 text-white font-xl cursor-pointer"
                                             color="#222f3e"
                                         />
-                                    </Link> :
-                                    <Link href={`${profile?.linktree?.telegram?.includes("https://t.me/") ? profile?.linktree?.telegram : `https://t.me/${profile?.linktree?.telegram}`}`} className="card__social-link bg-slate-800">
-                                        <InlineSVG
-                                            src="/images/telegram.svg"
-                                            className="fill-current w-6 h-6 text-white font-xl cursor-pointer"
-                                            color="#222f3e"
-                                        />
-                                    </Link>
-
+                                    </Link> 
                                 }
-                                {(dbProfile?.linkTree?.github && dbProfile?.linkTree?.github !== undefined) ?
+                                {(dbProfile?.linkTree?.github && dbProfile?.linkTree?.github !== undefined) &&
                                     <Link href={`${dbProfile?.linkTree?.github?.includes("https://github.com/") ? dbProfile?.linkTree?.github : `https://github.com/${dbProfile?.linkTree?.github}`}`} className="card__social-link bg-slate-800">
                                         <InlineSVG
                                             src="/images/github.svg"
                                             className="fill-current w-6 h-6 text-white font-xl cursor-pointer"
                                             color="#222f3e"
                                         />
-                                    </Link> :
-                                    <Link href={`${profile?.linktree?.github?.includes("https://github.com/") ? profile?.linktree?.github : `https://github.com/${profile?.linktree?.github}`}`} className="card__social-link bg-slate-800">
-                                        <InlineSVG
-                                            src="/images/github.svg"
-                                            className="fill-current w-6 h-6 text-white font-xl cursor-pointer"
-                                            color="#222f3e"
-                                        />
                                     </Link>
-
                                 }
                             </ul>
                         </div>
