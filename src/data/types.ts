@@ -63,3 +63,18 @@ export interface BlockUserType {
 export interface BlockedUser {
   blockedUserId: string;
 }
+
+export interface ProfileType {
+  accountId: string;
+  name: string;
+  profileImage?: string;
+  backgroundImage?: string;
+  about?: string;
+  tags?: string[];
+  linkTree?: {
+      twitter?: string;
+      github?: string;
+      telegram?: string;
+      website?: string;
+  };
+}

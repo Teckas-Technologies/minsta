@@ -32,7 +32,7 @@ export const FeedScroll = ({ blockedNfts,grid, sort , search, dark, hidepostids,
         setSortText("New to Old");
       }
     }
-  }, [search]);
+  }, [search, activeAccountId]);
 
   useEffect(()=> {
     if(sort){
