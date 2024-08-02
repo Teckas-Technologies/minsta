@@ -104,21 +104,21 @@ export const ProfilePage = () => {
                             if (profileData.name) {
                                 data.name = profileData.name;
                             }
-                            // if (images[0]) {
-                            //     data.profileImage = images[0];
-                            // }
-                            // if (images[1]) {
-                            //     data.backgroundImage = images[1];
-                            // }
+                            if (images !== undefined && images[0] && images[0] !== "no_image") {
+                                data.profileImage = images[0];
+                            }
+                            if (images !== undefined && images[1] && images[1] !== "no_image") {
+                                data.backgroundImage = images[1];
+                            }
                             if (profileData.description) {
                                 data.about = profileData.description;
                             }
                             if (Array.isArray(profileData.tags)) {
-                                data.tags = profileData.tags.flatMap(tagObj => 
-                                  Object.keys(tagObj)
+                                data.tags = profileData.tags.flatMap(tagObj =>
+                                    Object.keys(tagObj)
                                 );
                             }
-                              
+
                             if (profileData.linktree) {
                                 const linkTree: Partial<ProfileType['linkTree']> = {};
 
@@ -200,10 +200,10 @@ export const ProfilePage = () => {
             .replace(/- (.+)/g, '<li class="list-disc ml-5">$1</li>')
             // .replace(/\n/g, '<br />')
             .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" class="text-blue-500 underline" target="_blank" rel="noopener noreferrer">$1</a>');
-        
+
         return result;
     };
-    
+
 
     // let desContent = "";
 
@@ -232,13 +232,14 @@ export const ProfilePage = () => {
         const newRelativePathQuery = `${window.location.pathname}?${searchParams.toString()}`;
         router.push(newRelativePathQuery);
     };
+    console.log(images)
 
     return (
         <div className={darkMode ? "dark" : ""}>
             <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh] h-auto scroll-smooth">
-                <div className={`banner relative space-y-2 flex flex-col items-center justify-start w-full  rounded-lg ${((dbProfile && dbProfile.backgroundImage) || (profile && images)) && !edit ? 'h-[20rem]' : 'h-auto'}`} style={{ backgroundImage: `url('${(!edit && dbProfile?.backgroundImage) && dbProfile?.backgroundImage || (images && images.length > 1 && !edit) && images[1]}')`, backgroundPosition: 'center', backgroundSize: 'cover' }}>
+                <div className={`banner relative space-y-2 flex flex-col items-center justify-start w-full  rounded-lg ${!edit ? 'h-[20rem]' : 'h-auto'}`} style={{ backgroundImage: `url('${(!edit && dbProfile?.backgroundImage) && dbProfile?.backgroundImage || (images && images[1] !== "no_image" && !edit) && images[1] || !edit && '/images/dark_banner.jpg'}')`, backgroundPosition: 'center', backgroundSize: 'cover' }}>
                     <div className="page-title mt-20">
-                        <h2 className="title-font text-3xl dark:text-white underline underline-offset-4">{edit ? 'Edit Profile' : 'Profile'}</h2>
+                        <h2 className={`title-font text-3xl ${!edit ? 'text-white' : 'dark:text-white'} underline underline-offset-4`}>{edit ? 'Edit Profile' : 'Profile'}</h2>
                     </div>
                     {!edit ?
                         <div className="max-w-md flex gap-3 iems-center flex ml-auto mr-5 justify-center">
@@ -258,20 +259,20 @@ export const ProfilePage = () => {
                             </div>
                         </div> :
                         <EditProfile setEdit={setEdit} accountId={activeAccountIdNew} />}
-                    {(dbProfile || (profile && images)) && !edit && <ProfileCard profile={profile} dbProfile={dbProfile} images={images} accountId={accountId} />}
+                    {!edit && <ProfileCard profile={profile} dbProfile={dbProfile} images={images} accountId={accountId} />}
                 </div>
 
                 {/* {!dataItems && !itemsLoading && 
-                <div className="not-data flex items-center gap-3 mt-[20%]">
-                    <InlineSVG
-                        src="/images/no_data.svg"
-                        className="fill-current text-camera h-6 text-slate-800 dark:text-white"
-                    />
-                    <h2 className="dark:text-white">No Moments!</h2>
-                </div>
-            }
-             */}
-                <div className={`profile-content w-full md:px-[20rem] ${dbProfile || profile?.name ? 'md:mt-[15%] mt-[55%]' : 'md:mt-1 mt-2'}`}>
+                    <div className="not-data flex items-center gap-3 mt-[20%]">
+                        <InlineSVG
+                            src="/images/no_data.svg"
+                            className="fill-current text-camera h-6 text-slate-800 dark:text-white"
+                        />
+                        <h2 className="dark:text-white">No Moments!</h2>
+                    </div>
+                }
+                */}
+                <div className={`profile-content w-full md:px-[20rem] ${ 'md:mt-[15%] mt-[55%]' }`}>
                     {profile && followers !== null && followers !== undefined && following !== null && following !== undefined && !edit &&
                         <div className="flex justify-center">
                             <div className="flex items-center w-[70%] md:w-[20rem] justify-center gap-3 m-2 py-2 rounded-lg border-1 border border-sky-500">
