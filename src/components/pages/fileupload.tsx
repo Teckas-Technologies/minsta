@@ -72,6 +72,18 @@ export default function FileUploadPage() {
     }
   };
 
+  const generate = async () => {
+    if (file) {
+      setGenerating(true);
+      const photo = await fileToBase64(file);
+      const replicatePhoto = await reduceImageSize(photo, 10);
+      const titleAndDescription = await getTitleAndDescription(replicatePhoto);
+      setTitle(titleAndDescription?.title);
+      setDescription(titleAndDescription?.description);
+      setGenerating(false);
+    }
+  }
+
   const handleUpload = () => {
     if (!convertedPhotoFile) {
       alert("No file selected.");
@@ -135,6 +147,9 @@ export default function FileUploadPage() {
             <>
               <div className="tags pb-2 px-2">
                 {!generating ? <>
+                  <div className="generate-btn w-full flex pb-4 justify-center">
+                    <button className="btn success-btn" onClick={generate}>Generate New</button>
+                  </div>
                   <div className="input-field">
                     <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e) => { setTitle(e.target.value) }} />
                   </div>
