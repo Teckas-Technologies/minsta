@@ -141,6 +141,17 @@ export function Mint({
     }
   };
 
+  const generate = async () => {
+    if (currentPhoto) {
+      setGenerating(true);
+      const replicatePhoto = await reduceImageSize(currentPhoto, 10);
+      const titleAndDescription = await getTitleAndDescription(replicatePhoto);
+      setTitle(titleAndDescription?.title);
+      setDescription(titleAndDescription?.description);
+      setGenerating(false);
+    }
+  }
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -184,6 +195,9 @@ export function Mint({
 
               <div className="tags pb-2 pt-2 px-2">
                 {!generating ? <>
+                  <div className="generate-btn w-full flex pb-4 justify-center">
+                    <button className="btn success-btn" onClick={generate}>Generate New</button>
+                  </div>
                   <div className="input-field">
                     <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e) => { setTitle(e.target.value) }} />
                   </div>
