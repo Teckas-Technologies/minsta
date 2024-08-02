@@ -3,8 +3,9 @@ import InlineSVG from "react-inlinesvg"
 import { CoptText } from "./CopyText"
 import Link from "next/link"
 import { NEARSocialUserProfile } from "@/contracts/social"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ProfileType } from "@/data/types"
+import { useDarkMode } from "@/context/DarkModeContext"
 
 interface props {
     profile: NEARSocialUserProfile | undefined;
@@ -15,7 +16,17 @@ interface props {
 
 export const ProfileCard = ({ profile, dbProfile, images, accountId }: props) => {
     const [animation, setAnimation] = useState(false);
+    const [darkMode, setDarkMode] = useState<boolean>();
+    const { mode } = useDarkMode();
     const [profilePhoto, setProfilePhoto] = useState<string>();
+
+    useEffect(() => {
+        if (mode === "dark") {
+            setDarkMode(true);
+        } else {
+            setDarkMode(false);
+        }
+    }, [mode])
 
     function isBase64(str: string) {
         try {
@@ -28,7 +39,7 @@ export const ProfileCard = ({ profile, dbProfile, images, accountId }: props) =>
     return (
         <div className="container_profile absolute bottom-[-50%]">
             <div className="card_profile relative bg-slate-800 dark:bg-white">
-                {(profile?.active === true || false) && <div className="profile-active right-2 top-2 absolute flex items-center gap-1 py-1 px-2 rounded-2xl bg-white dark:bg-slate-800">
+                {(profile?.active === true || profile?.active === false) && <div className="profile-active right-2 top-2 absolute flex items-center gap-1 py-1 px-2 rounded-2xl bg-white dark:bg-slate-800">
                     <InlineSVG
                         src="/images/circle.svg"
                         className={`fill-current w-4 h-4 ${profile?.active ? "text-green-500" : "text-red-500"} font-xl cursor-pointer`}
@@ -45,18 +56,17 @@ export const ProfileCard = ({ profile, dbProfile, images, accountId }: props) =>
                         />
                         <p className="text-slate-800 dark:text-white text-sm overflow-hidden text-ellipsis whitespace-nowrap">{profile?.location}</p>
                     </div>}
-                {(dbProfile?.profileImage || (images && images?.length > 0)) &&
-                    (<div className="card__border w-[7rem] h-[7rem] p-1">
-                        <div className="relative w-full h-full">
-                            <Image src={ dbProfile?.profileImage ? dbProfile?.profileImage : images && images?.length > 0 ? images?.[0] : "/images/contact.jpg"} alt="Profile NFt" layout="fill" sizes="(max-width: 100%) 100%, (max-width: 100%) 100%, 100%" objectFit="cover" className="rounded-full object-cover" />
+                    <div className="card__border w-[7rem] h-[7rem] p-1">
+                        <div className={`${!darkMode && 'bg-white rounded-full'} relative w-full h-full`}>
+                            <Image src={ dbProfile?.profileImage ? dbProfile?.profileImage : images && images?.length > 0 ? images?.[0] : "/images/contact2.png"} alt="Profile NFt" layout="fill" sizes="(max-width: 100%) 100%, (max-width: 100%) 100%, 100%" objectFit="cover" className="rounded-full object-cover" />
                         </div>
-                    </div>)}
+                    </div>
 
                 {(dbProfile?.name || profile?.name) && <h3 className="card__name">{dbProfile?.name || profile?.name}</h3>}
                 {(dbProfile?.accountId || accountId) && <div className="flex gap-1 items-center justify-center mt-1"> <span className="card__profession h-5 pr-2">{dbProfile?.accountId || accountId}</span> <CoptText text={dbProfile?.accountId || accountId || ''} profilePage={true} /></div>}
                 {profile?.tagline && <h5 className="quote-font text-white dark:text-slate-800">“{profile?.tagline}”</h5>}
 
-                {(dbProfile?.linkTree || profile?.linktree) &&
+                {(dbProfile?.linkTree?.github || dbProfile?.linkTree?.telegram || dbProfile?.linkTree?.twitter || dbProfile?.linkTree?.website) &&
                     <div className={`card__social ${animation && 'animation'}`} id="card-social">
                         <div className="card__social-control">
                             <div className="card__social-toggle bg-slate-800" id="card-toggle" onClick={() => setAnimation(!animation)}>
