@@ -1,5 +1,4 @@
 import { HomePage } from "@/components/HomePage";
-import { DarkModeProvider } from "@/context/DarkModeContext";
 import { MINSTA_META } from "@/data/fallback";
 import { Metadata } from "next";
 

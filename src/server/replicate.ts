@@ -28,7 +28,7 @@ const replicate = () => {
         if (response.status !== 200 && response.status !== 201) {
           let error = await response.json();
           console.log(error);
-
+          console.log("Error >> ", error.detail)
           return NextResponse.json({ error: error.detail }, { status: 500 });
         }
 
@@ -63,6 +63,7 @@ const replicate = () => {
 
         if (response.status !== 201) {
           let error = await response.json();
+          console.log("Error >> ", error.detail)
           return NextResponse.json({ error: error.detail }, { status: 500 });
         }
 

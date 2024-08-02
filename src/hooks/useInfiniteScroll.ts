@@ -135,7 +135,7 @@ const useInfiniteScrollGQL = (
         constants.proxyContractAddress,
         ...constants.legacyProxyAddresses,
       ],
-      hiddenIds: profilePageNew ? [] : idsList,
+      hiddenIds: idsList,
       owner: profilePageNew ? [] : blockedUsers,
       contractAddress: constants.tokenContractAddress,
       offset: (state.offset - 1) * fetchNum,

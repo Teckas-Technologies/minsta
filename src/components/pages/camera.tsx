@@ -33,10 +33,6 @@ export default function CameraPage() {
     return <Mint currentPhoto={picture} backStep={tryAgain} />;
   }
 
-  const onGalleryClick = async () => {
-    console.log("Gallery Clicked!!")
-  }
-
   return (
     <div className={darkMode ? "dark" : ""}>
       <main className="h-camera overflow-hidden	 w-screen flex items-center justify-center bg-white dark:bg-slate-800 min-h-[99vh]">
@@ -80,7 +76,7 @@ export default function CameraPage() {
         </div>
       </main>
       {!picture && (
-        <footer className="fixed bottom-0 left-0 flex w-full items-end justify-center bg-primary h-16">
+        <footer className="fixed bottom-0 left-0 flex w-full items-end justify-center bg-primary h-16 dark:bg-slate-800">
           <FooterButton onClick={capture} />
         </footer>
       )}

@@ -8,7 +8,7 @@ import { TokenData } from "@/data/types";
 import InlineSVG from "react-inlinesvg";
 import { useMbWallet } from "@mintbase-js/react";
 
-export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setToast,setResult, dataItems, setDataItems, setItemsLoading, hiddenPage, activeId, profilePage}: any) => {
+export const FeedScroll = ({ blockedNfts,grid, sort , search, dark, hidepostids, setToast,setResult, dataItems, setDataItems, setItemsLoading, hiddenPage, activeId, profilePage}: any) => {
   const [mod, setMod] = useState(true);
   const ref = useRef<HTMLDivElement | null>(null);
   const entry = useIntersectionObserver(ref, {});
@@ -32,7 +32,7 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
         setSortText("New to Old");
       }
     }
-  }, [search]);
+  }, [search, activeAccountId]);
 
   useEffect(()=> {
     if(sort){
@@ -132,10 +132,10 @@ export const FeedScroll = ({ blockedNfts, sort , search, dark, hidepostids, setT
     <>
       {!hiddenPage && memoizedData?.length > 0 ? 
         memoizedData?.map((token: any, index: number) => {
-          return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} dark={dark} setToast={setToast} hiddenPage={hiddenPage} profilePage={profilePage}/>;
+          return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} grid={grid} dark={dark} setToast={setToast} hiddenPage={hiddenPage} profilePage={profilePage}/>;
         }) : 
         hiddenPage && hidepostids?.length !== 0 ?  memoizedData?.map((token: any, index: number) => {
-          return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} dark={dark} setToast={setToast} hiddenPage={hiddenPage} profilePage={profilePage}/>;
+          return <MemoizedImageThumb key={token?.metadata_id} token={token} index={index} grid={grid} dark={dark} setToast={setToast} hiddenPage={hiddenPage} profilePage={profilePage}/>;
         }): 
          ""}
       {
