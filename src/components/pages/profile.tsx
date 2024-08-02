@@ -155,7 +155,7 @@ export const ProfilePage = () => {
             fetchProfile();
             fetchDbProfile();
         }
-    }, [activeAccountId, accountId]);
+    }, [activeAccountId, accountId, edit]);
 
     useEffect(() => {
         if (mode === "dark") {
@@ -354,7 +354,7 @@ export const ProfilePage = () => {
                 </div>
                 {!edit && <h4 className={`title-font dark:text-white text-2xl font-lg ${profile ? 'mt-11' : 'mt-1'}  underline underline-offset-4`}>Moments</h4>}
                 {
-                    itemsLoading && !result &&
+                    itemsLoading && !result && !edit &&
                     <div className="mt-5 h-[50px]">
                         <div className="loader">
                         </div>

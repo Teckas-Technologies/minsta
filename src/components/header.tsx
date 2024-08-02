@@ -624,7 +624,7 @@ const Header = () => {
                     style={{ color: "#ff3572" }}
                   />
                 </li>
-                <li className="side-menu" onClick={() => push("/profile")}>
+                <li className="side-menu" onClick={() => push(`/profile/?accountId=${activeAccountId}`)}>
                   <h4>Profile</h4>
                   <InlineSVG
                     src="/images/arrow_right.svg"
@@ -634,7 +634,7 @@ const Header = () => {
                 </li>
               </>
             ) : activeAccountId && !isAdmin ? (
-              <li className="side-menu" onClick={() => push("/profile")}>
+              <li className="side-menu" onClick={() => push(`/profile/?accountId=${activeAccountId}`)}>
                 <h4>Profile</h4>
                 <InlineSVG
                   src="/images/arrow_right.svg"
