@@ -141,6 +141,13 @@ export function Mint({
     }
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      addTag();
+    }
+  };
+
   return (
     <div className={darkMode ? "dark" : ""}>
       <main className="h-[100Vh] relative w-[100%] px-4 flex flex-col items-center scroll photo-main dark:bg-slate-800">
@@ -187,7 +194,7 @@ export function Mint({
                   <h2 className="dark:text-white py-2">Generating Title & Description...</h2>
                 </div>}
                 <div className="input-field">
-                  <input type="text" placeholder="Enter tags..." className="border-none outline-none w-full" value={tag} onChange={(e) => { setTag(e.target.value) }} />
+                  <input type="text" placeholder="Enter tags..." className="border-none outline-none w-full" value={tag} onKeyDown={handleKeyDown} onChange={(e) => { setTag(e.target.value) }} />
                   <button className="btn success-btn" onClick={addTag}>Add</button>
                 </div>
                 {tags.length > 0 && (
