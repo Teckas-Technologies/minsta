@@ -95,7 +95,7 @@ const Header = () => {
   }
   const handleCloseMain = () => {
     setPop(false);
-    SetColor('green')
+    // SetColor('green')
   }
 
   useEffect(() => {
@@ -108,7 +108,7 @@ const Header = () => {
 
   const handleCloseTest = () => {
     setPop(false);
-    SetColor('yellow')
+    // SetColor('yellow')
   }
 
 
