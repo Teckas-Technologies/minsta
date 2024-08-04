@@ -6,6 +6,7 @@ import { convertBase64ToFile } from "@/utils/base64ToFile";
 import { Cloudinary } from '@cloudinary/url-gen';
 import { Resize } from '@cloudinary/url-gen/actions/resize';
 import { Effect } from '@cloudinary/url-gen/actions/effect';
+import InlineSVG from "react-inlinesvg";
 
 
 const cloudinary = new Cloudinary({
@@ -38,6 +39,8 @@ export function Mint({
   const [cldData, setCldData] = useState<any>();
   const [filter, setFilter] = useState<string | null>(null)
   const [toggleFilter, setToggleFilter] = useState(false);
+  const [toast, setToast] = useState(false);
+  const [toastText, setToastText] = useState("");
 
   const cloudImage = cldData?.public_id && cloudinary.image(cldData?.public_id);
 
@@ -57,19 +60,19 @@ export function Mint({
     }
   }, [mode])
 
-  useEffect(() => {
-    const generate = async (currentPhoto: string) => {
-      setGenerating(true);
-      const replicatePhoto = await reduceImageSize(currentPhoto, 10);
-      const titleAndDescription = await getTitleAndDescription(replicatePhoto);
-      setTitle(titleAndDescription?.title)
-      setDescription(titleAndDescription?.description)
-      setGenerating(false);
-    }
-    if (currentPhoto) {
-      generate(currentPhoto);
-    }
-  }, [currentPhoto])
+  // useEffect(() => {
+  //   const generate = async (currentPhoto: string) => {
+  //     setGenerating(true);
+  //     const replicatePhoto = await reduceImageSize(currentPhoto, 10);
+  //     const titleAndDescription = await getTitleAndDescription(replicatePhoto);
+  //     setTitle(titleAndDescription?.title)
+  //     setDescription(titleAndDescription?.description)
+  //     setGenerating(false);
+  //   }
+  //   if (currentPhoto) {
+  //     generate(currentPhoto);
+  //   }
+  // }, [currentPhoto])
 
   useEffect(() => {
     if (!currentPhoto) return;
@@ -159,6 +162,32 @@ export function Mint({
     }
   };
 
+  const openPreview = ()=>{
+    if(!title && !description) {
+      setHandleToast("Title & Description is required!", true)
+    } else if(!title){
+      setHandleToast("Title is required!", true)
+    } else if(!description) {
+      setHandleToast("Description is required!", true)
+    } else {
+      setPreview(true)
+    }
+  }
+
+  useEffect(()=> {
+    if(toast) {
+        setTimeout(()=> {
+            setToast(false);
+            setToastText("");
+        }, 5000)
+    }
+  }, [toast]);
+
+  const setHandleToast = (message: string, open: boolean) => {
+    setToast(open);
+    setToastText(message);
+  }
+
   return (
     <div className={darkMode ? "dark" : ""}>
       <main className="h-[100Vh] relative w-[100%] px-4 flex flex-col items-center scroll photo-main dark:bg-slate-800">
@@ -196,7 +225,12 @@ export function Mint({
               <div className="tags pb-2 pt-2 px-2">
                 {!generating ? <>
                   <div className="generate-btn w-full flex pb-4 justify-center">
-                    <button className="btn success-btn" onClick={generate}>Generate New</button>
+                    <button className="btn success-btn flex items-center gap-2" onClick={generate}>
+                      <InlineSVG
+                        src="/images/robot.svg"
+                        className="fill-current dark:text-white"
+                      /> Generate AI Title & Description
+                    </button>
                   </div>
                   <div className="input-field">
                     <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e) => { setTitle(e.target.value) }} />
@@ -236,8 +270,8 @@ export function Mint({
               </button>
               <button
                 className="gradientButton w-full text-primaryBtnText rounded px-4 py-2"
-                onClick={() => setPreview(true)}
-              // disabled={inputOpen ? true : false}
+                onClick={openPreview}
+                // disabled={!title && !description}
               >
                 Preview
               </button>
@@ -275,6 +309,19 @@ export function Mint({
               <button className={`${!title || !description || !currentPhoto ? 'cursor-not-allowed' : 'cursor-pointer'} gradientButton w-full text-primaryBtnText rounded px-4 py-2`} onClick={handleUpload} disabled={!title || !description || !currentPhoto}>Upload</button>
             </div>
           </div>
+        </div>}
+        {toast && 
+         <div id="toast-default" className="toast-container mt-6 md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed ">
+            <div className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
+                <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                    <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                    </svg>
+                    <span className="sr-only">Check icon</span>
+                </div>
+                <div className="ms-1 text-sm font-normal">{toastText}</div>
+            </div>
+            <div className="border-bottom-animation"></div>
         </div>}
       </main>
     </div>
