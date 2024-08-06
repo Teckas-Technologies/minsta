@@ -8,7 +8,7 @@ import '../app/style.css'
 import { constants } from "@/constants";
 import Link from "next/link";
 import { useDarkMode } from "@/context/DarkModeContext";
-import { useAppContext, useBack } from "@/context/BackContext";
+import { useBackContext } from "@/context/BackContext";
 
 const Header = () => {
   const pathname = usePathname();
@@ -25,9 +25,7 @@ const Header = () => {
   const popRef = useRef<HTMLDivElement | null>(null);
   const headerAccountRef = useRef<HTMLDivElement | null>(null);
   const [subMenu, setSubmenu] = useState(false);
-  const [search, setSearch] = useState("");
-  // const [back, setBack] = useState(false);
-  const { back, toggleBack } = useBack();
+  const { back, toggleBack, onBackButtonClick } = useBackContext();
 
   const router = useRouter();
 
@@ -136,7 +134,6 @@ const Header = () => {
     router.push(newRelativePathQuery);
   };
 
-  const { onBackButtonClick } : any = useAppContext();
   const handleBackClick = () => {
     onBackButtonClick();
   };
