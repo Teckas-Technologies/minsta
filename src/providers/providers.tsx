@@ -4,6 +4,9 @@ import { AppProvider } from "./app";
 
 import { MintbaseWalletContextProvider } from "@mintbase-js/react";
 import { ReplicateProvider } from "./replicate";
+import { BackProvider } from "@/context/BackContext";
+import { GridProvider } from "@/context/GridContext";
+import { DarkModeProvider } from "@/context/DarkModeContext";
 
 export const isDev = process.env.NEXT_PUBLIC_ENV === "dev";
 
@@ -25,11 +28,17 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
       callbackUrl={getCallbackUrl()}
       onlyMbWallet
     >
-      <ReplicateProvider>
-        <AppProvider>
-          <DataProvider>{children}</DataProvider>
-        </AppProvider>
-      </ReplicateProvider>
+      <BackProvider>
+        <GridProvider>
+          <DarkModeProvider>
+            <ReplicateProvider>
+              <AppProvider>
+                <DataProvider>{children}</DataProvider>
+              </AppProvider>
+            </ReplicateProvider>
+          </DarkModeProvider>
+        </GridProvider>
+      </BackProvider>
     </MintbaseWalletContextProvider>
   );
 };

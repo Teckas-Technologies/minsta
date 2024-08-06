@@ -15,7 +15,7 @@ import { useDarkMode } from "@/context/DarkModeContext";
 import { useFetchHiddenPost } from "@/hooks/db/HidePostHook";
 import { useGrid } from "@/context/GridContext";
 import { useMediaQuery } from "usehooks-ts";
-import { useAppContext, useBack } from "@/context/BackContext";
+import { useBackContext } from "@/context/BackContext";
 
 interface NFT {
   data: InfiniteScrollHook | undefined;
@@ -44,7 +44,7 @@ export const HomePage = () => {
   const [result, setResult] = useState("");
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const router = useRouter();
-  const { back, toggleBack } = useBack();
+  const { back, toggleBack, triggerBackAction, onNewButtonClickHandled } = useBackContext();
 
   useEffect(()=> {
     if(mode === "dark") {
@@ -119,8 +119,6 @@ export const HomePage = () => {
       setSearch(search);
     }
   }, []);
-
-  const { triggerBackAction, onNewButtonClickHandled } : any = useAppContext();
 
   useEffect(() => {
     if (triggerBackAction) {
