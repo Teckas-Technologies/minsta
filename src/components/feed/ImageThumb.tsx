@@ -15,6 +15,7 @@ import { useSaveBlockUser } from "@/hooks/db/BlockUserHook";
 
 const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePage }: any) => {
   const imageUrl = token?.media;
+  console.log("Image Url", imageUrl)
   const [error, setError] = useState(false);
   const { activeAccountId } = useMbWallet();
   const [shareModal, setShareModal] = useState(false);

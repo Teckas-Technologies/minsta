@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react"
 import InlineSVG from "react-inlinesvg"
 import { useDarkMode } from "@/context/DarkModeContext"
 import { useGrid } from "@/context/GridContext"
-import { getFollowers, getFollowing, getSocialProfile, NEARSocialUserProfile, setSocialData } from "@/contracts/social"
+import { getFollowers, getFollowing, getSocialProfile, NEARSocialUserProfile } from "@/contracts/social"
 import { getImage } from "@/contracts/social/image";
 import { ProfileCard } from "../ProfileCard";
 import { marked } from 'marked';

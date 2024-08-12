@@ -7,6 +7,9 @@ import { Cloudinary } from '@cloudinary/url-gen';
 import { Resize } from '@cloudinary/url-gen/actions/resize';
 import { Effect } from '@cloudinary/url-gen/actions/effect';
 import InlineSVG from "react-inlinesvg";
+import { useMbWallet } from "@mintbase-js/react";
+import { CreditsType } from "@/data/types";
+import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
 
 
 const cloudinary = new Cloudinary({
@@ -29,6 +32,7 @@ export function Mint({
 }) {
   const { isLoading, mintImage, reduceImageSize, getTitleAndDescription } = useApp();
   const [title, setTitle] = useState("");
+  const { activeAccountId, selector } = useMbWallet();
   const [description, setDescription] = useState("");
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -43,6 +47,10 @@ export function Mint({
   const [loadingEffect, setLoadingEffect] = useState(false);
   const [toast, setToast] = useState(false);
   const [toastText, setToastText] = useState("");
+  const { fetchCredits } = useFetchCredits();
+  const { saveCredits } = useSaveCredits();
+  const [credits, setCredits] = useState<number | null>();
+  const [buyCredit, setBuyCredit] = useState(false);
 
   const cloudImage = cldData?.public_id && cloudinary.image(cldData?.public_id);
 
@@ -60,19 +68,34 @@ export function Mint({
     }
   }, [mode])
 
-  // useEffect(() => {
-  //   const generate = async (currentPhoto: string) => {
-  //     setGenerating(true);
-  //     const replicatePhoto = await reduceImageSize(currentPhoto, 10);
-  //     const titleAndDescription = await getTitleAndDescription(replicatePhoto);
-  //     setTitle(titleAndDescription?.title)
-  //     setDescription(titleAndDescription?.description)
-  //     setGenerating(false);
-  //   }
-  //   if (currentPhoto) {
-  //     generate(currentPhoto);
-  //   }
-  // }, [currentPhoto])
+  useEffect(() => {
+    if (activeAccountId) {
+      const fetchDbProfile = async () => {
+        try {
+          let credit = await fetchCredits(activeAccountId);
+          console.log("credits coming >> ", credit);
+          
+          if (credit === null) {
+            const data: CreditsType = {
+              accountId: activeAccountId,
+              credit: 3
+            };
+            await saveCredits(data);
+            
+            credit = await fetchCredits(activeAccountId);
+          }
+          
+          setCredits(credit ? credit.credit : 0);
+        } catch (error) {
+          console.error("Error fetching or saving credits:", error);
+          setCredits(0);
+        }
+      };
+  
+      fetchDbProfile();
+    }
+  }, [activeAccountId, title, description]);
+  
 
   useEffect(() => {
     if (!currentPhoto) return;
@@ -146,6 +169,33 @@ export function Mint({
     setTimeout(() => setLoadingEffect(false), 1600)
   };
 
+  const generation = async () => {
+    if (!currentPhoto) {
+      setHandleToast("No file chosen!", true);
+      return;
+    }
+    if (credits === null || credits === undefined || credits <= 0) {
+      setBuyCredit(true);
+      return;
+    }
+    if (!activeAccountId) {
+      setHandleToast("No active account ID!", true);
+      return;
+    }
+    try {
+      await generate();
+      const data: CreditsType = {
+        accountId: activeAccountId,
+        credit: credits - 1
+      };
+      await saveCredits(data);
+      setCredits(credits - 1);
+    } catch (error) {
+      console.error("Error generating title and description:", error);
+      setHandleToast("Failed to generate title and description. Please try again.", true);
+    }
+  };
+
   const generate = async () => {
     if (currentPhoto) {
       setGenerating(true);
@@ -207,7 +257,7 @@ export function Mint({
             </div>
           </>
         ) : (<>
-          {!preview && <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 mb-2`}>
+          {!preview && !buyCredit && <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 mb-2`}>
             <div className="scroll-div h-auto">
               <div className="relative">
                 <Image src={src} alt="image" width={468} height={468} className="photo-img" />
@@ -240,7 +290,7 @@ export function Mint({
               <div className="tags pb-2 pt-2 px-2">
                 {!generating ? <>
                   <div className="generate-btn w-full flex pb-4 justify-center">
-                    <button className="btn success-btn flex items-center gap-2" onClick={generate}>
+                    <button className="btn success-btn flex items-center gap-2" onClick={generation}>
                       <InlineSVG
                         src="/images/robot.svg"
                         className="fill-current dark:text-white"
@@ -290,6 +340,19 @@ export function Mint({
               >
                 Preview
               </button>
+            </div>
+          </div>}
+          {buyCredit && <div className=" bg-slate-800 dark:bg-white md:w-[40%] p-3 flex justify-center items-center rounded-md">
+            <div className="buy-alert-box w-full flex flex-col gap-3 h-auto bg-white dark:bg-slate-800 rounded-md py-2 px-3">
+              <div className="head flex flex-col gap-2">
+                <h2 className="title-font text-center dark:text-white">Insufficient Credits!</h2>
+                <p className="dark:text-white text-justify">You don't have enough credits for the mind-blowing AI title and description generation.
+                  Spend $0.05 to get 5 credits.</p>
+              </div>
+              <div className="btns-credit flex items-center justify-center gap-2">
+                <button className="btn cancel-btn dark:text-white dark:border-white" onClick={() => setBuyCredit(false)}>Cancel</button>
+                <button className="btn success-btn border-green-600" >Spent</button>
+              </div>
             </div>
           </div>}
         </>
