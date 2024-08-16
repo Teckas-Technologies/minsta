@@ -334,7 +334,7 @@ export function Mint({
                   <button className="btn success-btn" onClick={addTag}>Add</button>
                 </div>
                 {tags.length > 0 && (
-                  <div className="added-tags flex gap-2 px-2 py-1 ">
+                  <div className="added-tags flex flex-wrap gap-2 px-2 py-1 ">
                     {tags.map((tag, index) => (
                       <div
                         key={index}
@@ -393,7 +393,7 @@ export function Mint({
               <h2 className="text-justify line-clamp-3"><span className="title-font">Description :</span> {description}</h2>
             </div>}
             {tags.length > 0 && (
-              <div className="added-tags flex gap-2 p-2 my-2">
+              <div className="added-tags flex flex-wrap gap-2 p-2 my-2">
                 {tags.map((tag, index) => (
                   <div
                     key={index}

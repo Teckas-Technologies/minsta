@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@cloudinary/url-gen": "^1.19.0",
+    "@mintbase-js/react": "^0.6.1-beta.0",
+    "@mintbase-js/sdk": "^0.6.1-beta.0",
     "@mintbase-js/storage": "^0.6.1-beta.0",
     "@near-wallet-selector/bitget-wallet": "^8.9.12",
     "@near-wallet-selector/bitte-wallet": "^8.9.12",

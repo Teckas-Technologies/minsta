@@ -207,28 +207,28 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
         {
           tagsArray[0] && <>
           <h2 className="text-lg pb-1 font-bold dark:text-white">Tags:</h2>
-        <div className={`meta-tags ${darkMode ? "box-shadow" : "box-shadow"}  px-3 py-2 mb-2 rounded-lg flex gap-3 mb-3`}>
+        <div className={`meta-tags ${darkMode ? "box-shadow" : "box-shadow"}  px-3 py-2 mb-2 rounded-lg flex flex-wrap gap-3 mb-3`}>
           {
             tagsArray[0] && 
-            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`} onClick={()=>push(`/?search=${tagsArray[0]}`)}>
+            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 cursor-pointer bg-slate-800 rounded-md`} onClick={()=>push(`/?search=${tagsArray[0]}`)}>
               <h3 className="text-white">#{tagsArray[0]}</h3>
             </div>
           }
           {
             tagsArray[1] && 
-            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
+            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 cursor-pointer bg-slate-800 rounded-md`} onClick={()=>push(`/?search=${tagsArray[1]}`)}>
               <h3 className="text-white">#{tagsArray[1]}</h3>
             </div>
           }
           {
             tagsArray[2] && 
-            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
+            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 cursor-pointer bg-slate-800 rounded-md`} onClick={()=>push(`/?search=${tagsArray[2]}`)}>
               <h3 className="text-white">#{tagsArray[2]}</h3>
             </div>
           }
           {
             tagsArray[3] && 
-            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 bg-slate-800 rounded-md`}>
+            <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 cursor-pointer bg-slate-800 rounded-md`} onClick={()=>push(`/?search=${tagsArray[3]}`)}>
               <h3 className="text-white">#{tagsArray[3]}</h3>
             </div>
           }
