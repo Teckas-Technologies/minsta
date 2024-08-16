@@ -446,7 +446,7 @@ const Header = () => {
                     </div>
                   </div>
                   {subMenu &&
-                    <div className="absolute bg-slate-700 rounded-md top-[110%] md:left-0 left-[-5rem] md:w-full w-[15rem]">
+                    <div className="absolute z-50 bg-slate-700 rounded-md top-[110%] md:left-0 left-[-5rem] md:w-full w-[15rem]">
                       <ul className="sub-menu-list flex flex-col gap-2 px-3 py-2">
                         {isAdmin && signedAccountId ?
                           (
@@ -576,7 +576,7 @@ const Header = () => {
         {renderHeaderButtons()}
       </header>
       <div className={isOpen ? "side-bar-open" : "side-bar-close"}>
-        <div className="side-mobile-nav side-bar">
+        <div className="side-mobile-nav side-bar z-10">
           <div className="close" onClick={() => setIsOpen(!isOpen)}>
             <div className="close-icon">
               <InlineSVG
