@@ -1,7 +1,6 @@
 import type { FinalExecutionOutcome, WalletSelector, WalletSelectorState } from '@near-wallet-selector/core';
 import '@near-wallet-selector/modal-ui/styles.css';
 import { setupWalletSelector } from '@near-wallet-selector/core';
-import { setupHereWallet } from '@near-wallet-selector/here-wallet';
 import { setupMeteorWallet } from '@near-wallet-selector/meteor-wallet';
 import { setupMintbaseWallet } from '@near-wallet-selector/mintbase-wallet';
 import { setupModal } from '@near-wallet-selector/modal-ui';

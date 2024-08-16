@@ -1,6 +1,5 @@
 import { setupBitgetWallet } from "@near-wallet-selector/bitget-wallet";
 import { setupCoin98Wallet } from "@near-wallet-selector/coin98-wallet";
-import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupLedger } from "@near-wallet-selector/ledger";
 import { setupMathWallet } from "@near-wallet-selector/math-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
@@ -28,7 +27,6 @@ export const naxiosInstance = new naxios({
   walletSelectorModules: [
     // setupMyNearWallet(),
     setupSender(),
-    // setupHereWallet(),
     // setupMeteorWallet(),
     setupLedger(),
     setupNearMobileWallet(),

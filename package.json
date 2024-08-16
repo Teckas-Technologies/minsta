@@ -24,9 +24,6 @@
   },
   "dependencies": {
     "@cloudinary/url-gen": "^1.19.0",
-    "@mintbase-js/react": "^0.6.1-beta.0",
-    "@mintbase-js/rpc": "^0.6.1-beta.0",
-    "@mintbase-js/sdk": "^0.6.1-beta.0",
     "@mintbase-js/storage": "^0.6.1-beta.0",
     "@near-wallet-selector/bitget-wallet": "^8.9.12",
     "@near-wallet-selector/bitte-wallet": "^8.9.12",
@@ -34,6 +31,7 @@
     "@near-wallet-selector/core": "^8.9.12",
     "@near-wallet-selector/ledger": "^8.9.12",
     "@near-wallet-selector/math-wallet": "^8.9.12",
+    "@near-wallet-selector/meteor-wallet": "^8.9.12",
     "@near-wallet-selector/mintbase-wallet": "^8.9.11",
     "@near-wallet-selector/narwallets": "^8.9.12",
     "@near-wallet-selector/near-mobile-wallet": "^8.9.12",
