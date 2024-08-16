@@ -3,13 +3,12 @@ import { CreditsType, HashesType } from "@/data/types";
 import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
 import { convertBase64ToFile } from "@/utils/base64ToFile";
 import useMintImage from "@/utils/useMint";
-import { useMbWallet } from "@mintbase-js/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import InlineSVG from "react-inlinesvg";
-import { getTxnStatus, getBalance } from '@mintbase-js/rpc';
-import useTransfer from "@/utils/useTransfer";
 import { useFetchHashes, useSaveHashes } from "@/hooks/db/HashHook";
+import { NearContext } from "@/wallet/WalletSelector";
+import useNEARTransfer from "@/utils/useTransfer";
 
 export default function FileUploadPage() {
   const fileInputRef = useRef<any>(null);
@@ -20,7 +19,7 @@ export default function FileUploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { push } = useRouter();
-  const { connect, selector, activeAccountId, isConnected } = useMbWallet();
+  const { wallet, signedAccountId } = useContext(NearContext);
   const [darkMode, setDarkMode] = useState<boolean>();
   const { mode } = useDarkMode();
   const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -33,7 +32,7 @@ export default function FileUploadPage() {
   const { saveCredits } = useSaveCredits();
   const [credits, setCredits] = useState<number | null>();
   const [buyCredit, setBuyCredit] = useState(false);
-  const [accountId, setAccountId] = useState("");
+  const [txhash, setTxhash] = useState("");
 
   useEffect(() => {
     if (mode === "dark") {
@@ -43,21 +42,24 @@ export default function FileUploadPage() {
     }
   }, [mode])
 
+  const handleSignIn = async () => {
+    return wallet?.signIn();
+  };
+
   useEffect(() => {
-    if (accountId) {
+    if (signedAccountId) {
       const fetchDbCredit = async () => {
         try {
-          let credit = await fetchCredits(accountId);
-          console.log("credits coming >> ", credit);
+          let credit = await fetchCredits(signedAccountId);
 
           if (credit === null) {
             const data: CreditsType = {
-              accountId: accountId,
+              accountId: signedAccountId,
               credit: 3
             };
             await saveCredits(data);
 
-            credit = await fetchCredits(accountId);
+            credit = await fetchCredits(signedAccountId);
           }
 
           setCredits(credit ? credit.credit : 0);
@@ -69,58 +71,38 @@ export default function FileUploadPage() {
 
       fetchDbCredit();
     }
-  }, [accountId, title, description, file]);
+  }, [title, description, file]);
 
-  console.log("credits setted >> ", credits);
 
-  const [balance, setBalance] = useState<number>(0);
-
-  const { transfer, signIn, signOut, isSignedIn,getAccount, initializeWalletSelector, getTransactionResult } = useTransfer();
-  const { fetchHashes } = useFetchHashes()
-  const { saveHashes } = useSaveHashes()
-
-  const value = isSignedIn();
-  console.log("Connected >> ", value)
-  console.log("Account >> ", accountId)
-
-  useEffect(()=>{
-    const account = getAccount()
-    if(account){
-      setAccountId(account)
-    }
-  },[file])
+  const { transfer } = useNEARTransfer();
+  const { fetchHashes } = useFetchHashes();
+  const { saveHashes } = useSaveHashes();
 
   useEffect(() => {
     const getresult = async () => {
       const searchParams = new URLSearchParams(window.location.search);
       if (searchParams) {
         const hash = searchParams.get('transactionHashes');
-        // const account = searchParams.get('account_id');
         if (hash) {
+          setTxhash(hash);
           const res = await fetchHashes(hash as string);
-          console.log("Hash Res >> ", res.exist)
-          if(res?.exist) {
-            console.log("Not added credits")
+          if (res?.exist) {
             return;
           }
           try {
-            const result = await getTransactionResult(hash);
-            console.log("Result >> ", result)
-            if (result.success) {
-              console.log("Step 1")
-              if(accountId) {
-                console.log("Step 2")
-                setAccountId(accountId)
+            const result = await wallet?.getTransactionResult(hash);
+            if (result?.success) {
+              if (result.signerId) {
                 const data: CreditsType = {
-                  accountId: accountId,
+                  accountId: result.signerId,
                   credit: 5
                 };
                 await saveCredits(data);
 
-                let credit = await fetchCredits(accountId);
+                let credit = await fetchCredits(result.signerId);
                 setCredits(credit?.credit);
                 const hashData: HashesType = {
-                  accountId: accountId,
+                  accountId: result.signerId,
                   amount: result.amount,
                   hash: hash
                 }
@@ -134,41 +116,14 @@ export default function FileUploadPage() {
       }
     }
     getresult();
-  }, [accountId])
-
-  const handleSignIn = async () => {
-    const accountId = await signIn();
-    setAccountId(accountId as string)
-  }
-
-  useEffect(()=>{
-    initializeWalletSelector();
-  },[])
-
-  const handleSignOut = async () => {
-    await signOut();
-    setAccountId("")
-  }
-
-  // useEffect(()=>{
-  //   if(activeAccountId){
-  //     const balance = async ()=>{
-  //       const res = await getBalance(activeAccountId);
-  //       setBalance(res)
-  //     }
-  //     balance();
-  //   }
-  // }, [])
+  }, [txhash, title, file])
 
   const handleTransfer = async () => {
-    const value = isSignedIn();
-    console.log("Value >> ", value)
     try {
-      if (!value) {
+      if (!signedAccountId) {
         handleSignIn();
-        await transfer("sweety08.testnet")
       } else {
-        await transfer("sweety08.testnet")
+        await transfer();
       }
     } catch (error) {
       console.error("Failed to sign and send transaction:", error);
@@ -220,14 +175,14 @@ export default function FileUploadPage() {
       setBuyCredit(true);
       return;
     }
-    // if (!accountId) {
-    //   setHandleToast("No active account ID!", true);
-    //   return;
-    // }
+    if (!signedAccountId) {
+      handleSignIn()
+      return;
+    }
     try {
       await generate();
       const data: CreditsType = {
-        accountId: accountId,
+        accountId: signedAccountId,
         credit: credits - 1
       };
       await saveCredits(data);
@@ -258,10 +213,9 @@ export default function FileUploadPage() {
       setHandleToast("No file chosen!", true)
       return;
     }
-    if (isConnected) {
+    if (signedAccountId) {
       setPreview(false)
       mintGif(convertedPhotoFile, title, description, tags);
-      console.log(file, "Uploading...");
       setUploading(true);
       setTitle("");
       setDescription("");
@@ -269,7 +223,7 @@ export default function FileUploadPage() {
       setFile(null);
       setFilePreview(null);
     } else {
-      connect();
+      handleSignIn();
     }
   };
 
@@ -345,15 +299,21 @@ export default function FileUploadPage() {
           {!uploading &&
             <>
               <div className="tags pb-2 px-2">
-                {!generating ? <>
-                  <div className="generate-btn w-full flex pb-4 justify-center">
-                    <button className="btn success-btn flex items-center gap-2" onClick={generation}>
-                      <InlineSVG
-                        src="/images/robot.svg"
-                        className="fill-current dark:text-white"
-                      /> Generate AI Title & Description
-                    </button>
+                <div className="generate-btn w-full flex pb-4 justify-between gap-2">
+                  <button className="btn success-btn flex justify-center items-center gap-2" onClick={generation} disabled={generating}>
+                    <InlineSVG
+                      src="/images/robot.svg"
+                      className="fill-current dark:text-white"
+                    /> <h2 className="title-font text-white">Generate using AI</h2>
+                  </button>
+                  <div className="credits border-2 border-green-700 rounded-md pl-3 pr-4 py-2 flex justify-center items-center gap-2">
+                    <InlineSVG
+                      src="/images/fire.svg"
+                      className="fill-current text-red-500 dark:text-yellow-500"
+                    /> <h2 className="title-font dark:text-white">{credits}</h2>
                   </div>
+                </div>
+                {!generating ? <>
                   <div className="input-field">
                     <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e) => { setTitle(e.target.value) }} />
                   </div>
@@ -403,12 +363,12 @@ export default function FileUploadPage() {
             <div className="buy-alert-box w-[80%] flex flex-col gap-3 h-auto bg-white dark:bg-slate-800 rounded-md py-2 px-3">
               <div className="head flex flex-col gap-2">
                 <h2 className="title-font text-center dark:text-white">Insufficient Credits!</h2>
-                <p className="dark:text-white text-justify">You don't have enough credits for the mind-blowing AI title and description generation.
+                <p className="dark:text-white text-justify">You don&apos;t have enough credits for the mind-blowing AI title and description generation.
                   Spend $0.05 to get 5 credits.</p>
               </div>
               <div className="btns-credit flex items-center justify-center gap-2">
                 <button className="btn cancel-btn dark:text-white dark:border-white" onClick={() => setBuyCredit(false)}>Cancel</button>
-                <button className="btn success-btn border-green-600" onClick={handleTransfer}>Spent</button>
+                <button className="btn success-btn border-green-600" onClick={handleTransfer}>Spend</button>
               </div>
             </div>
           </div>}

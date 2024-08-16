@@ -14,7 +14,7 @@ export const AdminLeaderBoard = () => {
     const [modalAction, setModalAction] = useState<string>("");
     const [selectedLeaders, setSelectedLeaders] = useState<any>([]);
     const [leaderList, setLeaderList] = useState<Leaderboard[]>([]);
-    const { leaderboard, activeAccountId, texts} = useLeaderBoardData();
+    const { leaderboard, texts} = useLeaderBoardData();
     const [darkMode, setDarkMode] = useState<boolean>();
     const {mode} = useDarkMode();
 

@@ -1,12 +1,11 @@
 "use client";
 
 import { useHomePageData } from "@/hooks/useHomePageData";
-import { useMbWallet } from "@mintbase-js/react";
 import { useRouter } from "next/navigation";
 import { DynamicGrid } from "./DynamicGrid";
 import { FirstToken } from "./FirstToken";
 import { FeedScroll } from "./feed/feedscroll";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useSearchTokenByOwner } from "@/hooks/useSearchTokenByOwner";
 import { useFeedDesc } from "@/hooks/userFeedDesc";
 import { InfiniteScrollHook } from "@/data/types";
@@ -16,6 +15,7 @@ import { useFetchHiddenPost } from "@/hooks/db/HidePostHook";
 import { useGrid } from "@/context/GridContext";
 import { useMediaQuery } from "usehooks-ts";
 import { useBackContext } from "@/context/BackContext";
+import { NearContext } from "@/wallet/WalletSelector";
 
 interface NFT {
   data: InfiniteScrollHook | undefined;
@@ -24,7 +24,7 @@ interface NFT {
 
 export const HomePage = () => {
   const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
-  const { connect, isConnected, activeAccountId } = useMbWallet();
+  const { wallet, signedAccountId } = useContext(NearContext);
   const [searchText, setSearchText] = useState("");
   const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
   const { data, isLoading }: NFT = useFeedDesc();
@@ -75,11 +75,11 @@ export const HomePage = () => {
   }
 
   useEffect(() => {
-    if(activeAccountId) {
-        setAccountId(activeAccountId);
-        fetchHidedPosts(activeAccountId);
+    if(signedAccountId) {
+        setAccountId(signedAccountId);
+        fetchHidedPosts(signedAccountId);
     }
-  }, [activeAccountId]);
+  }, [signedAccountId]);
 
   const fetchHidedPosts = async (accountId: string)=> {
       const hiddenPosts = await fetchHiddenPost(accountId);
@@ -89,10 +89,13 @@ export const HomePage = () => {
       }
   }
 
-  
+  const handleSignIn = async () => {
+    return wallet?.signIn();
+  };
+
   const handleLetsGoBtn = () => {
-    if (!isConnected) {
-      connect();
+    if (!signedAccountId) {
+      handleSignIn()
     } else {
       router.push("/camera");
     }

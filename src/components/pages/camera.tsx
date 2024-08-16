@@ -4,7 +4,11 @@ import Webcam from "react-webcam";
 import { useCamera } from "@/hooks/useCamera";
 import InlineSVG from "react-inlinesvg";
 import { useDarkMode } from "@/context/DarkModeContext";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { NearContext } from "@/wallet/WalletSelector";
+import { useFetchHashes, useSaveHashes } from "@/hooks/db/HashHook";
+import { CreditsType, HashesType } from "@/data/types";
+import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
 
 export default function CameraPage() {
   const {
@@ -20,6 +24,13 @@ export default function CameraPage() {
   } = useCamera();
   const [darkMode, setDarkMode] = useState<boolean>();
   const {mode} = useDarkMode();
+  const { wallet, signedAccountId } = useContext(NearContext);
+  const [txhash, setTxhash] = useState("");
+  const { fetchCredits } = useFetchCredits();
+  const { saveCredits } = useSaveCredits();
+  const { fetchHashes } = useFetchHashes();
+  const { saveHashes } = useSaveHashes();
+  const [credits, setCredits] = useState<number | null>();
 
   useEffect(()=> {
     if(mode === "dark") {
@@ -28,6 +39,47 @@ export default function CameraPage() {
       setDarkMode(false);
     }
   }, [mode])
+
+  useEffect(() => {
+    const getresult = async () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      console.log(searchParams)
+      if (searchParams) {
+        const hash = searchParams.get('transactionHashes');
+        if (hash) {
+          setTxhash(hash);
+          const res = await fetchHashes(hash as string);
+          if (res?.exist) {
+            return;
+          }
+          try {
+            const result = await wallet?.getTransactionResult(hash);
+            if (result?.success) {
+              if (result.signerId) {
+                const data: CreditsType = {
+                  accountId: result.signerId,
+                  credit: 5
+                };
+                await saveCredits(data);
+
+                let credit = await fetchCredits(result.signerId);
+                setCredits(credit?.credit);
+                const hashData: HashesType = {
+                  accountId: result.signerId,
+                  amount: result.amount,
+                  hash: hash
+                }
+                await saveHashes(hashData)
+              }
+            }
+          } catch (err) {
+            console.log("error >> ", err)
+          }
+        }
+      }
+    }
+    getresult();
+  }, [txhash])
 
   if (picture) {
     return <Mint currentPhoto={picture} backStep={tryAgain} />;

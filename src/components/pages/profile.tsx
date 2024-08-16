@@ -1,10 +1,9 @@
 import { DynamicGrid } from "../DynamicGrid"
 import { FirstToken } from "../FirstToken"
 import { FeedScroll } from "../feed/feedscroll"
-import { useMbWallet } from "@mintbase-js/react"
 import { useHomePageData } from "@/hooks/useHomePageData"
 import { InfiniteScrollHook, ProfileType } from "@/data/types"
-import { useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import InlineSVG from "react-inlinesvg"
 import { useDarkMode } from "@/context/DarkModeContext"
 import { useGrid } from "@/context/GridContext"
@@ -15,6 +14,7 @@ import { marked } from 'marked';
 import { EditProfile } from "../EditProfile"
 import { useRouter } from "next/navigation"
 import { useFetchProfile, useSaveProfile } from "@/hooks/db/ProfileHook"
+import { NearContext } from "@/wallet/WalletSelector"
 
 interface ProfileTypeNew {
     accountId: string;
@@ -35,7 +35,7 @@ export const ProfilePage = () => {
 
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
     const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
-    const { activeAccountId, connect, isConnected } = useMbWallet();
+    const { wallet, signedAccountId } = useContext(NearContext);
     const { grid, toggleGrid } = useGrid();
     const [accountId, setAccountId] = useState("")
     const [dataItems, setDataItems] = useState(false);
@@ -71,10 +71,10 @@ export const ProfilePage = () => {
     }, [description, desMore, dbProfile?.about]);
 
     useEffect(() => {
-        if (activeAccountId) {
-            setActiveAccountIdNew(activeAccountId)
+        if (signedAccountId) {
+            setActiveAccountIdNew(signedAccountId)
         }
-    }, [activeAccountId])
+    }, [signedAccountId])
 
     useEffect(() => {
         if (accountId) {
@@ -98,8 +98,8 @@ export const ProfilePage = () => {
 
                         const images = await Promise.all([image, backgroundImage]);
                         setImages(images)
-                        if (activeAccountId) {
-                            const data: Partial<ProfileType> = { accountId: activeAccountId };
+                        if (signedAccountId) {
+                            const data: Partial<ProfileType> = { accountId: signedAccountId };
 
                             if (profileData.name) {
                                 data.name = profileData.name;
@@ -155,7 +155,7 @@ export const ProfilePage = () => {
             fetchProfile();
             fetchDbProfile();
         }
-    }, [activeAccountId, accountId, edit]);
+    }, [signedAccountId, accountId, edit]);
 
     useEffect(() => {
         if (mode === "dark") {
@@ -243,7 +243,7 @@ export const ProfilePage = () => {
                     </div>
                     {!edit ?
                         <div className="max-w-md flex gap-3 iems-center flex ml-auto mr-5 justify-center">
-                            {accountId === activeAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={() => setEdit(true)}>
+                            {accountId === signedAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={() => setEdit(true)}>
                                 <InlineSVG
                                     src="/images/pencil.svg"
                                     className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"

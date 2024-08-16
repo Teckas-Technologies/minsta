@@ -159,3 +159,5 @@ export interface NEARSocialUserProfile {
         text: string;
       };
 }
+
+export type NetworkId = "testnet" | "mainnet";

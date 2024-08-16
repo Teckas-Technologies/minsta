@@ -2,13 +2,17 @@
 
 import { MINSTA_TEXTS } from "@/data/fallback";
 import { useApp } from "@/providers/app";
-import { useMbWallet } from "@mintbase-js/react";
-import React, { useEffect } from "react";
+import { NearContext } from "@/wallet/WalletSelector";
+import React, { useContext, useEffect } from "react";
 import InlineSVG from "react-inlinesvg";
 
 const Modal = ({ children }: { children?: React.ReactNode }) => {
   const { isMainModalOpen, closeModal } = useApp();
-  const { connect, isConnected } = useMbWallet();
+  const { wallet, signedAccountId } = useContext(NearContext);
+
+  const handleSignIn = async () => {
+    return wallet?.signIn();
+  };
 
   const texts = {
     about: {
@@ -76,12 +80,12 @@ const Modal = ({ children }: { children?: React.ReactNode }) => {
 
           <div
             className={`mb-14 text-center justify-center ${
-              isConnected ? "flex gap-8 mt-8" : ""
+              signedAccountId ? "flex gap-8 mt-8" : ""
             }`}
           >
             <button
               className="gradientButton text-primaryBtnText rounded px-14 py-3 text-sm font-light"
-              onClick={!isConnected ? () => connect() : () => closeModal()}
+              onClick={!signedAccountId ? () => handleSignIn() : () => closeModal()}
             >
               OK
             </button>

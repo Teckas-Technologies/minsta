@@ -7,17 +7,17 @@ import Link from "next/link";
 import { constants } from "@/constants";
 import InlineSVG from "react-inlinesvg";
 import { getImageUrl } from "@/utils/imageUrl";
-import { useMbWallet } from "@mintbase-js/react";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useFetchSocialMedias } from "@/hooks/db/SocialMediaHook";
 import { useSaveHidePost } from "@/hooks/db/HidePostHook";
 import { HidePost } from "@/data/types";
 import { useRouter } from "next/navigation";
 import { useDarkMode } from "@/context/DarkModeContext";
+import { NearContext } from "@/wallet/WalletSelector";
 
 export const MetaPage = ({ meta, slug, tokenId }: any) => {
   const finalUrl = getImageUrl(meta?.data?.nft_metadata?.[0]?.media);
-  const {activeAccountId, isConnected} = useMbWallet();
+  const { wallet, signedAccountId } = useContext(NearContext);
   const {push} = useRouter();
   const [shareModal, setShareModal] = useState(false);
   const [toast, setToast] = useState(false);
@@ -76,9 +76,9 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
   }
 
   const handleHidePost = async (tokenId: any, e: any) => {
-    if(activeAccountId) {
+    if(signedAccountId) {
       const data: HidePost = {
-        accountId: activeAccountId?.toString(),
+        accountId: signedAccountId?.toString(),
         hiddedTokenIds: [
           {
               id: tokenId
@@ -167,7 +167,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
                 }
               </div>
             }
-          {activeAccountId && 
+          {signedAccountId && 
           <button
             className="absolute hidden top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
             onMouseEnter={() => toggleTooltip('hide', true)}
@@ -181,7 +181,7 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
               />
           </button>}
           {showTooltip.hide && <div className="tooltip absolute top-[-1.8rem] left-2 bg-white px-2 py-1 rounded-md box-shadow">Hide</div>}
-          {activeAccountId && constants.adminId.includes(activeAccountId) && 
+          {signedAccountId && constants.adminId.includes(signedAccountId) && 
             <div>
               <button
                   className="absolute hidden top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"

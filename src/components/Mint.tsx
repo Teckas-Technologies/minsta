@@ -1,15 +1,16 @@
 import { useApp } from "@/providers/app";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { convertBase64ToFile } from "@/utils/base64ToFile";
 import { Cloudinary } from '@cloudinary/url-gen';
 import { Resize } from '@cloudinary/url-gen/actions/resize';
 import { Effect } from '@cloudinary/url-gen/actions/effect';
 import InlineSVG from "react-inlinesvg";
-import { useMbWallet } from "@mintbase-js/react";
 import { CreditsType } from "@/data/types";
 import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
+import { NearContext } from "@/wallet/WalletSelector";
+import useNEARTransfer from "@/utils/useTransfer";
 
 
 const cloudinary = new Cloudinary({
@@ -32,7 +33,7 @@ export function Mint({
 }) {
   const { isLoading, mintImage, reduceImageSize, getTitleAndDescription } = useApp();
   const [title, setTitle] = useState("");
-  const { activeAccountId, selector } = useMbWallet();
+  const { wallet, signedAccountId } = useContext(NearContext);
   const [description, setDescription] = useState("");
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -51,6 +52,7 @@ export function Mint({
   const { saveCredits } = useSaveCredits();
   const [credits, setCredits] = useState<number | null>();
   const [buyCredit, setBuyCredit] = useState(false);
+  const [txhash, setTxhash] = useState("");
 
   const cloudImage = cldData?.public_id && cloudinary.image(cldData?.public_id);
 
@@ -69,33 +71,49 @@ export function Mint({
   }, [mode])
 
   useEffect(() => {
-    if (activeAccountId) {
-      const fetchDbProfile = async () => {
+    if (signedAccountId) {
+      const fetchDbCredit = async () => {
         try {
-          let credit = await fetchCredits(activeAccountId);
-          console.log("credits coming >> ", credit);
-          
+          let credit = await fetchCredits(signedAccountId);
+
           if (credit === null) {
             const data: CreditsType = {
-              accountId: activeAccountId,
+              accountId: signedAccountId,
               credit: 3
             };
             await saveCredits(data);
-            
-            credit = await fetchCredits(activeAccountId);
+
+            credit = await fetchCredits(signedAccountId);
           }
-          
+
           setCredits(credit ? credit.credit : 0);
         } catch (error) {
           console.error("Error fetching or saving credits:", error);
           setCredits(0);
         }
       };
-  
-      fetchDbProfile();
+
+      fetchDbCredit();
     }
-  }, [activeAccountId, title, description]);
-  
+  }, [signedAccountId, title, description]);
+
+  const { transfer } = useNEARTransfer();
+
+  const handleSignIn = async () => {
+    return wallet?.signIn();
+  };
+
+  const handleTransfer = async () => {
+    try {
+      if (!signedAccountId) {
+        handleSignIn();
+      } else {
+        await transfer();
+      }
+    } catch (error) {
+      console.error("Failed to sign and send transaction:", error);
+    }
+  }
 
   useEffect(() => {
     if (!currentPhoto) return;
@@ -107,7 +125,6 @@ export function Mint({
         })
       }).then(r => r.json())
       setCldData(response);
-      console.log("res >>> ", response)
     })();
   }, [])
 
@@ -178,14 +195,14 @@ export function Mint({
       setBuyCredit(true);
       return;
     }
-    if (!activeAccountId) {
-      setHandleToast("No active account ID!", true);
+    if (!signedAccountId) {
+      handleSignIn();
       return;
     }
     try {
       await generate();
       const data: CreditsType = {
-        accountId: activeAccountId,
+        accountId: signedAccountId,
         credit: credits - 1
       };
       await saveCredits(data);
@@ -288,15 +305,21 @@ export function Mint({
               </div>
 
               <div className="tags pb-2 pt-2 px-2">
-                {!generating ? <>
-                  <div className="generate-btn w-full flex pb-4 justify-center">
-                    <button className="btn success-btn flex items-center gap-2" onClick={generation}>
-                      <InlineSVG
-                        src="/images/robot.svg"
-                        className="fill-current dark:text-white"
-                      /> Generate AI Title & Description
-                    </button>
+                <div className="generate-btn w-full flex pb-4 justify-between">
+                  <button className="btn success-btn flex items-center gap-2" onClick={generation} disabled={generating}>
+                    <InlineSVG
+                      src="/images/robot.svg"
+                      className="fill-current dark:text-white"
+                    /> <h2 className="title-font text-white">Generate using AI</h2>
+                  </button>
+                  <div className="credits border-2 border-green-700 rounded-md pl-3 pr-4 py-2 flex justify-center items-center gap-2">
+                    <InlineSVG
+                      src="/images/fire.svg"
+                      className="fill-current text-red-500 dark:text-yellow-500"
+                    /> <h2 className="title-font dark:text-white">{credits}</h2>
                   </div>
+                </div>
+                {!generating ? <>
                   <div className="input-field">
                     <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e) => { setTitle(e.target.value) }} />
                   </div>
@@ -346,12 +369,12 @@ export function Mint({
             <div className="buy-alert-box w-full flex flex-col gap-3 h-auto bg-white dark:bg-slate-800 rounded-md py-2 px-3">
               <div className="head flex flex-col gap-2">
                 <h2 className="title-font text-center dark:text-white">Insufficient Credits!</h2>
-                <p className="dark:text-white text-justify">You don't have enough credits for the mind-blowing AI title and description generation.
+                <p className="dark:text-white text-justify">You don&apos;t have enough credits for the mind-blowing AI title and description generation.
                   Spend $0.05 to get 5 credits.</p>
               </div>
               <div className="btns-credit flex items-center justify-center gap-2">
                 <button className="btn cancel-btn dark:text-white dark:border-white" onClick={() => setBuyCredit(false)}>Cancel</button>
-                <button className="btn success-btn border-green-600" >Spent</button>
+                <button className="btn success-btn border-green-600" onClick={handleTransfer}>Spend</button>
               </div>
             </div>
           </div>}

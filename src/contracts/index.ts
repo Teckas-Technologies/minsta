@@ -12,10 +12,10 @@ import { setupNearMobileWallet } from "@near-wallet-selector/near-mobile-wallet"
 import { setupNearFi } from "@near-wallet-selector/nearfi";
 import { setupNeth } from "@near-wallet-selector/neth";
 import { setupNightly } from "@near-wallet-selector/nightly";
-import { setupRamperWallet } from "@near-wallet-selector/ramper-wallet";
+// import { setupRamperWallet } from "@near-wallet-selector/ramper-wallet";
 import { setupSender } from "@near-wallet-selector/sender";
 import { setupWelldoneWallet } from "@near-wallet-selector/welldone-wallet";
-import { setupXDEFI } from "@near-wallet-selector/xdefi";
+// import { setupXDEFI } from "@near-wallet-selector/xdefi";
 import naxios from "@wpdas/naxios";
 
 import { constants } from "@/constants";
@@ -40,11 +40,11 @@ export const naxiosInstance = new naxios({
     // setupMintbaseWallet() as any,
     setupNearFi() as any,
     setupWelldoneWallet(),
-    setupXDEFI(),
+    // setupXDEFI(),
     // INFO: This is breaking the app because it needs to access 'fs' module which is not present on the client side
     // setupNearSnap(),
     setupNarwallets(),
-    setupRamperWallet(),
+    // setupRamperWallet(),
     setupNeth({
       gas: "300000000000000",
       bundle: false,

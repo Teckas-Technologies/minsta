@@ -2,20 +2,20 @@ import { useDarkMode } from "@/context/DarkModeContext";
 import { InfiniteScrollHook } from "@/data/types";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { useSearchTokenByOwner } from "@/hooks/useSearchTokenByOwner";
-import { useMbWallet } from "@mintbase-js/react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import InlineSVG from "react-inlinesvg";
 import { DynamicGrid } from "../DynamicGrid";
 import { FirstToken } from "../FirstToken";
 import { FeedScroll } from "../feed/feedscroll";
 import { useFetchHiddenPost } from "@/hooks/db/HidePostHook";
 import { useGrid } from "@/context/GridContext";
+import { NearContext } from "@/wallet/WalletSelector";
 
 export const HiddenPostPage = () => {
     
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
     const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
-    const {activeAccountId, connect, isConnected} = useMbWallet();
+    const { wallet, signedAccountId } = useContext(NearContext);
     const { grid, toggleGrid} = useGrid();
     const [toast, setToast] = useState(false);
     const [toastText, setToastText] = useState("")
@@ -55,16 +55,16 @@ export const HiddenPostPage = () => {
     }
 
     useEffect(() => {
-        if(activeAccountId) {
-            setAccountId(activeAccountId);
+        if(signedAccountId) {
+            setAccountId(signedAccountId);
         }
-    }, [activeAccountId]);
+    }, [signedAccountId]);
 
     useEffect(() => {
-        if(activeAccountId) {
-            fetchHidedPosts(activeAccountId);
+        if(signedAccountId) {
+            fetchHidedPosts(signedAccountId);
         }
-    }, [activeAccountId]);
+    }, [signedAccountId]);
 
     const fetchHidedPosts = async (accountId: string)=> {
         if(accountId) {
