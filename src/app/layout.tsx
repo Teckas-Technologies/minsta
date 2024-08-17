@@ -2,7 +2,7 @@
 import Header from "@/components/header";
 import "./globals.css";
 import "@near-wallet-selector/modal-ui/styles.css";
-import { Inter } from "@next/font/google";
+import { Inter } from "next/font/google";
 import Footer from "@/components/footer";
 import Providers from "@/providers/providers";
 import Navigation from "@/components/navigation";
