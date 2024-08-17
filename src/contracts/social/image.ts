@@ -1,3 +1,4 @@
+"use client"
 import { naxiosInstance } from "../index";
 import { Image, getSocialProfile } from "../social/index";
 

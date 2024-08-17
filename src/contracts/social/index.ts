@@ -1,3 +1,4 @@
+"use client"
 import { StorageCache } from "@wpdas/naxios";
 
 import { constants } from "../../constants";

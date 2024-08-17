@@ -1,12 +1,16 @@
 import { useApp } from "@/providers/app";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { convertBase64ToFile } from "@/utils/base64ToFile";
 import { Cloudinary } from '@cloudinary/url-gen';
 import { Resize } from '@cloudinary/url-gen/actions/resize';
 import { Effect } from '@cloudinary/url-gen/actions/effect';
 import InlineSVG from "react-inlinesvg";
+import { CreditsType } from "@/data/types";
+import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
+import { NearContext } from "@/wallet/WalletSelector";
+import useNEARTransfer from "@/utils/useTransfer";
 
 
 const cloudinary = new Cloudinary({
@@ -29,6 +33,7 @@ export function Mint({
 }) {
   const { isLoading, mintImage, reduceImageSize, getTitleAndDescription } = useApp();
   const [title, setTitle] = useState("");
+  const { wallet, signedAccountId } = useContext(NearContext);
   const [description, setDescription] = useState("");
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -43,6 +48,11 @@ export function Mint({
   const [loadingEffect, setLoadingEffect] = useState(false);
   const [toast, setToast] = useState(false);
   const [toastText, setToastText] = useState("");
+  const { fetchCredits } = useFetchCredits();
+  const { saveCredits } = useSaveCredits();
+  const [credits, setCredits] = useState<number | null>();
+  const [buyCredit, setBuyCredit] = useState(false);
+  const [txhash, setTxhash] = useState("");
 
   const cloudImage = cldData?.public_id && cloudinary.image(cldData?.public_id);
 
@@ -60,19 +70,50 @@ export function Mint({
     }
   }, [mode])
 
-  // useEffect(() => {
-  //   const generate = async (currentPhoto: string) => {
-  //     setGenerating(true);
-  //     const replicatePhoto = await reduceImageSize(currentPhoto, 10);
-  //     const titleAndDescription = await getTitleAndDescription(replicatePhoto);
-  //     setTitle(titleAndDescription?.title)
-  //     setDescription(titleAndDescription?.description)
-  //     setGenerating(false);
-  //   }
-  //   if (currentPhoto) {
-  //     generate(currentPhoto);
-  //   }
-  // }, [currentPhoto])
+  useEffect(() => {
+    if (signedAccountId) {
+      const fetchDbCredit = async () => {
+        try {
+          let credit = await fetchCredits(signedAccountId);
+
+          if (credit === null) {
+            const data: CreditsType = {
+              accountId: signedAccountId,
+              credit: 3
+            };
+            await saveCredits(data);
+
+            credit = await fetchCredits(signedAccountId);
+          }
+
+          setCredits(credit ? credit.credit : 0);
+        } catch (error) {
+          console.error("Error fetching or saving credits:", error);
+          setCredits(0);
+        }
+      };
+
+      fetchDbCredit();
+    }
+  }, [signedAccountId, title, description]);
+
+  const { transfer } = useNEARTransfer();
+
+  const handleSignIn = async () => {
+    return wallet?.signIn();
+  };
+
+  const handleTransfer = async () => {
+    try {
+      if (!signedAccountId) {
+        handleSignIn();
+      } else {
+        await transfer();
+      }
+    } catch (error) {
+      console.error("Failed to sign and send transaction:", error);
+    }
+  }
 
   useEffect(() => {
     if (!currentPhoto) return;
@@ -84,7 +125,6 @@ export function Mint({
         })
       }).then(r => r.json())
       setCldData(response);
-      console.log("res >>> ", response)
     })();
   }, [])
 
@@ -144,6 +184,33 @@ export function Mint({
       setActive(true)
     }
     setTimeout(() => setLoadingEffect(false), 1600)
+  };
+
+  const generation = async () => {
+    if (!currentPhoto) {
+      setHandleToast("No file chosen!", true);
+      return;
+    }
+    if (credits === null || credits === undefined || credits <= 0) {
+      setBuyCredit(true);
+      return;
+    }
+    if (!signedAccountId) {
+      handleSignIn();
+      return;
+    }
+    try {
+      await generate();
+      const data: CreditsType = {
+        accountId: signedAccountId,
+        credit: credits - 1
+      };
+      await saveCredits(data);
+      setCredits(credits - 1);
+    } catch (error) {
+      console.error("Error generating title and description:", error);
+      setHandleToast("Failed to generate title and description. Please try again.", true);
+    }
   };
 
   const generate = async () => {
@@ -207,7 +274,7 @@ export function Mint({
             </div>
           </>
         ) : (<>
-          {!preview && <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 mb-2`}>
+          {!preview && !buyCredit && <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 mb-2`}>
             <div className="scroll-div h-auto">
               <div className="relative">
                 <Image src={src} alt="image" width={468} height={468} className="photo-img" />
@@ -238,15 +305,21 @@ export function Mint({
               </div>
 
               <div className="tags pb-2 pt-2 px-2">
-                {!generating ? <>
-                  <div className="generate-btn w-full flex pb-4 justify-center">
-                    <button className="btn success-btn flex items-center gap-2" onClick={generate}>
-                      <InlineSVG
-                        src="/images/robot.svg"
-                        className="fill-current dark:text-white"
-                      /> Generate AI Title & Description
-                    </button>
+                <div className="generate-btn w-full flex pb-4 justify-between">
+                  <button className="btn success-btn flex items-center gap-2" onClick={generation} disabled={generating}>
+                    <InlineSVG
+                      src="/images/robot.svg"
+                      className="fill-current dark:text-white"
+                    /> <h2 className="title-font text-white">Generate using AI</h2>
+                  </button>
+                  <div className="credits border-2 border-green-700 rounded-md pl-3 pr-4 py-2 flex justify-center items-center gap-2">
+                    <InlineSVG
+                      src="/images/fire.svg"
+                      className="fill-current text-red-500 dark:text-yellow-500"
+                    /> <h2 className="title-font dark:text-white">{credits}</h2>
                   </div>
+                </div>
+                {!generating ? <>
                   <div className="input-field">
                     <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e) => { setTitle(e.target.value) }} />
                   </div>
@@ -261,7 +334,7 @@ export function Mint({
                   <button className="btn success-btn" onClick={addTag}>Add</button>
                 </div>
                 {tags.length > 0 && (
-                  <div className="added-tags flex gap-2 px-2 py-1 ">
+                  <div className="added-tags flex flex-wrap gap-2 px-2 py-1 ">
                     {tags.map((tag, index) => (
                       <div
                         key={index}
@@ -292,6 +365,19 @@ export function Mint({
               </button>
             </div>
           </div>}
+          {buyCredit && <div className=" bg-slate-800 dark:bg-white md:w-[40%] p-3 flex justify-center items-center rounded-md">
+            <div className="buy-alert-box w-full flex flex-col gap-3 h-auto bg-white dark:bg-slate-800 rounded-md py-2 px-3">
+              <div className="head flex flex-col gap-2">
+                <h2 className="title-font text-center dark:text-white">Insufficient Credits!</h2>
+                <p className="dark:text-white text-justify">You don&apos;t have enough credits for the mind-blowing AI title and description generation.
+                  Spend $0.05 to get 5 credits.</p>
+              </div>
+              <div className="btns-credit flex items-center justify-center gap-2">
+                <button className="btn cancel-btn dark:text-white dark:border-white" onClick={() => setBuyCredit(false)}>Cancel</button>
+                <button className="btn success-btn border-green-600" onClick={handleTransfer}>Spend</button>
+              </div>
+            </div>
+          </div>}
         </>
         )}
         {preview && <div className="preview absolute top-0 left-0 min-h-[100vh] h-[100%] right-0 bg-sky-100 dark:bg-slate-800 flex items-center justify-center pt-[15rem] pb-[10rem]">
@@ -307,7 +393,7 @@ export function Mint({
               <h2 className="text-justify line-clamp-3"><span className="title-font">Description :</span> {description}</h2>
             </div>}
             {tags.length > 0 && (
-              <div className="added-tags flex gap-2 p-2 my-2">
+              <div className="added-tags flex flex-wrap gap-2 p-2 my-2">
                 {tags.map((tag, index) => (
                   <div
                     key={index}

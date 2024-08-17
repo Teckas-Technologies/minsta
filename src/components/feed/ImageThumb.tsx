@@ -1,22 +1,22 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { constants } from "@/constants";
 
 import Image from "next/image";
 import Link from "next/link";
 import { getImageUrl } from "@/utils/imageUrl";
 import InlineSVG from "react-inlinesvg";
-import { useMbWallet } from "@mintbase-js/react";
 import { useFetchSocialMedias } from "@/hooks/db/SocialMediaHook";
 import { useSaveHidePost } from "@/hooks/db/HidePostHook";
 import { BlockUserType, HidePost } from "@/data/types";
 import { useSaveBlockUser } from "@/hooks/db/BlockUserHook";
+import { NearContext } from "@/wallet/WalletSelector";
 
 const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePage }: any) => {
   const imageUrl = token?.media;
   const [error, setError] = useState(false);
-  const { activeAccountId } = useMbWallet();
+  const { wallet, signedAccountId } = useContext(NearContext);
   const [shareModal, setShareModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [mobDeleteModal, setMobDeleteModal] = useState(false);
@@ -117,7 +117,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
 
   const handleHidePost = async (tokenId: any, unhide: boolean, e: any) => {
     const data: HidePost & { unhide?: boolean } = {
-      accountId: activeAccountId?.toString() || "",
+      accountId: signedAccountId?.toString() || "",
       hiddedTokenIds: [
         {
             id: tokenId
@@ -136,7 +136,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
 
   const handleDeleteUser = async (token: any,e:any) => {
     const data : BlockUserType = {
-      accountId: activeAccountId?.toString() || "",
+      accountId: signedAccountId?.toString() || "",
       blockedUsers: [
         {
           blockedUserId: token?.owner,
@@ -303,7 +303,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
             </div>
           }
           {
-            activeAccountId && !profilePage && grid === 1 && 
+            signedAccountId && !profilePage && grid === 1 && 
             <button
               className="absolute top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
               onMouseEnter={() => toggleTooltip('hide', true)}
@@ -324,7 +324,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
             </button>
           }
           {showTooltip.hide && <div className="tooltip absolute top-[-1.8rem] left-2 bg-white px-2 py-1 rounded-md box-shadow">{hiddenPage ? "Unhide" : "Hide"}</div>}
-          {!hiddenPage && !profilePage && activeAccountId && grid === 1 && 
+          {!hiddenPage && !profilePage && signedAccountId && grid === 1 && 
           <div>
             <button
                 className="absolute top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"

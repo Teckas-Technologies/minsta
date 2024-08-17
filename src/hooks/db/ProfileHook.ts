@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { HidePost, ProfileType } from "@/data/types";
+import { ProfileType } from "@/data/types";
 
 
 export const useFetchProfile = () => {

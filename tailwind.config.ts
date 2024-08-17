@@ -39,6 +39,11 @@ const config: Config = {
       textAlign: {
         'justify': 'justify',
       },
+      zIndex: {
+        1: '1',
+        5: '5',
+        100: '100',
+      },
       lineClamp: {
         1: '1',
         2: '2',

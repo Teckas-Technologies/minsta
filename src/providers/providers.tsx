@@ -2,32 +2,17 @@ import { constants } from "@/constants";
 import DataProvider from "./data";
 import { AppProvider } from "./app";
 
-import { MintbaseWalletContextProvider } from "@mintbase-js/react";
 import { ReplicateProvider } from "./replicate";
 import { BackProvider } from "@/context/BackContext";
 import { GridProvider } from "@/context/GridContext";
 import { DarkModeProvider } from "@/context/DarkModeContext";
+import { WalletProvider } from "./WalletProvider";
 
 export const isDev = process.env.NEXT_PUBLIC_ENV === "dev";
 
-export const getCallbackUrl = () => {
-  let callbackUrl = "";
-
-  if (typeof window !== "undefined") {
-    callbackUrl = window?.location.origin;
-  }
-
-  return callbackUrl;
-};
-
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
-    <MintbaseWalletContextProvider
-      contractAddress={constants.tokenContractAddress}
-      network={constants.network as any}
-      callbackUrl={getCallbackUrl()}
-      onlyMbWallet
-    >
+    <WalletProvider>
       <BackProvider>
         <GridProvider>
           <DarkModeProvider>
@@ -39,7 +24,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
           </DarkModeProvider>
         </GridProvider>
       </BackProvider>
-    </MintbaseWalletContextProvider>
+    </WalletProvider>
   );
 };
 

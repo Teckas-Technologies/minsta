@@ -1,12 +1,11 @@
 "use client";
 
 import { useHomePageData } from "@/hooks/useHomePageData";
-import { useMbWallet } from "@mintbase-js/react";
 import { useRouter } from "next/navigation";
 import { DynamicGrid } from "./DynamicGrid";
 import { FirstToken } from "./FirstToken";
 import { FeedScroll } from "./feed/feedscroll";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useSearchTokenByOwner } from "@/hooks/useSearchTokenByOwner";
 import { useFeedDesc } from "@/hooks/userFeedDesc";
 import { InfiniteScrollHook } from "@/data/types";
@@ -16,6 +15,7 @@ import { useFetchHiddenPost } from "@/hooks/db/HidePostHook";
 import { useGrid } from "@/context/GridContext";
 import { useMediaQuery } from "usehooks-ts";
 import { useBackContext } from "@/context/BackContext";
+import { NearContext } from "@/wallet/WalletSelector";
 
 interface NFT {
   data: InfiniteScrollHook | undefined;
@@ -24,7 +24,7 @@ interface NFT {
 
 export const HomePage = () => {
   const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
-  const { connect, isConnected, activeAccountId } = useMbWallet();
+  const { wallet, signedAccountId } = useContext(NearContext);
   const [searchText, setSearchText] = useState("");
   const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
   const { data, isLoading }: NFT = useFeedDesc();
@@ -75,11 +75,11 @@ export const HomePage = () => {
   }
 
   useEffect(() => {
-    if(activeAccountId) {
-        setAccountId(activeAccountId);
-        fetchHidedPosts(activeAccountId);
+    if(signedAccountId) {
+        setAccountId(signedAccountId);
+        fetchHidedPosts(signedAccountId);
     }
-  }, [activeAccountId]);
+  }, [signedAccountId]);
 
   const fetchHidedPosts = async (accountId: string)=> {
       const hiddenPosts = await fetchHiddenPost(accountId);
@@ -89,10 +89,13 @@ export const HomePage = () => {
       }
   }
 
-  
+  const handleSignIn = async () => {
+    return wallet?.signIn();
+  };
+
   const handleLetsGoBtn = () => {
-    if (!isConnected) {
-      connect();
+    if (!signedAccountId) {
+      handleSignIn()
     } else {
       router.push("/camera");
     }
@@ -181,10 +184,9 @@ export const HomePage = () => {
     </div>
   ) : (
     <div className={darkMode ? "dark" : ""}>
-      <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start space-y-4 mt-5 bg-slate-50 dark:bg-slate-800 min-h-[100vh] relative">
-        <div className="max-w-md flex flex-col ml-auto mt-20 justify-center mb-5">
+      <div className="max-w-md px-2 flex flex-col ml-auto mt-20 justify-center mb-5 fixed top-2 right-0 lg:right-14 z-1">
           <div className="flex space-x-2 items-center">
-            <div className="md:hidden" onClick={toggleGrid}>
+            <div className="md:hidden bg-white p-1 rounded-full" onClick={toggleGrid}>
               <InlineSVG
                 src="/images/grid.svg"
                 className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
@@ -193,10 +195,10 @@ export const HomePage = () => {
             <div className="relative">
               <div className="absolute inset-y-0 start-0 flex items-center ps-3 cursor-pointer justify-center">
                 <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                 </svg>
                 {/* {!searchText ? <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                 </svg> : 
                 <div onClick={handleClearSearch}>
                   <InlineSVG
@@ -241,6 +243,8 @@ export const HomePage = () => {
             </div>
           </div>
         </div>
+      <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start space-y-4 mt-5 pt-5 bg-slate-50 dark:bg-slate-800 min-h-[100vh] relative">
+        
          {/* {!dataItems && !itemsLoading && 
                 <div className="not-data flex items-center gap-3">
                     <InlineSVG
@@ -250,13 +254,13 @@ export const HomePage = () => {
                     <h2 className="dark:text-white">No Moments!</h2>
                 </div>
           }  */}
-          {
+          {/* {
             itemsLoading && 
             <div>
               <div className="loader">
               </div>
             </div>
-          }
+          } */}
         <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid? grid : "1")}>
 
           <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} grid={parseInt(grid && !isDesktop ? grid : "1")} sort={selectedOption} search={search} dark={darkMode} hidepostids={hidePostIds} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setToast={setHandleToast} setResult={setResult} hiddenPage={false} profilePage={false} activeId={accountId}/>
