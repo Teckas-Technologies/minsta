@@ -44,6 +44,9 @@ importers:
       '@near-wallet-selector/mintbase-wallet':
         specifier: ^8.9.11
         version: 8.9.12(encoding@0.1.13)
+      '@near-wallet-selector/my-near-wallet':
+        specifier: ^8.9.12
+        version: 8.9.12(encoding@0.1.13)
       '@near-wallet-selector/narwallets':
         specifier: ^8.9.12
         version: 8.9.12(encoding@0.1.13)
