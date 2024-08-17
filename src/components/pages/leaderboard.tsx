@@ -11,7 +11,7 @@ import { CoptText } from "../CopyText";
 import { useRouter } from "next/navigation";
 
 export const LeaderboardPage = () => {
-  const { openModal, leaderboard, activeAccountId, texts } = useLeaderBoardData();
+  const { openModal, leaderboard, signedAccountId, texts } = useLeaderBoardData();
   const [darkMode, setDarkMode] = useState<boolean>();
   const {mode} = useDarkMode();
   const { push } = useRouter()
@@ -54,7 +54,7 @@ export const LeaderboardPage = () => {
             <span className="pl-1 dark:text-white"> Moments</span>{" "}
           </div>
           {leaderboard?.map(({ account, count }, index) => {
-            const isCurrentUser = account === activeAccountId;
+            const isCurrentUser = account === signedAccountId;
             const isFirst = index === 0;
             return (
               <div key={`${account}-${index}`} className="flex gap-2 items-center">

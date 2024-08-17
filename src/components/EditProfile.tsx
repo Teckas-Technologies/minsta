@@ -4,8 +4,8 @@ import { getImage } from "@/contracts/social/image";
 import { useFetchProfile, useSaveProfile } from "@/hooks/db/ProfileHook";
 import { arrayBufferToBase64 } from "@/utils/arrayBufferToBase64";
 import { fileToArrayBuffer } from "@/utils/fileToArrayBuffer";
-import { useMbWallet } from "@mintbase-js/react";
-import { useEffect, useRef, useState } from "react";
+import { NearContext } from "@/wallet/WalletSelector";
+import { useContext, useEffect, useRef, useState } from "react";
 import InlineSVG from "react-inlinesvg";
 
 interface ProfileType {
@@ -38,7 +38,7 @@ const listDown = [
 export const EditProfile = ({ setEdit, accountId }: props) => {
     const [darkMode, setDarkMode] = useState<boolean>();
     const { mode } = useDarkMode();
-    const { activeAccountId, connect, isConnected } = useMbWallet();
+    const { wallet, signedAccountId } = useContext(NearContext);
     const [profileFileName, setProfileFileName] = useState('');
     const [backgroundFileName, setBackgroundFileName] = useState('');
     const [tags, setTags] = useState<string[]>([]);
@@ -58,12 +58,12 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
     const [followers, setFollowers] = useState<number | null>(null);
 
     useEffect(() => {
-        if (activeAccountId) {
+        if (signedAccountId) {
             const fetchProfile = async () => {
                 try {
-                    const profileData = await getSocialProfile({ accountId: activeAccountId });
-                    const followingData = await getFollowing({ accountId: activeAccountId });
-                    const followersData = await getFollowers({ accountId: activeAccountId });
+                    const profileData = await getSocialProfile({ accountId: signedAccountId });
+                    const followingData = await getFollowing({ accountId: signedAccountId });
+                    const followersData = await getFollowers({ accountId: signedAccountId });
                     setProfile(profileData);
                     setFollowing(followingData.total);
                     setFollowers(followersData.total);
@@ -88,10 +88,10 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
             
             setFormProfileData({
                 ...formProfileData,
-                accountId: activeAccountId
+                accountId: signedAccountId
             });
             const fetchAndSetProfile = async () => {
-                const profile = await fetchDBProfile(activeAccountId);
+                const profile = await fetchDBProfile(signedAccountId);
                 if (profile) {
                     setFormProfileData((prevData) => ({
                         ...prevData,
@@ -108,11 +108,11 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
             };
             setFormProfileData((prevData) => ({
                 ...prevData,
-                accountId: activeAccountId,
+                accountId: signedAccountId,
             }));
             fetchAndSetProfile();
         }
-    }, [activeAccountId, submitted]);
+    }, [signedAccountId, submitted]);
 
     useEffect(() => {
         if (toast) {

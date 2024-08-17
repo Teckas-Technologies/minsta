@@ -1,19 +1,19 @@
 import { FETCH_FEED, FETCH_FEED_NEW, FETCH_FEED_UNI } from "@/data/queries/feed.graphl";
 import useInfiniteScrollGQL from "@/hooks/useInfiniteScroll";
-import { useMemo, useRef } from "react";
+import { useContext, useMemo, useRef } from "react";
 import { useIntersectionObserver } from "usehooks-ts";
 import { MemoizedImageThumb } from "./ImageThumb";
 import { useEffect, useState } from "react";
 import { TokenData } from "@/data/types";
 import InlineSVG from "react-inlinesvg";
-import { useMbWallet } from "@mintbase-js/react";
+import { NearContext } from "@/wallet/WalletSelector";
 
 export const FeedScroll = ({ blockedNfts,grid, sort , search, dark, hidepostids, setToast,setResult, dataItems, setDataItems, setItemsLoading, hiddenPage, activeId, profilePage}: any) => {
   const [mod, setMod] = useState(true);
   const ref = useRef<HTMLDivElement | null>(null);
   const entry = useIntersectionObserver(ref, {});
   const isVisible = !!entry?.isIntersecting;
-  const {activeAccountId} = useMbWallet();
+  const { wallet, signedAccountId } = useContext(NearContext);
 
   const { items, isLoading, loadingItems, total, error, setIsFetchFirst, setSearchInput,setSortText, resetItemList, setActiveAccount, setHiddenPageNew, setProfilePageNew } = useInfiniteScrollGQL("q_FETCH_FEED_ALL", isVisible, search, sort, setResult, hiddenPage, activeId, profilePage);
 
@@ -32,7 +32,7 @@ export const FeedScroll = ({ blockedNfts,grid, sort , search, dark, hidepostids,
         setSortText("New to Old");
       }
     }
-  }, [search, activeAccountId]);
+  }, [search, signedAccountId]);
 
   useEffect(()=> {
     if(sort){
@@ -47,13 +47,13 @@ export const FeedScroll = ({ blockedNfts,grid, sort , search, dark, hidepostids,
   },[isLoading]);
 
   useEffect(() => {
-    if(activeAccountId) {
-      setActiveAccount(activeAccountId);
+    if(signedAccountId) {
+      setActiveAccount(signedAccountId);
     }
     if(activeId) {
       setActiveAccount(activeId);
     }
-  }, [activeAccountId, activeId, setActiveAccount]);
+  }, [signedAccountId, activeId, setActiveAccount]);
 
   useEffect(()=> {
     if(hiddenPage) {

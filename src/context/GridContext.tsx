@@ -8,7 +8,7 @@ type GridContextType = {
 const GridContext = createContext<GridContextType | undefined>(undefined);
 
 export const GridProvider = ({ children }: { children: ReactNode }) => {
-  const [grid, setGrid] = useState<string | null>("1");
+  const [grid, setGrid] = useState<string | null>("");
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

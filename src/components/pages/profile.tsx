@@ -1,20 +1,20 @@
 import { DynamicGrid } from "../DynamicGrid"
 import { FirstToken } from "../FirstToken"
 import { FeedScroll } from "../feed/feedscroll"
-import { useMbWallet } from "@mintbase-js/react"
 import { useHomePageData } from "@/hooks/useHomePageData"
 import { InfiniteScrollHook, ProfileType } from "@/data/types"
-import { useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import InlineSVG from "react-inlinesvg"
 import { useDarkMode } from "@/context/DarkModeContext"
 import { useGrid } from "@/context/GridContext"
-import { getFollowers, getFollowing, getSocialProfile, NEARSocialUserProfile, setSocialData } from "@/contracts/social"
+import { getFollowers, getFollowing, getSocialProfile, NEARSocialUserProfile } from "@/contracts/social"
 import { getImage } from "@/contracts/social/image";
 import { ProfileCard } from "../ProfileCard";
 import { marked } from 'marked';
 import { EditProfile } from "../EditProfile"
 import { useRouter } from "next/navigation"
 import { useFetchProfile, useSaveProfile } from "@/hooks/db/ProfileHook"
+import { NearContext } from "@/wallet/WalletSelector"
 
 interface ProfileTypeNew {
     accountId: string;
@@ -35,7 +35,7 @@ export const ProfilePage = () => {
 
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
     const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
-    const { activeAccountId, connect, isConnected } = useMbWallet();
+    const { wallet, signedAccountId } = useContext(NearContext);
     const { grid, toggleGrid } = useGrid();
     const [accountId, setAccountId] = useState("")
     const [dataItems, setDataItems] = useState(false);
@@ -71,10 +71,10 @@ export const ProfilePage = () => {
     }, [description, desMore, dbProfile?.about]);
 
     useEffect(() => {
-        if (activeAccountId) {
-            setActiveAccountIdNew(activeAccountId)
+        if (signedAccountId) {
+            setActiveAccountIdNew(signedAccountId)
         }
-    }, [activeAccountId])
+    }, [signedAccountId])
 
     useEffect(() => {
         if (accountId) {
@@ -98,8 +98,8 @@ export const ProfilePage = () => {
 
                         const images = await Promise.all([image, backgroundImage]);
                         setImages(images)
-                        if (activeAccountId) {
-                            const data: Partial<ProfileType> = { accountId: activeAccountId };
+                        if (signedAccountId) {
+                            const data: Partial<ProfileType> = { accountId: signedAccountId };
 
                             if (profileData.name) {
                                 data.name = profileData.name;
@@ -155,7 +155,7 @@ export const ProfilePage = () => {
             fetchProfile();
             fetchDbProfile();
         }
-    }, [activeAccountId, accountId, edit]);
+    }, [signedAccountId, accountId, edit]);
 
     useEffect(() => {
         if (mode === "dark") {
@@ -186,14 +186,6 @@ export const ProfilePage = () => {
         }
     }, [profile?.services]);
 
-    // const preprocessHTMLContent = (html: string) => {
-    //     const result = html.replace(/<h3>/g, '<h3 class="font-bold text-md">')
-    //         .replace(/<li>/g, '<li class="list-disc ml-5">')
-    //         .replace(/<a /g, '<a class="text-blue-500 underline" target="_blank" rel="noopener noreferrer" ');
-    //         console.log(result)
-    //     return result;
-    // };
-
     const preprocessHTMLContent = (html: string) => {
         const result = html
             .replace(/### (.+)/g, '<h3 class="font-bold text-md">$1</h3>')
@@ -203,18 +195,6 @@ export const ProfilePage = () => {
 
         return result;
     };
-
-
-    // let desContent = "";
-
-    // useEffect(()=>{
-    //     if(dbProfile?.about){
-    //         desContent = preprocessHTMLContent(dbProfile?.about);
-    //     }
-    //     if(profile?.description){
-    //         desContent = preprocessHTMLContent(profile?.description);
-    //     }
-    // },[dbProfile?.about, profile?.description])
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search);
@@ -236,14 +216,14 @@ export const ProfilePage = () => {
 
     return (
         <div className={darkMode ? "dark" : ""}>
-            <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh] h-auto scroll-smooth">
+            <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh] h-auto scroll-smooth overflow-y-scroll">
                 <div className={`banner relative space-y-2 flex flex-col items-center justify-start w-full  rounded-lg ${!edit ? 'h-[20rem]' : 'h-auto'}`} style={{ backgroundImage: `url('${(!edit && dbProfile?.backgroundImage) && dbProfile?.backgroundImage || (images && images[1] !== "no_image" && !edit) && images[1] || !edit && '/images/dark_banner.jpg'}')`, backgroundPosition: 'center', backgroundSize: 'cover' }}>
                     <div className="page-title mt-20">
                         <h2 className={`title-font text-3xl ${!edit ? 'text-white' : 'dark:text-white'} underline underline-offset-4`}>{edit ? 'Edit Profile' : 'Profile'}</h2>
                     </div>
                     {!edit ?
                         <div className="max-w-md flex gap-3 iems-center flex ml-auto mr-5 justify-center">
-                            {accountId === activeAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={() => setEdit(true)}>
+                            {accountId === signedAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={() => setEdit(true)}>
                                 <InlineSVG
                                     src="/images/pencil.svg"
                                     className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
@@ -272,7 +252,7 @@ export const ProfilePage = () => {
                     </div>
                 }
                 */}
-                <div className={`profile-content w-full md:px-[20rem] ${ 'md:mt-[15%] mt-[55%]' }`}>
+                <div className={`profile-content w-full md:px-[20rem] ${!edit && 'md:mt-[15%] mt-[55%]' }`}>
                     {profile && followers !== null && followers !== undefined && following !== null && following !== undefined && !edit &&
                         <div className="flex justify-center">
                             <div className="flex items-center w-[70%] md:w-[20rem] justify-center gap-3 m-2 py-2 rounded-lg border-1 border border-sky-500">
