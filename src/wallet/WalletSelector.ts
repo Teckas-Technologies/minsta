@@ -43,7 +43,7 @@ export class Wallet {
       ],
     });
 
-    const walletSelector = await this.selector;
+    const walletSelector = await this.selector as unknown as WalletSelector;
     const isSignedIn = walletSelector.isSignedIn();
     const accountId = isSignedIn ? walletSelector.store.getState().accounts[0].accountId : '';
 
