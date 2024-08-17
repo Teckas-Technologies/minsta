@@ -36,14 +36,14 @@ export class Wallet {
     this.selector = setupWalletSelector({
       network: this.networkId,
       modules: [
-        setupBitteWallet(),
+        setupBitteWallet() as any,
         // setupMyNearWallet(),
         // setupHereWallet(),
         // setupMintbaseWallet(),
       ],
     });
 
-    const walletSelector = await this.selector as unknown as WalletSelector;
+    const walletSelector = await this.selector as WalletSelector;
     const isSignedIn = walletSelector.isSignedIn();
     const accountId = isSignedIn ? walletSelector.store.getState().accounts[0].accountId : '';
 
