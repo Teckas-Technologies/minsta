@@ -1,27 +1,11 @@
 import { useDarkMode } from "@/context/DarkModeContext";
-import { getFollowers, getFollowing, getSocialProfile, NEARSocialUserProfile } from "@/contracts/social";
-import { getImage } from "@/contracts/social/image";
+import { useImage } from "@/utils/socialImage";
 import { useFetchProfile, useSaveProfile } from "@/hooks/db/ProfileHook";
-import { arrayBufferToBase64 } from "@/utils/arrayBufferToBase64";
-import { fileToArrayBuffer } from "@/utils/fileToArrayBuffer";
 import { NearContext } from "@/wallet/WalletSelector";
 import { useContext, useEffect, useRef, useState } from "react";
 import InlineSVG from "react-inlinesvg";
-
-interface ProfileType {
-    accountId: string;
-    name: string;
-    profileImage?: string;
-    backgroundImage?: string;
-    about: string;
-    tags: string[];
-    linkTree: {
-        twitter: string;
-        github: string;
-        telegram: string;
-        website: string;
-    };
-}
+import useNearSocialDB from "@/utils/useNearSocialDB";
+import { NEARSocialUserProfile } from "@/data/types";
 
 interface props {
     setEdit: (e: boolean) => void;
@@ -41,7 +25,6 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
     const { wallet, signedAccountId } = useContext(NearContext);
     const [profileFileName, setProfileFileName] = useState('');
     const [backgroundFileName, setBackgroundFileName] = useState('');
-    const [tags, setTags] = useState<string[]>([]);
     const [showDropdown, setShowDropdown] = useState<boolean>(false);
     const [filteredTags, setFilteredTags] = useState<string[]>([]);
     const [inputValue, setInputValue] = useState<string>('');
@@ -56,17 +39,29 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
     const [images, setImages] = useState<string[]>();
     const [following, setFollowing] = useState<number | null>(null);
     const [followers, setFollowers] = useState<number | null>(null);
+    const { getImage } = useImage();
+    const { getSocialProfile, setSocialProfile, getFollowing, getFollowers, uploadIPFS } = useNearSocialDB();
+
+    const [name, setName] = useState('');
+    const [about, setAbout] = useState('');
+    const [profileImage, setProfileImage] = useState('');
+    const [backgroundImage, setBackgroundImage] = useState('');
+    const [twitter, setTwitter] = useState('');
+    const [github, setGithub] = useState('');
+    const [telegram, setTelegram] = useState('');
+    const [website, setWebsite] = useState('');
+    const [tags, setTags] = useState<string[]>([]);
 
     useEffect(() => {
         if (signedAccountId) {
             const fetchProfile = async () => {
                 try {
-                    const profileData = await getSocialProfile({ accountId: signedAccountId });
-                    const followingData = await getFollowing({ accountId: signedAccountId });
-                    const followersData = await getFollowers({ accountId: signedAccountId });
+                    const profileData = await getSocialProfile(signedAccountId);
+                    // const followingData = await getFollowing({ accountId: signedAccountId });
+                    // const followersData = await getFollowers({ accountId: signedAccountId });
                     setProfile(profileData);
-                    setFollowing(followingData.total);
-                    setFollowers(followersData.total);
+                    // setFollowing(followingData.total);
+                    // setFollowers(followersData.total);
                     if (profileData) {
                         const image = getImage({
                             image: profileData?.image,
@@ -79,38 +74,22 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
 
                         const images = await Promise.all([image, backgroundImage]);
                         setImages(images)
+
+                        setName(profileData?.name || '');
+                        setAbout(profileData?.description || '');
+                        setProfileImage(profileData?.image?.ipfs_cid || '');
+                        setBackgroundImage(profileData?.backgroundImage?.ipfs_cid || '');
+                        setTwitter(profileData?.linktree?.twitter || '');
+                        setGithub(profileData?.linktree?.github || '');
+                        setTelegram(profileData?.linktree?.telegram || '');
+                        setWebsite(profileData?.linktree?.website || '');
+                        setTags(Object.keys(profileData?.tags || {}));
                     }
                 } catch (err) {
                     console.log("Error >> ", err)
                 }
             }
             fetchProfile();
-            
-            setFormProfileData({
-                ...formProfileData,
-                accountId: signedAccountId
-            });
-            const fetchAndSetProfile = async () => {
-                const profile = await fetchDBProfile(signedAccountId);
-                if (profile) {
-                    setFormProfileData((prevData) => ({
-                        ...prevData,
-                        ...profile,
-                        linkTree: {
-                            ...prevData.linkTree,
-                            ...profile.linkTree,
-                        },
-                    }));
-                    if(profile.tags && profile.tags?.length > 0){
-                        setTags(profile.tags);
-                    }
-                }
-            };
-            setFormProfileData((prevData) => ({
-                ...prevData,
-                accountId: signedAccountId,
-            }));
-            fetchAndSetProfile();
         }
     }, [signedAccountId, submitted]);
 
@@ -122,21 +101,6 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
             }, 5000)
         }
     }, [toast]);
-
-    const [formProfileData, setFormProfileData] = useState<ProfileType>({
-        accountId: '',
-        name: '',
-        about: '',
-        profileImage: '',
-        backgroundImage: '',
-        tags: [],
-        linkTree: {
-            twitter: '',
-            github: '',
-            telegram: '',
-            website: ''
-        }
-    });
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -170,51 +134,35 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
         if (file) {
             setProfileFileName(file.name);
             try {
-                // const base64 = await fileToArrayBuffer(file);
-                // console.log("Base 1 >> ", base64)
-                const arrayBuffer = await file.arrayBuffer();
-                const base64String = arrayBufferToBase64(arrayBuffer);
-                setFormProfileData(prevData => ({
-                    ...prevData,
-                    profileImage: base64String.toString()
-                }));
+                const profileCid = await uploadIPFS(file);
+                console.log("Profile Cid >> ", profileCid);
+                setProfileImage(profileCid);
             } catch (error) {
                 console.error('Error converting file to Base64:', error);
             }
         } else {
             setProfileFileName('');
-            setFormProfileData(prevData => ({
-                ...prevData,
-                profileImage: ''
-            }));
+            setProfileImage("");
         }
     };
-    
+
     const handleBackgroundFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
             setBackgroundFileName(file.name);
             try {
-                // const base64 = await fileToArrayBuffer(file);
-                // console.log("Base 2 >> ", base64)
-                const arrayBuffer = await file.arrayBuffer();
-                const base64String = arrayBufferToBase64(arrayBuffer);
-                setFormProfileData(prevData => ({
-                    ...prevData,
-                    backgroundImage: base64String.toString()
-                }));
+                const bgPicCid = await uploadIPFS(file);
+                console.log("Background Cid >> ", bgPicCid);
+                setBackgroundImage(bgPicCid);
             } catch (error) {
                 console.error('Error converting file to Base64:', error);
             }
         } else {
             setBackgroundFileName('');
-            setFormProfileData(prevData => ({
-                ...prevData,
-                backgroundImage: ''
-            }));
+            setBackgroundImage("");
         }
     };
-    
+
 
     const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
         const target = event.target
@@ -245,10 +193,6 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
 
     const handleTagSelection = (tag: string) => {
         if (!tags.includes(tag)) {
-            setFormProfileData({
-                ...formProfileData,
-                tags: [...tags, tag]
-            });
             setTags([...tags, tag]);
         }
         setInputValue('');
@@ -259,62 +203,41 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
         setTags(tags.filter(t => t !== tag));
     }
 
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = event.target;
-        if (name in formProfileData.linkTree) {
-            setFormProfileData((prevData) => ({
-                ...prevData,
-                linkTree: {
-                    ...prevData.linkTree,
-                    [name]: value
-                }
-            }));
-        } else {
-            setFormProfileData({
-                ...formProfileData,
-                [name]: value
-            });
-        }
-    };
-
     const handleSaveProfile = async () => {
-        console.log("Form Data >> ", formProfileData)
-        setLoading(true);
-        if (formProfileData.accountId && formProfileData.name) {
-            await saveDBProfile(formProfileData).then((res) => {
-                console.log("Response >> ", res?.savedProfile)
-                setToast(true);
-                if (res?.status === 200) {
-                    setToastText("Profile Saved Successfully!")
-                } else {
-                    setToastText("Error Saving Data!")
-                }
-                setFormProfileData({
-                    accountId: '',
-                    name: '',
-                    about: '',
-                    profileImage: '',
-                    backgroundImage: '',
-                    tags: [],
-                    linkTree: {
-                        github: '',
-                        telegram: '',
-                        twitter: '',
-                        website: ''
+        try {
+            const formattedTags = tags.reduce((acc, tag) => {
+                acc[tag] = "";
+                return acc;
+            }, {} as Record<string, string>);
+
+            const data = {
+                [signedAccountId]: {
+                    profile: {
+                        name: name,
+                        description: about,
+                        image: {
+                            ipfs_cid: profileImage
+                        },
+                        backgroundImage: {
+                            ipfs_cid: backgroundImage
+                        },
+                        linktree: {
+                            twitter: twitter,
+                            github: github,
+                            telegram: telegram,
+                            website: website
+                        },
+                        tags: formattedTags
                     }
-                });
-                setProfileFileName('');
-                setBackgroundFileName('');
-                setTags([]);
-                setInputValue('');
-                // setEdit(false)
-            })
-        } else {
-            setToast(true)
-            setToastText("Missing Required Field")
+                }
+            };
+
+            const result = await setSocialProfile(data);
+            return result;
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            throw error;
         }
-        setLoading(false);
-        setSubmitted(!submitted);
     };
 
     return (
@@ -328,7 +251,7 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
                     <div className={`${darkMode ? "image-holder-dark" : "image-holder"} profile-form-holder w-full md:w-[40%] rounded-md p-3`}>
                         <div className="input-field w-full">
                             <label htmlFor="name" className="text-lg font-bold pl-1 dark:text-white">Name</label>
-                            <input type="text" name="name" id="name" placeholder="Enter your name..." value={formProfileData.name} onChange={handleInputChange} className={`w-full p-2 text-lg rounded-md outline-none ${darkMode ? "image-holder-dark" : "image-holder"}`} />
+                            <input type="text" name="name" id="name" placeholder="Enter your name..." value={name} onChange={(e) => setName(e.target.value)} className={`w-full p-2 text-lg rounded-md outline-none ${darkMode ? "image-holder-dark" : "image-holder"}`} />
                         </div>
                         <div className="input-field w-full mt-2">
                             <label htmlFor="profileInput" className="text-lg font-bold pl-1 dark:text-white">Profile Picture</label>
@@ -360,11 +283,11 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
                         </div>
                         <div className="input-field w-full mt-2">
                             <label htmlFor="about" className="text-lg font-bold pl-1 dark:text-white">About</label>
-                            <textarea name="about" id="about" placeholder="Type About Yourself..." value={formProfileData.about} onChange={handleInputChange} className={`w-full p-2 text-lg rounded-md outline-none ${darkMode ? "image-holder-dark" : "image-holder"}`} />
+                            <textarea name="about" id="about" placeholder="Type About Yourself..." value={about} onChange={(e) => setAbout(e.target.value)} className={`w-full p-2 text-lg rounded-md outline-none ${darkMode ? "image-holder-dark" : "image-holder"}`} />
                         </div>
                         <div className="input-field w-full mt-2">
                             <label htmlFor="tags" className="text-lg font-bold pl-1 dark:text-white">Tags</label>
-                            <div className={`w-full relative flex gap-2 p-2 text-lg rounded-md outline-none bg-white ${darkMode ? "image-holder-dark" : "image-holder"}`}>
+                            <div className={`w-full relative flex flex-wrap gap-2 p-2 text-lg rounded-md outline-none bg-white ${darkMode ? "image-holder-dark" : "image-holder"}`}>
                                 {tags.length > 0 && tags.map((tag: any) => (
                                     <div key={tag} className="tags-profile py-1 px-2 border border-sky-600 rounded-md">
                                         <h3 key={tag} className="text-sky-500 flex items-center gap-1">#{tag}
@@ -407,7 +330,7 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
                                 <div className="social-link bg-slate-400 p-2 rounded-l-md">
                                     <h2 className="">https://twitter.com/</h2>
                                 </div>
-                                <input name="twitter" id="twitter" placeholder="Enter twiter account" value={formProfileData?.linkTree?.twitter} onChange={handleInputChange} className={`w-full outline-none`} />
+                                <input name="twitter" id="twitter" placeholder="Enter twiter account" value={twitter} onChange={(e) => setTwitter(e.target.value)} className={`w-full outline-none`} />
                             </div>
                         </div>
                         <div className="input-field w-full mt-2">
@@ -416,7 +339,7 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
                                 <div className="social-link bg-slate-400 p-2 rounded-l-md">
                                     <h2 className="">https://github.com/</h2>
                                 </div>
-                                <input name="github" id="github" placeholder="Enter github account" value={formProfileData?.linkTree?.github} onChange={handleInputChange} className={`w-full outline-none`} />
+                                <input name="github" id="github" placeholder="Enter github account" value={github} onChange={(e) => setGithub(e.target.value)} className={`w-full outline-none`} />
                             </div>
                         </div>
                         <div className="input-field w-full mt-2">
@@ -425,7 +348,7 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
                                 <div className="social-link bg-slate-400 p-2 rounded-l-md">
                                     <h2 className="">https://t.me/</h2>
                                 </div>
-                                <input name="telegram" id="telegram" placeholder="Enter telegram account" value={formProfileData?.linkTree?.telegram} onChange={handleInputChange} className={`w-full outline-none`} />
+                                <input name="telegram" id="telegram" placeholder="Enter telegram account" value={telegram} onChange={(e) => setTelegram(e.target.value)} className={`w-full outline-none`} />
                             </div>
                         </div>
                         <div className="input-field w-full mt-2">
@@ -434,11 +357,11 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
                                 <div className="social-link bg-slate-400 p-2 rounded-l-md">
                                     <h2 className="">https://</h2>
                                 </div>
-                                <input name="website" id="website" placeholder="Enter website url" value={formProfileData?.linkTree?.website} onChange={handleInputChange} className={`w-full outline-none`} />
+                                <input name="website" id="website" placeholder="Enter website url" value={website} onChange={(e) => setWebsite(e.target.value)} className={`w-full outline-none`} />
                             </div>
                         </div>
                         <div className="profile-upload mt-4 mb-2 flex gap-2">
-                            <button className="btn success-btn" disabled={formProfileData.accountId && formProfileData.name ? false : true} onClick={handleSaveProfile}>Save Profile</button>
+                            <button className="btn success-btn" onClick={handleSaveProfile}>Save Profile</button>
                             <button className="btn cancel-btn dark:text-white border dark:border-white" onClick={() => setEdit(false)}>Cancel</button>
                         </div>
 

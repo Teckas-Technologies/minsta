@@ -33,6 +33,7 @@ export default function FileUploadPage() {
   const [credits, setCredits] = useState<number | null>();
   const [buyCredit, setBuyCredit] = useState(false);
   const [txhash, setTxhash] = useState("");
+  const [balance, setBalance] = useState<any>();
 
   useEffect(() => {
     if (mode === "dark") {
@@ -71,64 +72,18 @@ export default function FileUploadPage() {
 
       fetchDbCredit();
     }
-  }, [title, description, file]);
+  }, [signedAccountId, title, description, file]);
 
-
-  const { transfer } = useNEARTransfer();
-  const { fetchHashes } = useFetchHashes();
-  const { saveHashes } = useSaveHashes();
-
-  useEffect(() => {
-    const getresult = async () => {
-      const searchParams = new URLSearchParams(window.location.search);
-      if (searchParams) {
-        const hash = searchParams.get('transactionHashes');
-        if (hash) {
-          setTxhash(hash);
-          const res = await fetchHashes(hash as string);
-          if (res?.exist) {
-            return;
-          }
-          try {
-            const result = await wallet?.getTransactionResult(hash);
-            if (result?.success) {
-              if (result.signerId) {
-                const data: CreditsType = {
-                  accountId: result.signerId,
-                  credit: 5
-                };
-                await saveCredits(data);
-
-                let credit = await fetchCredits(result.signerId);
-                setCredits(credit?.credit);
-                const hashData: HashesType = {
-                  accountId: result.signerId,
-                  amount: result.amount,
-                  hash: hash
-                }
-                await saveHashes(hashData)
-              }
-            }
-          } catch (err) {
-            console.log("error >> ", err)
-          }
-        }
-      }
+  useEffect(()=>{
+    const fetchBalance = async () =>{
+      const res = await wallet?.getBalance(signedAccountId);
+      setBalance(res)
+      console.log("Balance >>",balance)
     }
-    getresult();
-  }, [txhash, title, file])
-
-  const handleTransfer = async () => {
-    try {
-      if (!signedAccountId) {
-        handleSignIn();
-      } else {
-        await transfer();
-      }
-    } catch (error) {
-      console.error("Failed to sign and send transaction:", error);
+    if(signedAccountId){
+      fetchBalance()
     }
-  }
+  },[file])
 
   const addTag = () => {
     if (tag.trim() !== "" && tags.length < 4) {
@@ -364,11 +319,12 @@ export default function FileUploadPage() {
               <div className="head flex flex-col gap-2">
                 <h2 className="title-font text-center dark:text-white">Insufficient Credits!</h2>
                 <p className="dark:text-white text-justify">You don&apos;t have enough credits for the mind-blowing AI title and description generation.
-                  Spend $0.05 to get 5 credits.</p>
+                  Spend $0.05 to get 5 credits.</p> <br />
+                <p className="dark:text-white text-justify">Go to &quot;Profile&quot; page to buy an &quot;AI Credits&quot;.</p>
               </div>
               <div className="btns-credit flex items-center justify-center gap-2">
                 <button className="btn cancel-btn dark:text-white dark:border-white" onClick={() => setBuyCredit(false)}>Cancel</button>
-                <button className="btn success-btn border-green-600" onClick={handleTransfer}>Spend</button>
+                <button className="btn success-btn border-green-600" onClick={()=>push(`/profile/?accountId=${signedAccountId}`)}>Go to Profile</button>
               </div>
             </div>
           </div>}
