@@ -33,6 +33,7 @@ export default function FileUploadPage() {
   const [credits, setCredits] = useState<number | null>();
   const [buyCredit, setBuyCredit] = useState(false);
   const [txhash, setTxhash] = useState("");
+  const [balance, setBalance] = useState<any>();
 
   useEffect(() => {
     if (mode === "dark") {
@@ -118,10 +119,23 @@ export default function FileUploadPage() {
     getresult();
   }, [txhash, title, file])
 
+  useEffect(()=>{
+    const fetchBalance = async () =>{
+      const res = await wallet?.getBalance(signedAccountId);
+      setBalance(res)
+      console.log("Balance >>",balance)
+    }
+    if(signedAccountId){
+      fetchBalance()
+    }
+  },[file])
+
   const handleTransfer = async () => {
     try {
       if (!signedAccountId) {
         handleSignIn();
+      } else if(balance < 0.05) {
+        setHandleToast("Insufficient Balance!", true);
       } else {
         await transfer();
       }

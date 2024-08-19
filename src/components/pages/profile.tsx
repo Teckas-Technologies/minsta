@@ -2,34 +2,19 @@ import { DynamicGrid } from "../DynamicGrid"
 import { FirstToken } from "../FirstToken"
 import { FeedScroll } from "../feed/feedscroll"
 import { useHomePageData } from "@/hooks/useHomePageData"
-import { InfiniteScrollHook, ProfileType } from "@/data/types"
+import { InfiniteScrollHook, NEARSocialUserProfile, ProfileType } from "@/data/types"
 import { useContext, useEffect, useRef, useState } from "react"
 import InlineSVG from "react-inlinesvg"
 import { useDarkMode } from "@/context/DarkModeContext"
 import { useGrid } from "@/context/GridContext"
-import { getFollowers, getFollowing, getSocialProfile, NEARSocialUserProfile } from "@/contracts/social"
-import { getImage } from "@/contracts/social/image";
 import { ProfileCard } from "../ProfileCard";
 import { marked } from 'marked';
 import { EditProfile } from "../EditProfile"
 import { useRouter } from "next/navigation"
 import { useFetchProfile, useSaveProfile } from "@/hooks/db/ProfileHook"
 import { NearContext } from "@/wallet/WalletSelector"
-
-interface ProfileTypeNew {
-    accountId: string;
-    name: string;
-    profileImage?: string;
-    backgroundImage?: string;
-    about: string;
-    tags: string[];
-    linkTree: {
-        twitter: string;
-        github: string;
-        telegram: string;
-        website: string;
-    };
-}
+import useNearSocialDB from "@/utils/useNearSocialDB"
+import { useImage } from "@/utils/socialImage";
 
 export const ProfilePage = () => {
 
@@ -60,6 +45,8 @@ export const ProfilePage = () => {
     const [isOverflowing, setIsOverflowing] = useState(false);
     const descriptionRef = useRef<HTMLParagraphElement>(null);
     const { saveDBProfile } = useSaveProfile();
+    const { getSocialProfile, getAvailableStorage, getFollowing, getFollowers } = useNearSocialDB();
+    const { getImage } = useImage();
 
     useEffect(() => {
         const descriptionEl = descriptionRef.current;
@@ -76,16 +63,27 @@ export const ProfilePage = () => {
         }
     }, [signedAccountId])
 
+    // useEffect(() => {
+    //     if (signedAccountId) {
+    //         const getDBAvailableStorage = async () => {
+    //             const storage = await getAvailableStorage()
+    //             console.log("Storage >> ", storage)
+    //         }
+    //         getDBAvailableStorage();
+    //     }
+    // }, [signedAccountId, accountId, edit]);
+
     useEffect(() => {
-        if (accountId) {
+        if (signedAccountId) {
             const fetchProfile = async () => {
                 try {
-                    const profileData = await getSocialProfile({ accountId: accountId });
-                    const followingData = await getFollowing({ accountId: accountId });
-                    const followersData = await getFollowers({ accountId: accountId });
+                    const profileData = await getSocialProfile(accountId)
+                    // const followingData = await getFollowing({ accountId: accountId });
+                    // const followersData = await getFollowers({ accountId: accountId });
                     setProfile(profileData);
-                    setFollowing(followingData.total);
-                    setFollowers(followersData.total);
+                    // setFollowing(followingData.total);
+                    // setFollowers(followersData.total);
+                    console.log("Profile data >> ", profileData)
                     if (profileData) {
                         const image = getImage({
                             image: profileData?.image,
@@ -97,63 +95,14 @@ export const ProfilePage = () => {
                         });
 
                         const images = await Promise.all([image, backgroundImage]);
-                        setImages(images)
-                        if (signedAccountId) {
-                            const data: Partial<ProfileType> = { accountId: signedAccountId };
-
-                            if (profileData.name) {
-                                data.name = profileData.name;
-                            }
-                            if (images !== undefined && images[0] && images[0] !== "no_image") {
-                                data.profileImage = images[0];
-                            }
-                            if (images !== undefined && images[1] && images[1] !== "no_image") {
-                                data.backgroundImage = images[1];
-                            }
-                            if (profileData.description) {
-                                data.about = profileData.description;
-                            }
-                            if (Array.isArray(profileData.tags)) {
-                                data.tags = profileData.tags.flatMap(tagObj =>
-                                    Object.keys(tagObj)
-                                );
-                            }
-
-                            if (profileData.linktree) {
-                                const linkTree: Partial<ProfileType['linkTree']> = {};
-
-                                if (profileData.linktree.telegram) {
-                                    linkTree.telegram = profileData.linktree.telegram;
-                                }
-                                if (profileData.linktree.twitter) {
-                                    linkTree.twitter = profileData.linktree.twitter;
-                                }
-                                if (profileData.linktree.github) {
-                                    linkTree.github = profileData.linktree.github;
-                                }
-                                if (profileData.linktree.website) {
-                                    linkTree.website = profileData.linktree.website;
-                                }
-
-                                if (Object.keys(linkTree).length > 0) {
-                                    data.linkTree = linkTree;
-                                }
-                            }
-
-                            await saveDBProfile(data);
-                        }
+                        setImages(images);
                     }
                 } catch (err) {
                     console.log("Error >> ", err)
                 }
             }
 
-            const fetchDbProfile = async () => {
-                const profile = await fetchDBProfile(accountId);
-                setDbProfile(profile);
-            }
             fetchProfile();
-            fetchDbProfile();
         }
     }, [signedAccountId, accountId, edit]);
 
@@ -217,29 +166,41 @@ export const ProfilePage = () => {
     return (
         <div className={darkMode ? "dark" : ""}>
             <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh] h-auto scroll-smooth overflow-y-scroll">
-                <div className={`banner relative space-y-2 flex flex-col items-center justify-start w-full  rounded-lg ${!edit ? 'h-[20rem]' : 'h-auto'}`} style={{ backgroundImage: `url('${(!edit && dbProfile?.backgroundImage) && dbProfile?.backgroundImage || (images && images[1] !== "no_image" && !edit) && images[1] || !edit && '/images/dark_banner.jpg'}')`, backgroundPosition: 'center', backgroundSize: 'cover' }}>
+                <div className={`banner relative space-y-2 flex flex-col items-center justify-start w-full  rounded-lg ${!edit ? 'h-[20rem]' : 'h-auto'}`} style={{ backgroundImage: `url('${(images && images[1] !== "no_image" && !edit) && images[1] || !edit && '/images/dark_banner.jpg'}')`, backgroundPosition: 'center', backgroundSize: 'cover' }}>
                     <div className="page-title mt-20">
                         <h2 className={`title-font text-3xl ${!edit ? 'text-white' : 'dark:text-white'} underline underline-offset-4`}>{edit ? 'Edit Profile' : 'Profile'}</h2>
                     </div>
                     {!edit ?
-                        <div className="max-w-md flex gap-3 iems-center flex ml-auto mr-5 justify-center">
-                            {accountId === signedAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={() => setEdit(true)}>
-                                <InlineSVG
-                                    src="/images/pencil.svg"
-                                    className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
-                                    color="#222f3e"
-                                />
-                            </div>}
-                            <div className="md:hidden flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={toggleGrid}>
-                                <InlineSVG
-                                    src="/images/grid.svg"
-                                    className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
-                                    color="#222f3e"
-                                />
+                        <>
+                            <div className="max-w-md flex gap-3 iems-center flex ml-auto mr-5 justify-center">
+                                {accountId === signedAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={() => setEdit(true)}>
+                                    <InlineSVG
+                                        src="/images/pencil.svg"
+                                        className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
+                                        color="#222f3e"
+                                    />
+                                </div>}
+                                <div className="md:hidden flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={toggleGrid}>
+                                    <InlineSVG
+                                        src="/images/grid.svg"
+                                        className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
+                                        color="#222f3e"
+                                    />
+                                </div>
                             </div>
-                        </div> :
+                            {/* <div className="set-banner">
+                                <div className="set-banner-pic bg-white flex items-center px-2 py-1 gap-2 rounded-md cursor-pointer">
+                                    <InlineSVG
+                                        src="/images/camera_fill.svg"
+                                        className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
+                                        color="#222f3e"
+                                    />
+                                    <h2>Add cover photo</h2>
+                                </div>
+                            </div> */}
+                        </> :
                         <EditProfile setEdit={setEdit} accountId={activeAccountIdNew} />}
-                    {!edit && <ProfileCard profile={profile} dbProfile={dbProfile} images={images} accountId={accountId} />}
+                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} />}
                 </div>
 
                 {/* {!dataItems && !itemsLoading && 
@@ -252,8 +213,8 @@ export const ProfilePage = () => {
                     </div>
                 }
                 */}
-                <div className={`profile-content w-full md:px-[20rem] ${!edit && 'md:mt-[15%] mt-[55%]' }`}>
-                    {profile && followers !== null && followers !== undefined && following !== null && following !== undefined && !edit &&
+                <div className={`profile-content w-full md:px-[20rem] ${!edit && 'md:mt-[15%] mt-[55%]'}`}>
+                    {/* {profile && followers !== null && followers !== undefined && following !== null && following !== undefined && !edit &&
                         <div className="flex justify-center">
                             <div className="flex items-center w-[70%] md:w-[20rem] justify-center gap-3 m-2 py-2 rounded-lg border-1 border border-sky-500">
                                 <div className="following">
@@ -268,15 +229,15 @@ export const ProfilePage = () => {
                                     <h4 className="dark:text-white text-center">{followers}</h4>
                                 </div>
                             </div>
-                        </div>}
-                    {(dbProfile?.about || profile?.description) && !edit && <div>
+                        </div>} */}
+                    {profile?.description && !edit && <div>
                         <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Description</h2>
                         {/* <p className={`text-justify content dark:text-white ${!desMore ? "line-clamp-2" : ""}`} dangerouslySetInnerHTML={{ __html: preprocessHTMLContent(description) || dbProfile?.about as string }}></p> */}
                         <p
                             ref={descriptionRef}
                             className={`text-justify content dark:text-white ${!desMore ? "line-clamp-2" : ""}`}
                             dangerouslySetInnerHTML={{
-                                __html: preprocessHTMLContent(dbProfile?.about ?? profile?.description ?? ""),
+                                __html: preprocessHTMLContent(profile?.description ?? ""),
                             }}
                         ></p>
                         {isOverflowing && (
@@ -302,7 +263,20 @@ export const ProfilePage = () => {
                         )}
                     </div>}
 
-                    {(dbProfile?.tags && dbProfile?.tags?.length > 0 && !edit) && <div>
+                    {(profile?.tags && Object.keys(profile.tags).length > 0 && !edit) && (
+                        <div>
+                            <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Tags</h2>
+                            <div className="tags flex items-center gap-2">
+                                {Object.entries(profile.tags).map(([key, value], i) => (
+                                    <div className="tag rounded-lg" key={i}>
+                                        <p>#{key}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* {(dbProfile?.tags && dbProfile?.tags?.length > 0 && !edit) && <div>
                         <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Tags</h2>
                         <div className="tags flex items-center gap-2">
                             {dbProfile?.tags &&
@@ -313,7 +287,7 @@ export const ProfilePage = () => {
                                 ))
                             }
                         </div>
-                    </div>}
+                    </div>} */}
                     {profile?.services && !edit && <div>
                         <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Services</h2>
                         <p className={`text-justify content dark:text-white ${!serviceMore ? "line-clamp-1" : ""}`} dangerouslySetInnerHTML={{ __html: preprocessHTMLContent(services) }}></p>
