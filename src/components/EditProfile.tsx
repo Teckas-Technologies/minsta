@@ -287,7 +287,7 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
                         </div>
                         <div className="input-field w-full mt-2">
                             <label htmlFor="tags" className="text-lg font-bold pl-1 dark:text-white">Tags</label>
-                            <div className={`w-full relative flex gap-2 p-2 text-lg rounded-md outline-none bg-white ${darkMode ? "image-holder-dark" : "image-holder"}`}>
+                            <div className={`w-full relative flex flex-wrap gap-2 p-2 text-lg rounded-md outline-none bg-white ${darkMode ? "image-holder-dark" : "image-holder"}`}>
                                 {tags.length > 0 && tags.map((tag: any) => (
                                     <div key={tag} className="tags-profile py-1 px-2 border border-sky-600 rounded-md">
                                         <h3 key={tag} className="text-sky-500 flex items-center gap-1">#{tag}

@@ -10,7 +10,7 @@ import InlineSVG from "react-inlinesvg";
 import { CreditsType } from "@/data/types";
 import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
 import { NearContext } from "@/wallet/WalletSelector";
-import useNEARTransfer from "@/utils/useTransfer";
+import { useRouter } from "next/navigation";
 
 
 const cloudinary = new Cloudinary({
@@ -52,6 +52,7 @@ export function Mint({
   const { saveCredits } = useSaveCredits();
   const [credits, setCredits] = useState<number | null>();
   const [buyCredit, setBuyCredit] = useState(false);
+  const { push } = useRouter();
   const [txhash, setTxhash] = useState("");
 
   const cloudImage = cldData?.public_id && cloudinary.image(cldData?.public_id);
@@ -97,23 +98,9 @@ export function Mint({
     }
   }, [signedAccountId, title, description]);
 
-  const { transfer } = useNEARTransfer();
-
   const handleSignIn = async () => {
     return wallet?.signIn();
   };
-
-  const handleTransfer = async () => {
-    try {
-      if (!signedAccountId) {
-        handleSignIn();
-      } else {
-        await transfer();
-      }
-    } catch (error) {
-      console.error("Failed to sign and send transaction:", error);
-    }
-  }
 
   useEffect(() => {
     if (!currentPhoto) return;
@@ -370,11 +357,12 @@ export function Mint({
               <div className="head flex flex-col gap-2">
                 <h2 className="title-font text-center dark:text-white">Insufficient Credits!</h2>
                 <p className="dark:text-white text-justify">You don&apos;t have enough credits for the mind-blowing AI title and description generation.
-                  Spend $0.05 to get 5 credits.</p>
+                  Spend $0.05 to get 5 credits.</p> <br />
+                <p className="dark:text-white text-justify">Go to &quot;Profile&quot; page to buy an &quot;AI Credits&quot;.</p>
               </div>
               <div className="btns-credit flex items-center justify-center gap-2">
                 <button className="btn cancel-btn dark:text-white dark:border-white" onClick={() => setBuyCredit(false)}>Cancel</button>
-                <button className="btn success-btn border-green-600" onClick={handleTransfer}>Spend</button>
+                <button className="btn success-btn border-green-600" onClick={()=>push(`/profile/?accountId=${signedAccountId}`)}>Go to Profile</button>
               </div>
             </div>
           </div>}

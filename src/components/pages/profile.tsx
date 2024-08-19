@@ -17,7 +17,6 @@ import useNearSocialDB from "@/utils/useNearSocialDB"
 import { useImage } from "@/utils/socialImage";
 
 export const ProfilePage = () => {
-
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
     const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
     const { wallet, signedAccountId } = useContext(NearContext);
@@ -34,6 +33,8 @@ export const ProfilePage = () => {
     const [images, setImages] = useState<string[]>();
     const [following, setFollowing] = useState<number | null>(null);
     const [followers, setFollowers] = useState<number | null>(null);
+    const [toast, setToast] = useState(false);
+    const [toastText, setToastText] = useState("");
     const [description, setDescription] = useState<string>("");
     const [services, setServices] = useState<string>("");
     const [edit, setEdit] = useState(false);
@@ -74,10 +75,10 @@ export const ProfilePage = () => {
     // }, [signedAccountId, accountId, edit]);
 
     useEffect(() => {
-        if (signedAccountId) {
+        if (accountId) {
             const fetchProfile = async () => {
                 try {
-                    const profileData = await getSocialProfile(accountId)
+                    const profileData = await getSocialProfile(accountId);
                     // const followingData = await getFollowing({ accountId: accountId });
                     // const followersData = await getFollowers({ accountId: accountId });
                     setProfile(profileData);
@@ -163,6 +164,20 @@ export const ProfilePage = () => {
     };
     console.log(images)
 
+    useEffect(() => {
+        if (toast) {
+          setTimeout(() => {
+            setToast(false);
+            setToastText("");
+          }, 5000)
+        }
+      }, [toast]);
+
+    const setHandleToast = (message: string, open: boolean) => {
+        setToast(open);
+        setToastText(message);
+    }
+
     return (
         <div className={darkMode ? "dark" : ""}>
             <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh] h-auto scroll-smooth overflow-y-scroll">
@@ -200,7 +215,7 @@ export const ProfilePage = () => {
                             </div> */}
                         </> :
                         <EditProfile setEdit={setEdit} accountId={activeAccountIdNew} />}
-                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} />}
+                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} />}
                 </div>
 
                 {/* {!dataItems && !itemsLoading && 
@@ -318,12 +333,25 @@ export const ProfilePage = () => {
                 {!edit && <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid ? grid : "1")}>
                     <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} grid={parseInt(grid ? grid : "1")} search={accountId} dark={darkMode} hidepostids={[]} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setResult={setResult} hiddenPage={false} activeId={accountId} profilePage={true} />
                 </DynamicGrid>}
-                {
+                {/* {
                     result && !edit &&
                     <div className="pb-5">
                         <h2 className="dark:text-white">{result}</h2>
                     </div>
-                }
+                } */}
+                {toast &&
+                    <div id="toast-default" className="toast-container mt-6 md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed ">
+                        <div className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
+                            <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                                </svg>
+                                <span className="sr-only">Check icon</span>
+                            </div>
+                            <div className="ms-1 text-sm font-normal">{toastText}</div>
+                        </div>
+                        <div className="border-bottom-animation"></div>
+                    </div>}
             </main>
         </div>
     )
