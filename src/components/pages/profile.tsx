@@ -228,7 +228,7 @@ export const ProfilePage = () => {
                     </div>
                 }
                 */}
-                <div className={`profile-content w-full md:px-[20rem] ${!edit && 'md:mt-[15%] mt-[55%]'}`}>
+                <div className={`profile-content w-full md:px-[20rem] ${!edit && 'md:mt-[20%] mt-[77%]'}`}>
                     {/* {profile && followers !== null && followers !== undefined && following !== null && following !== undefined && !edit &&
                         <div className="flex justify-center">
                             <div className="flex items-center w-[70%] md:w-[20rem] justify-center gap-3 m-2 py-2 rounded-lg border-1 border border-sky-500">
