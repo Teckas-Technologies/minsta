@@ -9,6 +9,7 @@ import { NearContext } from "@/wallet/WalletSelector"
 import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook"
 import useNEARTransfer from "@/utils/useTransfer"
 import { useFetchHashes, useSaveHashes } from "@/hooks/db/HashHook"
+import FollowButton from "./buttons/follow-button"
 
 interface props {
     profile: NEARSocialUserProfile | undefined;
@@ -135,7 +136,7 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast }: prop
     },[])
 
     return (
-        <div className="container_profile absolute bottom-[-50%]">
+        <div className="container_profile absolute bottom-[-70%]">
             <div className="card_profile relative bg-slate-800 dark:bg-white">
                 {(profile?.active === true || profile?.active === false) && <div className="profile-active right-2 top-2 absolute flex items-center gap-1 py-1 px-2 rounded-2xl bg-white dark:bg-slate-800">
                     <InlineSVG
@@ -195,6 +196,7 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast }: prop
                             <h2>{"Buy"}</h2>
                         </div>}
                 </div>}
+                <FollowButton accountId={accountId} />
                 {(profile?.linktree?.github || profile?.linktree?.telegram || profile?.linktree?.twitter || profile?.linktree?.website) &&
                     <div className={`card__social ${animation && 'animation'}`} id="card-social">
                         <div className="card__social-control">
