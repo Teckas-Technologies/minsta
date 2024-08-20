@@ -9,6 +9,28 @@ const useNearSocialDB = () => {
     const [error, setError] = useState<string | null>(null);
     const { wallet, signedAccountId } = useContext(NearContext);
 
+    const getSocialData = async ({ path }: { path: string }) => {
+        try {
+          if (!wallet) {
+            throw new Error("Wallet is undefined");
+          }
+      
+          const response = await wallet?.viewMethod({
+            contractId: constants.SOCIAL_DB_CONTRACT_ID, 
+            method: 'keys',
+            args: { keys: [path] },
+          });
+      
+          if (!response) return;
+          console.log("Social Data >> ", response);
+      
+          return response;
+        } catch (error: any) {
+          console.error("getSocialData:", error);
+          throw new Error(error?.message || "An error occurred during the fetch social data process.");
+        }
+    };
+
     const getSocialProfile = async (accountId: string) => {
         setLoading(true);
 
@@ -195,7 +217,7 @@ const useNearSocialDB = () => {
         }
     };
 
-    return { getSocialProfile, setSocialProfile, getFollowing, getFollowers, getAvailableStorage, buyStorage, uploadIPFS, loading, error };
+    return { getSocialData, getSocialProfile, setSocialProfile, getFollowing, getFollowers, getAvailableStorage, buyStorage, uploadIPFS, loading, error };
 }
 
 export default useNearSocialDB;

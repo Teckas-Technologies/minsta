@@ -15,6 +15,7 @@ import { useFetchProfile, useSaveProfile } from "@/hooks/db/ProfileHook"
 import { NearContext } from "@/wallet/WalletSelector"
 import useNearSocialDB from "@/utils/useNearSocialDB"
 import { useImage } from "@/utils/socialImage";
+import Image from "next/image"
 
 export const ProfilePage = () => {
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
@@ -46,8 +47,65 @@ export const ProfilePage = () => {
     const [isOverflowing, setIsOverflowing] = useState(false);
     const descriptionRef = useRef<HTMLParagraphElement>(null);
     const { saveDBProfile } = useSaveProfile();
-    const { getSocialProfile, getAvailableStorage, getFollowing, getFollowers } = useNearSocialDB();
+    const { getSocialProfile, setSocialProfile, getAvailableStorage, getFollowing, getFollowers, uploadIPFS } = useNearSocialDB();
     const { getImage } = useImage();
+    const [uploadText, setUploadText] = useState<string>("");
+    const [cid, setCid] = useState<string>("");
+    const [uploadModel, setUploadModel] = useState<boolean>(false);
+    const [backgroundFileName, setBackgroundFileName] = useState('');
+    const [backgroundImageCid, setBackgroundImageCid] = useState('');
+
+    const handleUpload = (text: string, cid: string, open: boolean) => {
+        setUploadText(text);
+        setUploadModel(open);
+        setCid(cid);
+    }
+
+    useEffect(() => {
+        if (backgroundImageCid) {
+            handleUpload("Background Image", backgroundImageCid, true);
+        }
+    }, [backgroundImageCid])
+
+    const handleSaveProfile = async () => {
+        try {
+            const profileData = {
+                [signedAccountId]: {
+                    profile: {
+                        image: {
+                            ipfs_cid: cid
+                        }
+                    }
+                }
+            };
+            const bgData = {
+                [signedAccountId]: {
+                    profile: {
+                        backgroundImage: {
+                            ipfs_cid: cid
+                        }
+                    }
+                }
+            };
+            console.log("Step 1")
+            if (cid) {
+                console.log("Step 2")
+                if (uploadText === "Profile Image") {
+                    console.log("Step 3")
+                    const result = await setSocialProfile(profileData);
+                    return result;
+                }
+                if (uploadText === "Background Image") {
+                    const result = await setSocialProfile(bgData);
+                    return result;
+                }
+            }
+            return;
+        } catch (error) {
+            console.error('Error saving profile image:', error);
+            throw error;
+        }
+    };
 
     useEffect(() => {
         const descriptionEl = descriptionRef.current;
@@ -166,17 +224,41 @@ export const ProfilePage = () => {
 
     useEffect(() => {
         if (toast) {
-          setTimeout(() => {
-            setToast(false);
-            setToastText("");
-          }, 5000)
+            setTimeout(() => {
+                setToast(false);
+                setToastText("");
+            }, 5000)
         }
-      }, [toast]);
+    }, [toast]);
 
     const setHandleToast = (message: string, open: boolean) => {
         setToast(open);
         setToastText(message);
     }
+
+    const handleFileClick = (inputId: string) => {
+        const fileInput = document.getElementById(inputId);
+        if (fileInput) {
+            (fileInput as HTMLInputElement).click();
+        }
+    };
+
+    const handleBackgroundFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setBackgroundFileName(file.name);
+            try {
+                const bgPicCid = await uploadIPFS(file);
+                console.log("Background Cid >> ", bgPicCid);
+                setBackgroundImageCid(bgPicCid);
+            } catch (error) {
+                console.error('Error converting file to Base64:', error);
+            }
+        } else {
+            setBackgroundFileName('');
+            setBackgroundImageCid("");
+        }
+    };
 
     return (
         <div className={darkMode ? "dark" : ""}>
@@ -203,19 +285,20 @@ export const ProfilePage = () => {
                                     />
                                 </div>
                             </div>
-                            {/* <div className="set-banner">
-                                <div className="set-banner-pic bg-white flex items-center px-2 py-1 gap-2 rounded-md cursor-pointer">
+                            {accountId === signedAccountId && <div className="set-banner">
+                                <div className="set-banner-pic bg-white flex items-center px-2 py-1 gap-2 rounded-md cursor-pointer" onClick={() => handleFileClick('backgroundInput')}>
                                     <InlineSVG
                                         src="/images/camera_fill.svg"
                                         className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
                                         color="#222f3e"
                                     />
-                                    <h2>Add cover photo</h2>
+                                    <h2>{profile?.backgroundImage ? "Change cover photo" : "Add cover photo"}</h2>
                                 </div>
-                            </div> */}
+                                <input type="file" name="picture" id="backgroundInput" onChange={handleBackgroundFileChange} className={`hidden w-full p-2 text-lg rounded-md outline-none ${darkMode ? "image-holder-dark" : "image-holder"}`} />
+                            </div>}
                         </> :
                         <EditProfile setEdit={setEdit} accountId={activeAccountIdNew} />}
-                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} />}
+                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} />}
                 </div>
 
                 {/* {!dataItems && !itemsLoading && 
@@ -228,7 +311,7 @@ export const ProfilePage = () => {
                     </div>
                 }
                 */}
-                <div className={`profile-content w-full md:px-[20rem] ${!edit && 'md:mt-[15%] mt-[55%]'}`}>
+                <div className={`profile-content w-full md:px-[20rem] ${!edit && 'md:mt-[20%] mt-[77%]'}`}>
                     {/* {profile && followers !== null && followers !== undefined && following !== null && following !== undefined && !edit &&
                         <div className="flex justify-center">
                             <div className="flex items-center w-[70%] md:w-[20rem] justify-center gap-3 m-2 py-2 rounded-lg border-1 border border-sky-500">
@@ -352,6 +435,23 @@ export const ProfilePage = () => {
                         </div>
                         <div className="border-bottom-animation"></div>
                     </div>}
+                {uploadModel && <div className="upload-model fixed bg-sky-50 dark:bg-slate-800 top-0 bottom-0 right-0 left-0 flex justify-center items-center">
+                    <div className={`upload-box w-[20rem] bg-white mx-3 px-3 py-2 flex flex-col items-center gap-2 rounded-md ${darkMode ? "box-shadow-dark" : "box-shadow"}`}>
+                        <h2 className="title-font">Upload your {uploadText}</h2>
+                        <div className="image w-[5rem] h-[5rem] relative rounded-full">
+                            <img
+                                src={`https://ipfs.near.social/ipfs/${cid}`}
+                                alt="Profile NFT"
+                                className="rounded-full object-cover w-full h-full"
+                            />
+                        </div>
+                        <div className="btns flex gap-2">
+                            <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={() => handleUpload("", "", false)}>Cancel</button>
+                            <button className="btn bg-sky-500 cursor-pointer" onClick={handleSaveProfile}>Upload</button>
+                        </div>
+                    </div>
+                </div>}
+
             </main>
         </div>
     )
