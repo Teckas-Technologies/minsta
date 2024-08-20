@@ -10,16 +10,18 @@ import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook"
 import useNEARTransfer from "@/utils/useTransfer"
 import { useFetchHashes, useSaveHashes } from "@/hooks/db/HashHook"
 import FollowButton from "./buttons/follow-button"
+import useNearSocialDB from "@/utils/useNearSocialDB"
 
 interface props {
     profile: NEARSocialUserProfile | undefined;
     // dbProfile: ProfileType | undefined;
     images: string[] | undefined,
     accountId: string;
-    setHandleToast: (s:string, e: boolean) => void
+    setHandleToast: (s: string, e: boolean) => void
+    handleUpload: (text: string, cid: string, open: boolean) => void
 }
 
-export const ProfileCard = ({ profile, images, accountId, setHandleToast }: props) => {
+export const ProfileCard = ({ profile, images, accountId, setHandleToast, handleUpload }: props) => {
     const [animation, setAnimation] = useState(false);
     const [darkMode, setDarkMode] = useState<boolean>();
     const { mode } = useDarkMode();
@@ -30,6 +32,15 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast }: prop
     const [buyCredit, setBuyCredit] = useState(false);
     const [txhash, setTxhash] = useState("");
     const [balance, setBalance] = useState<any>();
+    const [profileFileName, setProfileFileName] = useState('');
+    const [profileImageCid, setProfileImageCid] = useState('');
+    const { uploadIPFS } = useNearSocialDB();
+
+    useEffect(() => {
+        if (profileImageCid) {
+            handleUpload("Profile Image", profileImageCid, true);
+        }
+    }, [profileImageCid])
 
     useEffect(() => {
         if (mode === "dark") {
@@ -108,32 +119,56 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast }: prop
 
     const handleSignIn = async () => {
         return wallet?.signIn();
-      };
+    };
 
     const handleTransfer = async () => {
         try {
-          if (!signedAccountId) {
-            handleSignIn();
-          } else if(balance < 0.05) {
-            setHandleToast("Insufficient Balance!", true);
-          } else {
-            await transfer();
-          }
+            if (!signedAccountId) {
+                handleSignIn();
+            } else if (balance < 0.05) {
+                setHandleToast("Insufficient Balance!", true);
+            } else {
+                await transfer();
+            }
         } catch (error) {
-          console.error("Failed to sign and send transaction:", error);
+            console.error("Failed to sign and send transaction:", error);
         }
     }
 
-    useEffect(()=>{
-        const fetchBalance = async () =>{
-          const res = await wallet?.getBalance(signedAccountId);
-          setBalance(res)
-          console.log("Balance >>",balance)
+    useEffect(() => {
+        const fetchBalance = async () => {
+            const res = await wallet?.getBalance(signedAccountId);
+            setBalance(res)
+            console.log("Balance >>", balance)
         }
-        if(signedAccountId){
-          fetchBalance()
+        if (signedAccountId) {
+            fetchBalance()
         }
-    },[])
+    }, [])
+
+    const handleFileClick = (inputId: string) => {
+        const fileInput = document.getElementById(inputId);
+        if (fileInput) {
+            (fileInput as HTMLInputElement).click();
+        }
+    };
+
+    const handleProfileFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setProfileFileName(file.name);
+            try {
+                const profileCid = await uploadIPFS(file);
+                console.log("Separate Profile Cid >> ", profileCid);
+                setProfileImageCid(profileCid);
+            } catch (error) {
+                console.error('Error converting file to Base64:', error);
+            }
+        } else {
+            setProfileFileName('');
+            setProfileImageCid("");
+        }
+    };
 
     return (
         <div className="container_profile absolute bottom-[-70%]">
@@ -158,7 +193,7 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast }: prop
                 <div className="card__border w-[7rem] h-[7rem] p-1">
                     <div className={`${!darkMode && 'bg-white rounded-full'} relative w-full h-full`}>
                         <Image src={(images && images.length > 0 && images[0] !== "no_image" ? images[0] : "/images/contact2.png")} alt="Profile NFt" layout="fill" sizes="(max-width: 100%) 100%, (max-width: 100%) 100%, 100%" objectFit="cover" className="rounded-full object-cover" />
-                        {/* <div className="set-profile-pic absolute bottom-0 right-0 dark:bg-slate-800 rounded-full bg-white cursor-pointer">
+                        {accountId === signedAccountId && <div className="set-profile-pic absolute bottom-0 right-0 dark:bg-slate-800 rounded-full bg-white cursor-pointer" onClick={() => handleFileClick('profileInput')}>
                             <div className="cam relative p-2">
                                 <InlineSVG
                                     src="/images/camera_fill.svg"
@@ -173,7 +208,8 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast }: prop
                                     />
                                 </div>
                             </div>
-                        </div> */}
+                        </div>}
+                        <input type="file" name="picture" id="profileInput" accept="image/*" onChange={handleProfileFileChange} className={`hidden w-full p-2 text-lg rounded-md outline-none ${darkMode ? "image-holder-dark" : "image-holder"}`} />
                     </div>
                 </div>
 
