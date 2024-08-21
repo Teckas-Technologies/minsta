@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { useBackContext } from "@/context/BackContext";
 import { NearContext } from "@/wallet/WalletSelector";
+import { useFetchProfile, useSaveProfile } from "@/hooks/db/ProfileHook";
 
 const Header = () => {
   const pathname = usePathname();
@@ -25,6 +26,8 @@ const Header = () => {
   const headerAccountRef = useRef<HTMLDivElement | null>(null);
   const [subMenu, setSubmenu] = useState(false);
   const { back, toggleBack, onBackButtonClick } = useBackContext();
+  const { fetchDBProfile } = useFetchProfile();
+  const { saveDBProfile } = useSaveProfile()
 
   const router = useRouter();
 
@@ -43,7 +46,17 @@ const Header = () => {
     setIsOpen(false)
   }, [pathname])
 
-
+  useEffect(()=>{
+    if(signedAccountId) {
+      const fetchId = async () => {
+        const fetchedId = await fetchDBProfile(signedAccountId);
+        if(fetchedId === null) {
+          await saveDBProfile({accountId: signedAccountId});
+        }
+      }
+      fetchId();
+    }
+  },[signedAccountId])
 
   useEffect(() => {
     handleNet();
@@ -182,6 +195,10 @@ const Header = () => {
 
         <div className="menu">
           <button onClick={() => push("/leaderboard")}>Leaderboard</button>
+        </div>
+
+        <div className="menu">
+          <button onClick={() => push("/stats")}>Stats</button>
         </div>
 
         <div className="menu">
@@ -400,6 +417,9 @@ const Header = () => {
                 <button onClick={() => push("/leaderboard")}>Leaderboard</button>
               </div>
               <div className="menu">
+                <button onClick={() => push("/stats")}>Stats</button>
+              </div>
+              <div className="menu">
                 <Link href="https://github.com/Teckas-Technologies/minsta" target="_blank" rel="noopener noreferrer">
                   <div className="github flex items-center gap-2">
                     <InlineSVG
@@ -601,6 +621,14 @@ const Header = () => {
 
             {/* {pathname === "/admin" ? <AdminSideMenu setAdminPage={setAdminPage}/> : "User"} */}
 
+            <li className="side-menu" onClick={() => push("/stats")}>
+              <h4>Stats</h4>
+              <InlineSVG
+                src="/images/arrow_right.svg"
+                className="icon fill-current text-headerText"
+                style={{ color: "#ff3572" }}
+              />
+            </li>
             <li className="side-menu" onClick={() => push("/leaderboard")}>
               <h4>Leaderboard</h4>
               <InlineSVG

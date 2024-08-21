@@ -30,7 +30,6 @@ export const ProfilePage = () => {
     const { mode } = useDarkMode();
     const [result, setResult] = useState("");
     const [profile, setProfile] = useState<NEARSocialUserProfile>();
-    const [dbProfile, setDbProfile] = useState<ProfileType>();
     const [images, setImages] = useState<string[]>();
     const [following, setFollowing] = useState<number | null>(null);
     const [followers, setFollowers] = useState<number | null>(null);
@@ -114,7 +113,7 @@ export const ProfilePage = () => {
                 setIsOverflowing(descriptionEl.scrollHeight > descriptionEl.clientHeight);
             }, 100);
         }
-    }, [description, desMore, dbProfile?.about]);
+    }, [description, desMore]);
 
     useEffect(() => {
         if (signedAccountId) {

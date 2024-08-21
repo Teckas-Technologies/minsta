@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ProfileType } from "@/data/types";
-import { findProfileById, saveProfile } from "../../utils/ProfileUtils";
+import { findProfileById, findAllProfile, saveProfile } from "../../utils/ProfileUtils";
 
 const profile = () => {
   return {
@@ -8,12 +8,14 @@ const profile = () => {
       GET: async (request: Request, data: any) => {
         const url = new URL(request.url);
         const accountId = url.searchParams.get("accountId");
-        console.log("Account Id >>",accountId)
-        if (!accountId) {
-          return NextResponse.json({ error: "Account ID is required" }, { status: 400 });
+        if (accountId) {
+          const profile: ProfileType = await findProfileById(accountId.toString());
+          return NextResponse.json(profile, { status: 200 });
+        } else {
+          const profiles = await findAllProfile();
+          const totalProfiles = profiles.length;
+          return NextResponse.json({ totalProfiles }, { status: 200 });
         }
-        const profile: ProfileType = await findProfileById(accountId.toString());
-        return NextResponse.json(profile, { status: 200 });
       },
       POST: async (request: Request) => {
         const body = await request.json();
