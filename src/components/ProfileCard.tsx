@@ -31,10 +31,10 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
     const [credits, setCredits] = useState<number | null>();
     const [buyCredit, setBuyCredit] = useState(false);
     const [txhash, setTxhash] = useState("");
-    const [balance, setBalance] = useState<any>();
+    const [balance, setBalance] = useState<number>(0);
     const [profileFileName, setProfileFileName] = useState('');
     const [profileImageCid, setProfileImageCid] = useState('');
-    const { uploadIPFS } = useNearSocialDB();
+    const { getBalance, uploadIPFS } = useNearSocialDB();
 
     useEffect(() => {
         if (profileImageCid) {
@@ -137,9 +137,10 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
 
     useEffect(() => {
         const fetchBalance = async () => {
-            const res = await wallet?.getBalance(signedAccountId);
-            setBalance(res)
-            console.log("Balance >>", balance)
+            const res = await getBalance();
+            if(res !== undefined){
+                setBalance(res)
+            }
         }
         if (signedAccountId) {
             fetchBalance()
