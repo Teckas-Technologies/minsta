@@ -45,8 +45,10 @@ export const ProfilePage = () => {
     const { fetchDBProfile } = useFetchProfile();
     const [isOverflowing, setIsOverflowing] = useState(false);
     const descriptionRef = useRef<HTMLParagraphElement>(null);
-    const { saveDBProfile } = useSaveProfile();
-    const { getSocialProfile, setSocialProfile, getAvailableStorage, getFollowing, getFollowers, uploadIPFS } = useNearSocialDB();
+    const [balance, setBalance] = useState<number>(0);
+    const [availableStorage, setAvailableStorage] = useState<bigint | null>();
+    const [storageModel, setStorageModel] = useState(false);
+    const { getSocialProfile, setSocialProfile, getAvailableStorage, buyStorage, getFollowing, getFollowers, getBalance, uploadIPFS } = useNearSocialDB();
     const { getImage } = useImage();
     const [uploadText, setUploadText] = useState<string>("");
     const [cid, setCid] = useState<string>("");
@@ -86,11 +88,8 @@ export const ProfilePage = () => {
                     }
                 }
             };
-            console.log("Step 1")
             if (cid) {
-                console.log("Step 2")
                 if (uploadText === "Profile Image") {
-                    console.log("Step 3")
                     const result = await setSocialProfile(profileData);
                     return result;
                 }
@@ -121,15 +120,50 @@ export const ProfilePage = () => {
         }
     }, [signedAccountId])
 
-    // useEffect(() => {
-    //     if (signedAccountId) {
-    //         const getDBAvailableStorage = async () => {
-    //             const storage = await getAvailableStorage()
-    //             console.log("Storage >> ", storage)
-    //         }
-    //         getDBAvailableStorage();
-    //     }
-    // }, [signedAccountId, accountId, edit]);
+    useEffect(() => {
+        const fetchBalance = async () => {
+            const res = await getBalance();
+            if(res !== undefined){
+                setBalance(res);
+            }
+            
+        }
+        if (signedAccountId) {
+            fetchBalance()
+        }
+    }, [])
+
+    useEffect(() => {
+        if (signedAccountId) {
+            const getDBAvailableStorage = async () => {
+                const storage = await getAvailableStorage()
+                console.log("Storage >> ", storage)
+                if (typeof storage === 'bigint') {
+                    setAvailableStorage(storage);
+                } else if (storage === undefined) {
+                    setAvailableStorage(null);
+                }
+            }
+            getDBAvailableStorage();
+        }
+    }, [signedAccountId, edit]);
+
+    const handleEdit = () => {
+        if(availableStorage === null || (typeof availableStorage === 'bigint' && BigInt(availableStorage) <= BigInt(512))){
+            setStorageModel(true);
+        } else {
+            setEdit(true)
+        }
+    }
+
+    const buySocialDBStorage = async () => {
+        if(balance > 0.05){
+            return await buyStorage();
+        } else {
+            setHandleToast("Insufficient Balance!", true);
+            return;
+        }
+    }
 
     useEffect(() => {
         if (accountId) {
@@ -269,7 +303,7 @@ export const ProfilePage = () => {
                     {!edit ?
                         <>
                             <div className="max-w-md flex gap-3 iems-center flex ml-auto mr-5 justify-center">
-                                {accountId === signedAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={() => setEdit(true)}>
+                                {accountId === signedAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={handleEdit}>
                                     <InlineSVG
                                         src="/images/pencil.svg"
                                         className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
@@ -422,7 +456,7 @@ export const ProfilePage = () => {
                     </div>
                 } */}
                 {toast &&
-                    <div id="toast-default" className="toast-container mt-6 md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed ">
+                    <div id="toast-default" className="toast-container mt-6 md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed z-50">
                         <div className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
                             <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
                                 <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -447,6 +481,17 @@ export const ProfilePage = () => {
                         <div className="btns flex gap-2">
                             <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={() => handleUpload("", "", false)}>Cancel</button>
                             <button className="btn bg-sky-500 cursor-pointer" onClick={handleSaveProfile}>Upload</button>
+                        </div>
+                    </div>
+                </div>}
+
+                {storageModel && <div className="upload-model fixed bg-sky-50 dark:bg-slate-800 top-0 bottom-0 right-0 left-0 flex justify-center items-center">
+                    <div className={`upload-box w-[20rem] bg-white mx-3 px-3 py-2 flex flex-col items-center gap-2 rounded-md ${darkMode ? "box-shadow-dark" : "box-shadow"}`}>
+                        <h2 className="title-font">Insufficient Storage!</h2>
+                        <p className="text-justify">{`You don't have enough space to set the profile on near.social. Please buy ${availableStorage !== null ? "additional" : ""} storage on near.social by spending 0.05 NEAR.`}</p>
+                        <div className="btns flex gap-2">
+                            <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={()=>setStorageModel(false)}>Cancel</button>
+                            <button className="btn bg-sky-500 cursor-pointer" onClick={buySocialDBStorage}>Buy</button>
                         </div>
                     </div>
                 </div>}
