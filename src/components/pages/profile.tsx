@@ -16,6 +16,8 @@ import { NearContext } from "@/wallet/WalletSelector"
 import useNearSocialDB from "@/utils/useNearSocialDB"
 import { useImage } from "@/utils/socialImage";
 import Image from "next/image"
+import useNEARTransfer from "@/utils/useTransfer"
+import { constants } from "@/constants"
 
 export const ProfilePage = () => {
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
@@ -55,11 +57,17 @@ export const ProfilePage = () => {
     const [uploadModel, setUploadModel] = useState<boolean>(false);
     const [backgroundFileName, setBackgroundFileName] = useState('');
     const [backgroundImageCid, setBackgroundImageCid] = useState('');
+    const [buyCreditModel, setBuyCreditModel] = useState(false);
+    const [amount, setAmount] = useState<number>(1);
 
     const handleUpload = (text: string, cid: string, open: boolean) => {
         setUploadText(text);
         setUploadModel(open);
         setCid(cid);
+    }
+
+    const handleBuyCredit = (open: boolean) => {
+        setBuyCreditModel(open);
     }
 
     useEffect(() => {
@@ -126,12 +134,11 @@ export const ProfilePage = () => {
             if(res !== undefined){
                 setBalance(res);
             }
-            
         }
         if (signedAccountId) {
             fetchBalance()
         }
-    }, [])
+    }, [activeAccountIdNew])
 
     useEffect(() => {
         if (signedAccountId) {
@@ -293,6 +300,21 @@ export const ProfilePage = () => {
         }
     };
 
+    const calculateCredit = (amount: number) => {
+        const creditValue = amount / constants.creditAmount;
+        return Math.floor(creditValue);
+    };
+
+    const { transfer } = useNEARTransfer();
+
+    const buyCredit = async (amount: number) => {
+        if(balance >= amount) {
+            await transfer(amount.toString());
+        } else {
+            setHandleToast("Insufficient Balance!", true);
+        }
+    }
+
     return (
         <div className={darkMode ? "dark" : ""}>
             <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh] h-auto scroll-smooth overflow-y-scroll">
@@ -331,7 +353,7 @@ export const ProfilePage = () => {
                             </div>}
                         </> :
                         <EditProfile setEdit={setEdit} accountId={activeAccountIdNew} />}
-                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} />}
+                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} handleBuyCredit={handleBuyCredit} />}
                 </div>
 
                 {/* {!dataItems && !itemsLoading && 
@@ -496,6 +518,24 @@ export const ProfilePage = () => {
                     </div>
                 </div>}
 
+                {buyCreditModel && <div className="upload-model fixed bg-sky-50 dark:bg-slate-800 top-0 bottom-0 right-0 left-0 flex justify-center items-center">
+                    <div className={`upload-box w-[20rem] bg-white mx-3 px-3 py-2 flex flex-col items-center gap-2 rounded-md ${darkMode ? "box-shadow-dark" : "box-shadow"}`}>
+                        <h2 className="title-font">Buy Credits!</h2>
+                        <div className={`input-box h-11 w-full rounded-md flex items-center justify-between ${darkMode ? "box-shadow" : "box-shadow"}`}>
+                            <input type="number" min={0.05} value={amount} onChange={(e)=> setAmount(parseFloat(e.target.value))} className={`bg-white px-4 py-2 flex-grow rounded-md h-11 text-sm border-none outline-none`}/>
+                            <div className="box-near h-11 w-13 p-2 pr-4">
+                                <img src="images/near-logo.png" className="h-full w-full" alt="" />
+                            </div>
+                        </div>
+                        <div className="credit-value">
+                            <h2>{!isNaN(amount) ? amount : 0} NEAR = {calculateCredit(!isNaN(amount) ? amount : 0)} Credits</h2>
+                        </div>
+                        <div className="btns flex gap-2">
+                            <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={()=>setBuyCreditModel(false)}>Cancel</button>
+                            <button className="btn bg-sky-500 cursor-pointer" onClick={()=>buyCredit(amount)}>Buy</button>
+                        </div>
+                    </div>
+                </div>}
             </main>
         </div>
     )

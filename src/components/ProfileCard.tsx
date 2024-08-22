@@ -7,10 +7,11 @@ import { CreditsType, HashesType, NEARSocialUserProfile, ProfileType } from "@/d
 import { useDarkMode } from "@/context/DarkModeContext"
 import { NearContext } from "@/wallet/WalletSelector"
 import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook"
-import useNEARTransfer from "@/utils/useTransfer"
+import * as nearAPI from "near-api-js";
 import { useFetchHashes, useSaveHashes } from "@/hooks/db/HashHook"
 import FollowButton from "./buttons/follow-button"
 import useNearSocialDB from "@/utils/useNearSocialDB"
+import { constants } from "@/constants"
 
 interface props {
     profile: NEARSocialUserProfile | undefined;
@@ -19,9 +20,10 @@ interface props {
     accountId: string;
     setHandleToast: (s: string, e: boolean) => void
     handleUpload: (text: string, cid: string, open: boolean) => void
+    handleBuyCredit: (open: boolean)=> void;
 }
 
-export const ProfileCard = ({ profile, images, accountId, setHandleToast, handleUpload }: props) => {
+export const ProfileCard = ({ profile, images, accountId, setHandleToast, handleUpload, handleBuyCredit }: props) => {
     const [animation, setAnimation] = useState(false);
     const [darkMode, setDarkMode] = useState<boolean>();
     const { mode } = useDarkMode();
@@ -73,9 +75,13 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
         }
     }, [signedAccountId, profile]);
 
-    const { transfer } = useNEARTransfer();
     const { fetchHashes } = useFetchHashes();
     const { saveHashes } = useSaveHashes();
+
+    const calculateCredit = (amount: number) => {
+        const creditValue = amount / constants.creditAmount;
+        return Math.floor(creditValue);
+    };
 
     useEffect(() => {
         const getresult = async () => {
@@ -92,9 +98,11 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
                         const result = await wallet?.getTransactionResult(hash);
                         if (result?.success) {
                             if (result.signerId) {
+                                const amt = nearAPI.utils.format.formatNearAmount(result.amount);
+                                const resCredit = calculateCredit(parseFloat(amt));
                                 const data: CreditsType = {
                                     accountId: result.signerId,
-                                    credit: 5
+                                    credit: resCredit
                                 };
                                 await saveCredits(data);
 
@@ -102,7 +110,7 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
                                 setCredits(credit?.credit);
                                 const hashData: HashesType = {
                                     accountId: result.signerId,
-                                    amount: result.amount,
+                                    amount: parseFloat(amt),
                                     hash: hash
                                 }
                                 await saveHashes(hashData)
@@ -128,7 +136,7 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
             } else if (balance < 0.05) {
                 setHandleToast("Insufficient Balance!", true);
             } else {
-                await transfer();
+                handleBuyCredit(true);
             }
         } catch (error) {
             console.error("Failed to sign and send transaction:", error);
@@ -145,7 +153,7 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
         if (signedAccountId) {
             fetchBalance()
         }
-    }, [])
+    }, [signedAccountId])
 
     const handleFileClick = (inputId: string) => {
         const fileInput = document.getElementById(inputId);
