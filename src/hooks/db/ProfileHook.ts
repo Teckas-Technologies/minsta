@@ -3,6 +3,7 @@ import { ProfileType } from "@/data/types";
 
 export const useFetchTotalProfiles = () => {
   const [totalProfiles, setTotalProfiles] = useState<number | null>(null);
+  const [lastMonthProfiles, setLastMonthProfiles] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,7 +14,8 @@ export const useFetchTotalProfiles = () => {
       const response = await fetch('/api/profile');
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
-      setTotalProfiles(data.totalProfiles);
+      setTotalProfiles(data?.totalProfiles);
+      setLastMonthProfiles(data?.lastMonthProfiles)
     } catch (err) {
       console.error('Error fetching total profiles:', err);
       setError('Error fetching total profiles!');
@@ -26,7 +28,7 @@ export const useFetchTotalProfiles = () => {
     fetchTotalProfiles();
   }, []);
 
-  return { totalProfiles, loading, error };
+  return { totalProfiles, lastMonthProfiles, loading, error };
 };
 
 export const useFetchProfile = () => {

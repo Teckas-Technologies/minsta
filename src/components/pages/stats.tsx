@@ -18,8 +18,8 @@ export const StatsPage = () => {
             setDarkMode(false);
         }
     }, [mode])
-    const { data, totalNFTs, distinctOwners } = useStats();
-    const { totalProfiles, loading, error } = useFetchTotalProfiles();
+    const { data, totalNFTs, distinctOwners, totalNFTsLast30Days, distinctOwnersLast30Days } = useStats();
+    const { totalProfiles, lastMonthProfiles, loading, error } = useFetchTotalProfiles();
     return (
         <div className={darkMode ? "dark" : ""}>
             <main className="relative px-1 lg:px-12 pb-5 mx-auto flex flex-col items-center justify-start pt-[5rem] bg-sky-50 dark:bg-slate-800 min-h-[99vh] h-auto scroll-smooth overflow-y-scroll">
@@ -40,7 +40,7 @@ export const StatsPage = () => {
                             <div className="flex items-center"><InlineSVG
                                 src="/images/arrow_up.svg"
                                 className="fill-current text-green-500"
-                            /> <p><span className="text-green-500">16</span> last month</p></div>
+                            /> <p><span className="text-green-500">{lastMonthProfiles}</span> last month</p></div>
                         </div>
                     </div>
                     <div className={`analytic-box bg-white group ${darkMode && "box-shadow-dark"} rounded-md flex flex-col justify-between px-5 pb-5 pt-3`}>
@@ -56,7 +56,7 @@ export const StatsPage = () => {
                             <div className="flex items-center"><InlineSVG
                                 src="/images/arrow_up.svg"
                                 className="fill-current text-green-500"
-                            /> <p><span className="text-green-500">63</span> last month</p></div>
+                            /> <p><span className="text-green-500">{totalNFTsLast30Days}</span> last month</p></div>
                         </div>
                     </div>
                     <div className={`analytic-box bg-white group ${darkMode && "box-shadow-dark"} rounded-md flex flex-col justify-between px-5 pb-5 pt-3`}>
@@ -88,7 +88,7 @@ export const StatsPage = () => {
                             <div className="flex items-center"><InlineSVG
                                 src="/images/arrow_up.svg"
                                 className="fill-current text-green-500"
-                            /> <p><span className="text-green-500">8</span> last month</p></div>
+                            /> <p><span className="text-green-500">{distinctOwnersLast30Days}</span> last month</p></div>
                         </div>
                     </div>
                 </div>
