@@ -189,6 +189,25 @@ const useNearSocialDB = () => {
         }
     }
 
+    const getBalance = async () => {
+        setLoading(true);
+
+        try {
+            if (!wallet) {
+                throw new Error("Wallet is undefined");
+            }
+            const result = await wallet?.getBalance(signedAccountId);
+            return result;
+        } catch (error: any) {
+            setError(
+                error?.message || "An error occurred during the purchase near social db storage process."
+            );
+            console.log("Error >> ", error)
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const uploadIPFS = async (file: File) => {
         setLoading(true);
         setError(null);
@@ -217,7 +236,7 @@ const useNearSocialDB = () => {
         }
     };
 
-    return { getSocialData, getSocialProfile, setSocialProfile, getFollowing, getFollowers, getAvailableStorage, buyStorage, uploadIPFS, loading, error };
+    return { getSocialData, getSocialProfile, setSocialProfile, getFollowing, getFollowers, getAvailableStorage, buyStorage, getBalance, uploadIPFS, loading, error };
 }
 
 export default useNearSocialDB;
