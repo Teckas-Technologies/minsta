@@ -8,7 +8,7 @@ const useNEARTransfer = () => {
     const [error, setError] = useState<string | null>(null);
     const { wallet, signedAccountId } = useContext(NearContext);
 
-    const transfer = async () => {
+    const transfer = async (amount: string) => {
         if (!signedAccountId) {
             setError("Active account ID is not set.");
             return;
@@ -19,7 +19,7 @@ const useNEARTransfer = () => {
             if (!wallet) {
                 throw new Error("Wallet is undefined");
             }
-            const amountInYocto = nearAPI.utils.format.parseNearAmount("0.05");
+            const amountInYocto = nearAPI.utils.format.parseNearAmount(amount);
 
             const transaction = {
                 receiverId: 'minstaorg.testnet',

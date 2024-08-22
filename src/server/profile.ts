@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ProfileType } from "@/data/types";
-import { findProfileById, findAllProfile, saveProfile } from "../../utils/ProfileUtils";
+import { findProfileById, findAllProfile, saveProfile, findProfilesJoinedLast30Days } from "../../utils/ProfileUtils";
 
 const profile = () => {
   return {
@@ -12,9 +12,10 @@ const profile = () => {
           const profile: ProfileType = await findProfileById(accountId.toString());
           return NextResponse.json(profile, { status: 200 });
         } else {
-          const profiles = await findAllProfile();
-          const totalProfiles = profiles.length;
-          return NextResponse.json({ totalProfiles }, { status: 200 });
+          const totalProfiles = await findAllProfile();
+          const lastMonthProfiles = await findProfilesJoinedLast30Days();
+          // const totalProfiles = profiles.length;
+          return NextResponse.json({ totalProfiles, lastMonthProfiles }, { status: 200 });
         }
       },
       POST: async (request: Request) => {
