@@ -104,7 +104,7 @@ const useInfiniteScrollGQL = (
   const [scrolling, setScrolling] = useState(false);
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const fetchNum = isDesktop ? 8 : 10;
+  const fetchNum = isDesktop ? 12 : 15;
 
   useEffect(()=>{
     setActiveAccount(activeId);
