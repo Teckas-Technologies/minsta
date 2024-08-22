@@ -28,7 +28,10 @@ const CONTRACT_ID = "v1.social08.testnet"
 
 export const NETWORK = (process.env.NEXT_PUBLIC_NETWORK || "testnet") as NetworkId;
 
+const creditAmount = parseFloat(process.env.CREDIT_AMOUNT ?? "0.05");
+
 export const constants = {
+  creditAmount,
   SOCIAL_DB_CONTRACT_ID,
   CONTRACT_ID,
   NETWORK,

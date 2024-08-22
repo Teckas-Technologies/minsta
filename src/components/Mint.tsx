@@ -356,13 +356,19 @@ export function Mint({
             <div className="buy-alert-box w-full flex flex-col gap-3 h-auto bg-white dark:bg-slate-800 rounded-md py-2 px-3">
               <div className="head flex flex-col gap-2">
                 <h2 className="title-font text-center dark:text-white">Insufficient Credits!</h2>
-                <p className="dark:text-white text-justify">You don&apos;t have enough credits for the mind-blowing AI title and description generation.
-                  Spend $0.05 to get 5 credits.</p> <br />
-                <p className="dark:text-white text-justify">Go to &quot;Profile&quot; page to buy an &quot;AI Credits&quot;.</p>
+                <p className="dark:text-white text-justify">
+                  You don&apos;t have enough credits for the mind-blowing AI title and description generation.
+                </p>
+                <p className="dark:text-white text-justify">
+                  Go to the &quot;Profile&quot; page to buy &quot;AI Credits&quot;.
+                </p>
+                <p className="dark:text-white text-center">
+                  1 credit = 0.05 NEAR.
+                </p>
               </div>
               <div className="btns-credit flex items-center justify-center gap-2">
                 <button className="btn cancel-btn dark:text-white dark:border-white" onClick={() => setBuyCredit(false)}>Cancel</button>
-                <button className="btn success-btn border-green-600" onClick={()=>push(`/profile/?accountId=${signedAccountId}`)}>Go to Profile</button>
+                <button className="btn success-btn border-green-600" onClick={() => push(`/profile/?accountId=${signedAccountId}`)}>Go to Profile</button>
               </div>
             </div>
           </div>}
