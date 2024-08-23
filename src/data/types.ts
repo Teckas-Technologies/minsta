@@ -73,6 +73,12 @@ export interface CreditsType {
   credit: number;
 }
 
+export interface CreditsTypeReq {
+  accountId: string;
+  credit: number;
+  detuct: boolean;
+}
+
 export interface HashesType {
   accountId: string;
   amount: number;

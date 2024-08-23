@@ -1,5 +1,5 @@
 import { useDarkMode } from "@/context/DarkModeContext";
-import { CreditsType, HashesType } from "@/data/types";
+import { CreditsType, CreditsTypeReq, HashesType } from "@/data/types";
 import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
 import { convertBase64ToFile } from "@/utils/base64ToFile";
 import useMintImage from "@/utils/useMint";
@@ -54,9 +54,10 @@ export default function FileUploadPage() {
           let credit = await fetchCredits(signedAccountId);
 
           if (credit === null) {
-            const data: CreditsType = {
+            const data: CreditsTypeReq = {
               accountId: signedAccountId,
-              credit: 3
+              credit: 3,
+              detuct: false
             };
             await saveCredits(data);
 
@@ -136,9 +137,10 @@ export default function FileUploadPage() {
     }
     try {
       await generate();
-      const data: CreditsType = {
+      const data: CreditsTypeReq = {
         accountId: signedAccountId,
-        credit: credits - 1
+        credit: credits - 1,
+        detuct: true
       };
       await saveCredits(data);
       setCredits(credits - 1);
@@ -163,15 +165,24 @@ export default function FileUploadPage() {
     }
   }
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!convertedPhotoFile) {
       setHandleToast("No file chosen!", true)
       return;
     }
     if (signedAccountId) {
-      setPreview(false)
-      mintGif(convertedPhotoFile, title, description, tags);
+      setPreview(false);
       setUploading(true);
+      const res = await mintGif(convertedPhotoFile, title, description, tags);
+      // if(res){
+      //   setUploading(false);
+      //   setHandleToast("Minted Successfully!", true);
+      //   setTimeout(()=>push("/"), 5000)
+      // } else if(!res) {
+      //   setUploading(false);
+      //   setHandleToast("Minting Failed!", true);
+      //   setTimeout(()=>push("/"), 5000)
+      // }
       setTitle("");
       setDescription("");
       setTags([]);

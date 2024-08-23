@@ -8,7 +8,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [signedAccountId, setSignedAccountId] = useState<string>('');
 
   useEffect(() => {
-    const walletInstance = new Wallet({ networkId: constants.network, createAccessKeyFor: 'test.testnet' });
+    const walletInstance = new Wallet({ networkId: constants.network, createAccessKeyFor: constants.tokenContractAddress });
     walletInstance.startUp(setSignedAccountId);
     setWallet(walletInstance);
   }, []);

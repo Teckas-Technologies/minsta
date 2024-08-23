@@ -19,7 +19,7 @@ export const AppContext = createContext<{
   closeModal: () => void;
   isMainModalOpen: boolean;
   isRewardsModalOpen: boolean;
-  mintImage: (photo: File, title:string, description: string,  tags: string[]) => void;
+  mintImage: (photo: File, title:string, description: string,  tags: string[]) => any;
   reduceImageSize: (photo: string, num: number) => Promise<string>;
   getTitleAndDescription: (photo: string) => Promise<Generate>;
   isLoading: boolean;
@@ -49,7 +49,7 @@ interface IAppConsumer {
   closeModal: () => void;
   isMainModalOpen: boolean;
   isRewardsModalOpen: boolean;
-  mintImage: (photo: File, title:string, description: string, tags: string[]) => void;
+  mintImage: (photo: File, title:string, description: string, tags: string[]) => any;
   reduceImageSize: (photo: string, num: number) => Promise<string>;
   getTitleAndDescription: (photo: string) => Promise<Generate>;
   isLoading: false;

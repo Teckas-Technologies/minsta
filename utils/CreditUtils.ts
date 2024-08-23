@@ -1,6 +1,6 @@
 import Credits from "../model/Credits";
 import { connectToDatabase } from "./mongoose";
-import { CreditsType } from "@/data/types";
+import { CreditsType, CreditsTypeReq } from "@/data/types";
 
 export const findAllCredits = async (): Promise<any> => {
     await connectToDatabase();
@@ -20,15 +20,20 @@ export const findCreditById = async (accountId: string): Promise<any> => {
     }
 }
 
-export async function saveCredit(data: CreditsType ): Promise<any> {
+export async function saveCredit(data: CreditsTypeReq ): Promise<any> {
     await connectToDatabase();
-    const { accountId, credit} = data;
+    const { accountId, credit, detuct} = data;
 
     let existingProfile = await Credits.findOne({ accountId });
 
     if (existingProfile) {
-        existingProfile.credit = credit
-        return existingProfile.save();
+        if(detuct){
+            existingProfile.credit = credit;
+            return existingProfile.save();
+        } else {
+            existingProfile.credit += credit;
+            return existingProfile.save();
+        }
     } else {
         const newCredit = new Credits({
             accountId: accountId,

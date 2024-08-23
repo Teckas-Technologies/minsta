@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { CreditsType } from "@/data/types";
+import { CreditsType, CreditsTypeReq } from "@/data/types";
 import { findCreditById, saveCredit } from "../../utils/CreditUtils";
 
 const credits = () => {
@@ -16,7 +16,7 @@ const credits = () => {
       },
       POST: async (request: Request) => {
         const body = await request.json();
-        const credit: CreditsType = body;
+        const credit: CreditsTypeReq = body;
         console.log("API >> ", credit)
         const savedCredit = await saveCredit(credit);
         console.log("API Saved >> ", savedCredit)
