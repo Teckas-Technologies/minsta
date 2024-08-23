@@ -2,7 +2,7 @@ import { NetworkId } from '@/data/types';
 require("dotenv").config();
 
 const appName: string = process.env.NEXT_PUBLIC_APP_TITLE || "MINTBASE";
-const network = (process.env.NEXT_PUBLIC_NETWORK || "mainnet") as NetworkId;
+const network = (process.env.NEXT_PUBLIC_NETWORK || "testnet") as NetworkId;
 const proxyContractAddress =
   process.env.NEXT_PUBLIC_PROXY_MINTER_CONTRACT_ADDRESS ||
   "0.drop.proxy.mintbase.near";
@@ -23,14 +23,14 @@ const twitterText =
 
 const adminId = process.env.ADMIN_ID || ["fungible_rhmor.testnet", "exact_spikespiegel.testnet", "minsta.testnet", "chloe.mintbus.near"];
 
-const SOCIAL_DB_CONTRACT_ID = process.env.SOCIAL_DB_CONTRACT_ID || "social.near";
+const SOCIAL_DB_CONTRACT_ID = process.env.SOCIAL_DB_CONTRACT_ID || "v1.social08.testnet";
 const CONTRACT_ID = "v1.social08.testnet"
 
-export const NETWORK = (process.env.NEXT_PUBLIC_NETWORK || "mainnet") as NetworkId;
+export const NETWORK = (process.env.NEXT_PUBLIC_NETWORK || "testnet") as NetworkId;
 
 const creditAmount = parseFloat(process.env.CREDIT_AMOUNT ?? "0.05");
 
-const receiverId = process.env.RECEIVER_ID || "minstaorg.near";
+const receiverId = process.env.RECEIVER_ID || "minstaorg.testnet";
 
 export const constants = {
   receiverId,
