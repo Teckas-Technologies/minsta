@@ -2,7 +2,7 @@ import { DynamicGrid } from "../DynamicGrid"
 import { FirstToken } from "../FirstToken"
 import { FeedScroll } from "../feed/feedscroll"
 import { useHomePageData } from "@/hooks/useHomePageData"
-import { InfiniteScrollHook, NEARSocialUserProfile, ProfileType } from "@/data/types"
+import { CreditsType, CreditsTypeReq, HashesType, InfiniteScrollHook, NEARSocialUserProfile, ProfileType } from "@/data/types"
 import { useContext, useEffect, useRef, useState } from "react"
 import InlineSVG from "react-inlinesvg"
 import { useDarkMode } from "@/context/DarkModeContext"
@@ -18,6 +18,9 @@ import { useImage } from "@/utils/socialImage";
 import Image from "next/image"
 import useNEARTransfer from "@/utils/useTransfer"
 import { constants } from "@/constants"
+import { useFetchHashes, useSaveHashes } from "@/hooks/db/HashHook"
+import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook"
+import * as nearAPI from "near-api-js";
 
 export const ProfilePage = () => {
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
@@ -305,11 +308,41 @@ export const ProfilePage = () => {
         return Math.floor(creditValue);
     };
 
+    
+
     const { transfer } = useNEARTransfer();
+    const { saveHashes } = useSaveHashes();
+    const { saveCredits } = useSaveCredits();
+    const { fetchCredits } = useFetchCredits();
+    const [creditAdded, setCreditAdded] = useState(false);
 
     const buyCredit = async (amount: number) => {
+        setCreditAdded(false);
         if(balance >= amount) {
-            await transfer(amount.toString());
+            const result = await transfer(amount.toString());
+            if (result?.success) {
+                if (result?.signerId && result.depositAmount) {
+                    const amt = nearAPI.utils.format.formatNearAmount(result.depositAmount);
+                    const resCredit = calculateCredit(parseFloat(amt));
+                    const data: CreditsTypeReq = {
+                        accountId: result.signerId,
+                        credit: resCredit,
+                        detuct: false
+                    };
+                    await saveCredits(data);
+
+                    let credit = await fetchCredits(result.signerId);
+                    // setCredits(credit?.credit);
+                    const hashData: HashesType = {
+                        accountId: result.signerId,
+                        amount: parseFloat(amt),
+                        hash: result.hash as string
+                    }
+                    await saveHashes(hashData);
+                    setBuyCreditModel(false);
+                    setCreditAdded(true);
+                }
+            }
         } else {
             setHandleToast("Insufficient Balance!", true);
         }
@@ -353,7 +386,7 @@ export const ProfilePage = () => {
                             </div>}
                         </> :
                         <EditProfile setEdit={setEdit} accountId={activeAccountIdNew} />}
-                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} handleBuyCredit={handleBuyCredit} />}
+                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} handleBuyCredit={handleBuyCredit} creditAdded={creditAdded} />}
                 </div>
 
                 {/* {!dataItems && !itemsLoading && 

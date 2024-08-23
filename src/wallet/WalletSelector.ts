@@ -37,6 +37,7 @@ export class Wallet {
       network: this.networkId,
       modules: [
         setupBitteWallet() as any,
+        // setupMeteorWallet(),
         // setupMyNearWallet(),
         // setupHereWallet(),
         // setupMintbaseWallet(),

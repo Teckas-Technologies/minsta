@@ -3,7 +3,7 @@ import InlineSVG from "react-inlinesvg"
 import { CoptText } from "./CopyText"
 import Link from "next/link"
 import { useContext, useEffect, useState } from "react"
-import { CreditsType, HashesType, NEARSocialUserProfile, ProfileType } from "@/data/types"
+import { CreditsType, CreditsTypeReq, HashesType, NEARSocialUserProfile, ProfileType } from "@/data/types"
 import { useDarkMode } from "@/context/DarkModeContext"
 import { NearContext } from "@/wallet/WalletSelector"
 import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook"
@@ -21,9 +21,10 @@ interface props {
     setHandleToast: (s: string, e: boolean) => void
     handleUpload: (text: string, cid: string, open: boolean) => void
     handleBuyCredit: (open: boolean)=> void;
+    creditAdded: boolean
 }
 
-export const ProfileCard = ({ profile, images, accountId, setHandleToast, handleUpload, handleBuyCredit }: props) => {
+export const ProfileCard = ({ profile, images, accountId, setHandleToast, handleUpload, handleBuyCredit, creditAdded }: props) => {
     const [animation, setAnimation] = useState(false);
     const [darkMode, setDarkMode] = useState<boolean>();
     const { mode } = useDarkMode();
@@ -58,9 +59,10 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
                 try {
                     let credit = await fetchCredits(signedAccountId);
                     if (credit === null) {
-                        const data: CreditsType = {
+                        const data: CreditsTypeReq = {
                             accountId: signedAccountId,
-                            credit: 3
+                            credit: 3,
+                            detuct: false
                         };
                         await saveCredits(data);
                         credit = await fetchCredits(signedAccountId);
@@ -73,7 +75,7 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
             };
             fetchDbCredit();
         }
-    }, [signedAccountId, profile]);
+    }, [signedAccountId, profile, creditAdded]);
 
     const { fetchHashes } = useFetchHashes();
     const { saveHashes } = useSaveHashes();
@@ -100,9 +102,10 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
                             if (result.signerId) {
                                 const amt = nearAPI.utils.format.formatNearAmount(result.amount);
                                 const resCredit = calculateCredit(parseFloat(amt));
-                                const data: CreditsType = {
+                                const data: CreditsTypeReq = {
                                     accountId: result.signerId,
-                                    credit: resCredit
+                                    credit: resCredit,
+                                    detuct: false
                                 };
                                 await saveCredits(data);
 
@@ -236,10 +239,11 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
                             <h2 className="dark:text-white">{credits}</h2>
                         </div>
                     </div>
-                    {credits && credits <= 0 &&
+                    {/* {credits && credits <= 0 && */}
                         <div className="buy-credit bg-green-500 flex justify-center items-center rounded-md gap-2 px-2 py-1 my-1 cursor-pointer" onClick={handleTransfer}>
                             <h2>{"Buy"}</h2>
-                        </div>}
+                        </div>
+                        {/* } */}
                 </div>}
                 <FollowButton accountId={accountId} />
                 {(profile?.linktree?.github || profile?.linktree?.telegram || profile?.linktree?.twitter || profile?.linktree?.website) &&
