@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CreditsType } from "@/data/types";
+import { CreditsType, CreditsTypeReq } from "@/data/types";
 
 
 export const useFetchCredits = () => {
@@ -31,7 +31,7 @@ export const useSaveCredits = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    const saveCredits = async (data: CreditsType) => {
+    const saveCredits = async (data: CreditsTypeReq) => {
       setLoading(true);
       setError(null);
       console.log("Hook >> ", data)

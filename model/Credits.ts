@@ -12,7 +12,7 @@ const creditsSchema = new mongoose.Schema(
             required: true,
         },
         credit: {
-            type: String,
+            type: Number,
             required: true,
         },
     },

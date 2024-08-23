@@ -30,7 +30,10 @@ export const NETWORK = (process.env.NEXT_PUBLIC_NETWORK || "testnet") as Network
 
 const creditAmount = parseFloat(process.env.CREDIT_AMOUNT ?? "0.05");
 
+const receiverId = process.env.RECEIVER_ID || "minstaorg.testnet";
+
 export const constants = {
+  receiverId,
   creditAmount,
   SOCIAL_DB_CONTRACT_ID,
   CONTRACT_ID,

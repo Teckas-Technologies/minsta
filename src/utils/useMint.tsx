@@ -73,7 +73,7 @@ const useMintImage = () => {
     }
 
     try {
-      return await wallet.callMethod({
+      const res = await wallet.callMethod({
         contractId: constants.proxyContractAddress,
         method: 'mint',
         args: {
@@ -83,9 +83,11 @@ const useMintImage = () => {
         gas: '200000000000000',
         deposit: '10000000000000000000000'
       });
+      console.log("Ress 1 >>> ", res);
+      return res;
     } catch (error) {
       console.error("Failed to sign and send transaction:", error);
-      throw new Error("Failed to sign and send transaction");
+      // throw new Error("Failed to sign and send transaction");
     }
   };
 
@@ -170,7 +172,8 @@ const useMintImage = () => {
       };
       const uploadedData = await uploadReferenceObject(refObject);
       const metadata = { reference: uploadedData?.id, title: title, description: description };
-      await performTransaction(wallet, metadata);
+      const res = await performTransaction(wallet, metadata);
+      return res;
     } catch (error: any) {
       setError(
         error?.message || "An error occurred during the minting process."
@@ -203,7 +206,9 @@ const useMintImage = () => {
       };
       const uploadedData = await uploadReferenceObject(refObject);
       const metadata = { reference: uploadedData?.id, title: originalTitle, description: originalDescription };
-      await performTransaction(wallet, metadata);
+      const res = await performTransaction(wallet, metadata);
+      console.log("Ress 2 >>> ", res);
+      return res;
     } catch (error: any) {
       setError(
         error?.message || "An error occurred during the minting process."

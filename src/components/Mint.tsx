@@ -7,7 +7,7 @@ import { Cloudinary } from '@cloudinary/url-gen';
 import { Resize } from '@cloudinary/url-gen/actions/resize';
 import { Effect } from '@cloudinary/url-gen/actions/effect';
 import InlineSVG from "react-inlinesvg";
-import { CreditsType } from "@/data/types";
+import { CreditsType, CreditsTypeReq } from "@/data/types";
 import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
 import { NearContext } from "@/wallet/WalletSelector";
 import { useRouter } from "next/navigation";
@@ -78,9 +78,10 @@ export function Mint({
           let credit = await fetchCredits(signedAccountId);
 
           if (credit === null) {
-            const data: CreditsType = {
+            const data: CreditsTypeReq = {
               accountId: signedAccountId,
-              credit: 3
+              credit: 3,
+              detuct: false
             };
             await saveCredits(data);
 
@@ -152,7 +153,16 @@ export function Mint({
       } else {
         photoFile = await urlToFile(src, 'image/jpeg', 'image/jpeg');
       }
-      mintImage(photoFile, title, description, tags);
+      const res = await mintImage(photoFile, title, description, tags);
+      // if(res){
+      //   // setUploading(false);
+      //   setHandleToast("Minted Successfully!", true);
+      //   setTimeout(()=>push("/"), 5000)
+      // } else if(!res) {
+      //   // setUploading(false);
+      //   setHandleToast("Minting Failed!", true);
+      //   setTimeout(()=>push("/"), 5000)
+      // }
       setTitle("");
       setDescription("");
       setTags([])
@@ -188,9 +198,10 @@ export function Mint({
     }
     try {
       await generate();
-      const data: CreditsType = {
+      const data: CreditsTypeReq = {
         accountId: signedAccountId,
-        credit: credits - 1
+        credit: credits - 1,
+        detuct: true
       };
       await saveCredits(data);
       setCredits(credits - 1);
