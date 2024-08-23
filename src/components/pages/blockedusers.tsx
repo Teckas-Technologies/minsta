@@ -1,12 +1,12 @@
 import { useDarkMode } from "@/context/DarkModeContext";
 import { BlockUserType } from "@/data/types";
-import { useMbWallet } from "@mintbase-js/react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useFetchBlockUser, useSaveBlockUser } from "@/hooks/db/BlockUserHook";
 import InlineSVG from "react-inlinesvg";
+import { NearContext } from "@/wallet/WalletSelector";
 
 export const BlockedUsersPage = () => {
-    const {activeAccountId, connect, isConnected} = useMbWallet();
+    const { wallet, signedAccountId } = useContext(NearContext);
     const [showModal, setShowModal] = useState(false);
     const [selectedBlockedUsers, setSelectedBlockedUsers] = useState<any>([]);
     const { fetchBlockUser } = useFetchBlockUser();
@@ -25,10 +25,10 @@ export const BlockedUsersPage = () => {
     }, [mode])
 
     useEffect(() => {
-        if (activeAccountId) {
-            fetchBlockedUsers(activeAccountId);
+        if (signedAccountId) {
+            fetchBlockedUsers(signedAccountId);
         }
-    }, [activeAccountId, blockedUsers]);
+    }, [signedAccountId, blockedUsers]);
 
     const fetchBlockedUsers = async (activeAccount : string) => {
         const blockedUsersData = await fetchBlockUser(activeAccount);
@@ -57,7 +57,7 @@ export const BlockedUsersPage = () => {
     const handleUnblock = async () => {
         if (selectedBlockedUsers.length > 0) {
             const data: BlockUserType & { unblock?: boolean } = {
-                accountId: activeAccountId?.toString() || "",
+                accountId: signedAccountId?.toString() || "",
                 blockedUsers: selectedBlockedUsers.map((id: string) => ({ blockedUserId: id })),
                 unblock: true
             }

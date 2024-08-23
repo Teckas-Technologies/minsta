@@ -4,9 +4,23 @@ import { ProfileType } from "@/data/types";
 
 export const findAllProfile = async (): Promise<any> => {
     await connectToDatabase();
-    const profiles = await Profile.find({});
+    const profiles = await Profile.countDocuments({});
     return profiles;
 }
+
+export const findProfilesJoinedLast30Days = async (): Promise<number> => {
+    await connectToDatabase();
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentProfilesCount = await Profile.countDocuments({
+        createdAt: { $gte: thirtyDaysAgo }
+    });
+
+    return recentProfilesCount;
+}
+
 
 export const findProfileById = async (accountId: string): Promise<any> => {
     await connectToDatabase();
@@ -22,37 +36,15 @@ export const findProfileById = async (accountId: string): Promise<any> => {
 
 export async function saveProfile(data: ProfileType ): Promise<any> {
     await connectToDatabase();
-    const { accountId, name, profileImage, backgroundImage, about, tags, linkTree } = data;
+    const { accountId } = data;
 
     let existingProfile = await Profile.findOne({ accountId });
 
     if (existingProfile) {
-        if (name) existingProfile.name = name;
-        if (profileImage) existingProfile.profileImage = profileImage;
-        if (backgroundImage) existingProfile.backgroundImage = backgroundImage;
-        if (about) existingProfile.about = about;
-        if (tags) existingProfile.tags = tags;
-
-        if (!existingProfile.linkTree) {
-            existingProfile.linkTree = {};
-        }
-        if (linkTree) {
-            if (linkTree.github) existingProfile.linkTree.github = linkTree.github;
-            if (linkTree.twitter) existingProfile.linkTree.twitter = linkTree.twitter;
-            if (linkTree.telegram) existingProfile.linkTree.telegram = linkTree.telegram;
-            if (linkTree.website) existingProfile.linkTree.website = linkTree.website;
-        }
-
-        return existingProfile.save();
+        return;
     } else {
         const newProfile = new Profile({
-            accountId,
-            name,
-            profileImage,
-            backgroundImage,
-            about,
-            tags,
-            linkTree
+            accountId
         });
         return newProfile.save();
     }

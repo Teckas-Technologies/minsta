@@ -1,20 +1,20 @@
 "use client";
-import React from "react";
+import React, { useContext } from "react";
 import Link from "next/link";
 import { constants } from "@/constants";
-import { useMbWallet } from "@mintbase-js/react";
 import InlineSVG from "react-inlinesvg";
+import { NearContext } from "@/wallet/WalletSelector";
 
 const ViewYourNfts = () => {
-  const { activeAccountId, isConnected } = useMbWallet();
+  const { wallet, signedAccountId } = useContext(NearContext);
 
-  return isConnected ? (
+  return signedAccountId ? (
     <div className="flex gap-2 items-center">
       <Link
         target="_blank"
         rel="noopener noreferrer"
         passHref
-        href={`${constants.mintbaseBaseUrl}/human/${activeAccountId}/owned/0`}
+        href={`${constants.mintbaseBaseUrl}/human/${signedAccountId}/owned/0`}
         className="text-linkColor text-sm dark:text-white"
       >
         View your NFTs

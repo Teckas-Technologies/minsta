@@ -1,9 +1,9 @@
-import { useMbWallet } from "@mintbase-js/react";
 import { uploadReference } from "@mintbase-js/storage";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { generateRandomId } from "./generateRandomId";
 import { useReplicate } from "@/providers/replicate";
 import { constants } from "@/constants";
+import { NearContext, Wallet } from "@/wallet/WalletSelector";
 
 type ReferenceObject = {
   title?: string;
@@ -14,12 +14,12 @@ type ReferenceObject = {
 const useMintImage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { selector, activeAccountId } = useMbWallet();
+  const { wallet, signedAccountId } = useContext(NearContext);
   const { addRequest } = useReplicate();
 
   const getWallet = async () => {
     try {
-      return await selector.wallet();
+      // return await selector.wallet();
     } catch (error) {
       console.error("Failed to retrieve the wallet:", error);
       setLoading(false);
@@ -65,7 +65,7 @@ const useMintImage = () => {
   };
 
   const performTransaction = async (
-    wallet: any,
+    wallet: Wallet,
     metadata: any,
   ) => {
     if (!wallet) {
@@ -73,27 +73,21 @@ const useMintImage = () => {
     }
 
     try {
-      return await wallet.signAndSendTransaction({
-        signerId: activeAccountId,
-        receiverId: constants.proxyContractAddress,
-        actions: [
-          {
-            type: "FunctionCall",
-            params: {
-              methodName: "mint",
-              args: {
-                metadata: JSON.stringify(metadata),
-                nft_contract_id: constants.tokenContractAddress,
-              },
-              gas: "200000000000000",
-              deposit: "10000000000000000000000",
-            },
-          },
-        ],
+      const res = await wallet.callMethod({
+        contractId: constants.proxyContractAddress,
+        method: 'mint',
+        args: {
+          metadata: JSON.stringify(metadata),
+          nft_contract_id: constants.tokenContractAddress,
+        },
+        gas: '200000000000000',
+        deposit: '10000000000000000000000'
       });
+      console.log("Ress 1 >>> ", res);
+      return res;
     } catch (error) {
       console.error("Failed to sign and send transaction:", error);
-      throw new Error("Failed to sign and send transaction");
+      // throw new Error("Failed to sign and send transaction");
     }
   };
 
@@ -157,8 +151,12 @@ const useMintImage = () => {
     });
   };
 
-  const mintImage = async (photoFile: File, title:string, description: string, tags: string[]) => {
-    if (!activeAccountId) {
+  const mintImage = async (photoFile: File, title: string, description: string, tags: string[]) => {
+    if (!wallet) {
+      setError("Wallet is not initialized.");
+      return;
+    }
+    if (!signedAccountId) {
       setError("Active account ID is not set.");
       return;
     }
@@ -166,13 +164,6 @@ const useMintImage = () => {
     setLoading(true);
 
     try {
-      const wallet = await getWallet();
-      // const photoFile = convertBase64ToFile(photo);
-      // const replicatePhoto = await reduceImageSize(photo, 10); //10MB limit replicate
-      // const titleAndDescription = await getTitleAndDescription(replicatePhoto);
-      // const originalTitle = title && title.trim() ? title : titleAndDescription.title;
-      // const originalDescription = description && description.trim() ? description : titleAndDescription.description;
-
       const refObject = {
         title: title,
         description: description,
@@ -181,7 +172,8 @@ const useMintImage = () => {
       };
       const uploadedData = await uploadReferenceObject(refObject);
       const metadata = { reference: uploadedData?.id, title: title, description: description };
-      await performTransaction(wallet, metadata);
+      const res = await performTransaction(wallet, metadata);
+      return res;
     } catch (error: any) {
       setError(
         error?.message || "An error occurred during the minting process."
@@ -191,8 +183,12 @@ const useMintImage = () => {
     }
   };
 
-  const mintGif = async (photoFile: File, title: string, description:string, tags: string[]) => {
-    if (!activeAccountId) {
+  const mintGif = async (photoFile: File, title: string, description: string, tags: string[]) => {
+    if (!wallet) {
+      setError("Wallet is not initialized.");
+      return;
+    }
+    if (!signedAccountId) {
       setError("Active account ID is not set.");
       return;
     }
@@ -200,13 +196,6 @@ const useMintImage = () => {
     setLoading(true);
 
     try {
-      const wallet = await getWallet();
-      // const photo = await fileToBase64(gif);
-      // const photoFile = convertBase64ToFile(photo);
-      // const replicatePhoto = await reduceImageSize(photo, 10); //10MB limit replicate
-      // const titleAndDescription = await getTitleAndDescription(replicatePhoto);
-      // console.log("Title >> ",titleAndDescription.title)
-      // console.log("Description >> ",titleAndDescription.description)
       const originalTitle = title && title.trim() && title;
       const originalDescription = description && description.trim() && description;
       const refObject = {
@@ -217,7 +206,9 @@ const useMintImage = () => {
       };
       const uploadedData = await uploadReferenceObject(refObject);
       const metadata = { reference: uploadedData?.id, title: originalTitle, description: originalDescription };
-      await performTransaction(wallet, metadata);
+      const res = await performTransaction(wallet, metadata);
+      console.log("Ress 2 >>> ", res);
+      return res;
     } catch (error: any) {
       setError(
         error?.message || "An error occurred during the minting process."
@@ -236,7 +227,7 @@ const useMintImage = () => {
     });
   };
 
-  return { mintImage,mintGif, fileToBase64, getTitleAndDescription,reduceImageSize, loading, error };
+  return { mintImage, mintGif, fileToBase64, getTitleAndDescription, reduceImageSize, loading, error };
 };
 
 export default useMintImage;

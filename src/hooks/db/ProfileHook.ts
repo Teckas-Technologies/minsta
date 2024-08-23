@@ -1,6 +1,35 @@
 import { useEffect, useState } from "react";
-import { HidePost, ProfileType } from "@/data/types";
+import { ProfileType } from "@/data/types";
 
+export const useFetchTotalProfiles = () => {
+  const [totalProfiles, setTotalProfiles] = useState<number | null>(null);
+  const [lastMonthProfiles, setLastMonthProfiles] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchTotalProfiles = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/profile');
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      setTotalProfiles(data?.totalProfiles);
+      setLastMonthProfiles(data?.lastMonthProfiles)
+    } catch (err) {
+      console.error('Error fetching total profiles:', err);
+      setError('Error fetching total profiles!');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTotalProfiles();
+  }, []);
+
+  return { totalProfiles, lastMonthProfiles, loading, error };
+};
 
 export const useFetchProfile = () => {
         const [profile, setProfile] = useState<ProfileType | null>(null)

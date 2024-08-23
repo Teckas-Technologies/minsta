@@ -1,10 +1,10 @@
 import { isUndefined } from "lodash";
-import { useMemo } from "react";
-import { useMbWallet } from "@mintbase-js/react";
+import { useContext, useMemo } from "react";
 import { constants } from "@/constants";
 import { useApp } from "@/providers/app";
 import { MINSTA_TEXTS } from "@/data/fallback";
 import { useGraphQlQuery } from "@/data/useGraphQlQuery";
+import { NearContext } from "@/wallet/WalletSelector";
 
 interface LeaderboardData {
   token: {
@@ -43,7 +43,7 @@ export const useLeaderBoardData = () => {
     },
   };
 
-  const { activeAccountId } = useMbWallet();
+  const { wallet, signedAccountId } = useContext(NearContext);
 
   const { openModal } = useApp();
 
@@ -83,5 +83,5 @@ export const useLeaderBoardData = () => {
     return resultArray;
   }, [data, loading]);
 
-  return { texts, leaderboard, openModal, activeAccountId };
+  return { texts, leaderboard, openModal, signedAccountId };
 };

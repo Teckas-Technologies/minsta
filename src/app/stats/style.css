@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Black+Ops+One&family=Montaga&family=Sevillana&display=swap');
+
+.analytic-box {
+    flex-grow: 1;
+    min-width: 15rem;
+    height: 7rem;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    transition: 0.2s ease;
+}
+
+.winner-box {
+    flex-grow: 1;
+    min-width: 15rem;
+    height: auto;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    transition: 0.2s ease;
+}
+
+.giveaway-details-box{
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.left_1{
+    flex: 1;
+}
+
+.winner{
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.circle {
+    transition: 0.2s ease;
+}
+
+.analytic-box:hover, .winner-box:hover {
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.title-font {
+    font-family: "Black Ops One", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #222f3e;
+}

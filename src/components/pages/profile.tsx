@@ -1,41 +1,31 @@
 import { DynamicGrid } from "../DynamicGrid"
 import { FirstToken } from "../FirstToken"
 import { FeedScroll } from "../feed/feedscroll"
-import { useMbWallet } from "@mintbase-js/react"
 import { useHomePageData } from "@/hooks/useHomePageData"
-import { InfiniteScrollHook, ProfileType } from "@/data/types"
-import { useEffect, useRef, useState } from "react"
+import { CreditsType, CreditsTypeReq, HashesType, InfiniteScrollHook, NEARSocialUserProfile, ProfileType } from "@/data/types"
+import { useContext, useEffect, useRef, useState } from "react"
 import InlineSVG from "react-inlinesvg"
 import { useDarkMode } from "@/context/DarkModeContext"
 import { useGrid } from "@/context/GridContext"
-import { getFollowers, getFollowing, getSocialProfile, NEARSocialUserProfile, setSocialData } from "@/contracts/social"
-import { getImage } from "@/contracts/social/image";
 import { ProfileCard } from "../ProfileCard";
 import { marked } from 'marked';
 import { EditProfile } from "../EditProfile"
 import { useRouter } from "next/navigation"
 import { useFetchProfile, useSaveProfile } from "@/hooks/db/ProfileHook"
-
-interface ProfileTypeNew {
-    accountId: string;
-    name: string;
-    profileImage?: string;
-    backgroundImage?: string;
-    about: string;
-    tags: string[];
-    linkTree: {
-        twitter: string;
-        github: string;
-        telegram: string;
-        website: string;
-    };
-}
+import { NearContext } from "@/wallet/WalletSelector"
+import useNearSocialDB from "@/utils/useNearSocialDB"
+import { useImage } from "@/utils/socialImage";
+import Image from "next/image"
+import useNEARTransfer from "@/utils/useTransfer"
+import { constants } from "@/constants"
+import { useFetchHashes, useSaveHashes } from "@/hooks/db/HashHook"
+import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook"
+import * as nearAPI from "near-api-js";
 
 export const ProfilePage = () => {
-
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
     const [filteredNFT, setFilteredNFT] = useState<InfiniteScrollHook | undefined>();
-    const { activeAccountId, connect, isConnected } = useMbWallet();
+    const { wallet, signedAccountId } = useContext(NearContext);
     const { grid, toggleGrid } = useGrid();
     const [accountId, setAccountId] = useState("")
     const [dataItems, setDataItems] = useState(false);
@@ -45,10 +35,11 @@ export const ProfilePage = () => {
     const { mode } = useDarkMode();
     const [result, setResult] = useState("");
     const [profile, setProfile] = useState<NEARSocialUserProfile>();
-    const [dbProfile, setDbProfile] = useState<ProfileType>();
     const [images, setImages] = useState<string[]>();
     const [following, setFollowing] = useState<number | null>(null);
     const [followers, setFollowers] = useState<number | null>(null);
+    const [toast, setToast] = useState(false);
+    const [toastText, setToastText] = useState("");
     const [description, setDescription] = useState<string>("");
     const [services, setServices] = useState<string>("");
     const [edit, setEdit] = useState(false);
@@ -59,7 +50,71 @@ export const ProfilePage = () => {
     const { fetchDBProfile } = useFetchProfile();
     const [isOverflowing, setIsOverflowing] = useState(false);
     const descriptionRef = useRef<HTMLParagraphElement>(null);
-    const { saveDBProfile } = useSaveProfile();
+    const [balance, setBalance] = useState<number>(0);
+    const [availableStorage, setAvailableStorage] = useState<bigint | null>();
+    const [storageModel, setStorageModel] = useState(false);
+    const { getSocialProfile, setSocialProfile, getAvailableStorage, buyStorage, getFollowing, getFollowers, getBalance, uploadIPFS } = useNearSocialDB();
+    const { getImage } = useImage();
+    const [uploadText, setUploadText] = useState<string>("");
+    const [cid, setCid] = useState<string>("");
+    const [uploadModel, setUploadModel] = useState<boolean>(false);
+    const [backgroundFileName, setBackgroundFileName] = useState('');
+    const [backgroundImageCid, setBackgroundImageCid] = useState('');
+    const [buyCreditModel, setBuyCreditModel] = useState(false);
+    const [amount, setAmount] = useState<number>(1);
+
+    const handleUpload = (text: string, cid: string, open: boolean) => {
+        setUploadText(text);
+        setUploadModel(open);
+        setCid(cid);
+    }
+
+    const handleBuyCredit = (open: boolean) => {
+        setBuyCreditModel(open);
+    }
+
+    useEffect(() => {
+        if (backgroundImageCid) {
+            handleUpload("Background Image", backgroundImageCid, true);
+        }
+    }, [backgroundImageCid])
+
+    const handleSaveProfile = async () => {
+        try {
+            const profileData = {
+                [signedAccountId]: {
+                    profile: {
+                        image: {
+                            ipfs_cid: cid
+                        }
+                    }
+                }
+            };
+            const bgData = {
+                [signedAccountId]: {
+                    profile: {
+                        backgroundImage: {
+                            ipfs_cid: cid
+                        }
+                    }
+                }
+            };
+            if (cid) {
+                if (uploadText === "Profile Image") {
+                    const result = await setSocialProfile(profileData);
+                    return result;
+                }
+                if (uploadText === "Background Image") {
+                    const result = await setSocialProfile(bgData);
+                    return result;
+                }
+            }
+            return;
+        } catch (error) {
+            console.error('Error saving profile image:', error);
+            throw error;
+        }
+    };
 
     useEffect(() => {
         const descriptionEl = descriptionRef.current;
@@ -68,24 +123,69 @@ export const ProfilePage = () => {
                 setIsOverflowing(descriptionEl.scrollHeight > descriptionEl.clientHeight);
             }, 100);
         }
-    }, [description, desMore, dbProfile?.about]);
+    }, [description, desMore]);
 
     useEffect(() => {
-        if (activeAccountId) {
-            setActiveAccountIdNew(activeAccountId)
+        if (signedAccountId) {
+            setActiveAccountIdNew(signedAccountId)
         }
-    }, [activeAccountId])
+    }, [signedAccountId])
+
+    useEffect(() => {
+        const fetchBalance = async () => {
+            const res = await getBalance();
+            if(res !== undefined){
+                setBalance(res);
+            }
+        }
+        if (signedAccountId) {
+            fetchBalance()
+        }
+    }, [activeAccountIdNew])
+
+    useEffect(() => {
+        if (signedAccountId) {
+            const getDBAvailableStorage = async () => {
+                const storage = await getAvailableStorage()
+                console.log("Storage >> ", storage)
+                if (typeof storage === 'bigint') {
+                    setAvailableStorage(storage);
+                } else if (storage === undefined) {
+                    setAvailableStorage(null);
+                }
+            }
+            getDBAvailableStorage();
+        }
+    }, [signedAccountId, edit]);
+
+    const handleEdit = () => {
+        if(availableStorage === null || (typeof availableStorage === 'bigint' && BigInt(availableStorage) <= BigInt(512))){
+            setStorageModel(true);
+        } else {
+            setEdit(true)
+        }
+    }
+
+    const buySocialDBStorage = async () => {
+        if(balance > 0.05){
+            return await buyStorage();
+        } else {
+            setHandleToast("Insufficient Balance!", true);
+            return;
+        }
+    }
 
     useEffect(() => {
         if (accountId) {
             const fetchProfile = async () => {
                 try {
-                    const profileData = await getSocialProfile({ accountId: accountId });
-                    const followingData = await getFollowing({ accountId: accountId });
-                    const followersData = await getFollowers({ accountId: accountId });
+                    const profileData = await getSocialProfile(accountId);
+                    // const followingData = await getFollowing({ accountId: accountId });
+                    // const followersData = await getFollowers({ accountId: accountId });
                     setProfile(profileData);
-                    setFollowing(followingData.total);
-                    setFollowers(followersData.total);
+                    // setFollowing(followingData.total);
+                    // setFollowers(followersData.total);
+                    console.log("Profile data >> ", profileData)
                     if (profileData) {
                         const image = getImage({
                             image: profileData?.image,
@@ -97,65 +197,16 @@ export const ProfilePage = () => {
                         });
 
                         const images = await Promise.all([image, backgroundImage]);
-                        setImages(images)
-                        if (activeAccountId) {
-                            const data: Partial<ProfileType> = { accountId: activeAccountId };
-
-                            if (profileData.name) {
-                                data.name = profileData.name;
-                            }
-                            if (images !== undefined && images[0] && images[0] !== "no_image") {
-                                data.profileImage = images[0];
-                            }
-                            if (images !== undefined && images[1] && images[1] !== "no_image") {
-                                data.backgroundImage = images[1];
-                            }
-                            if (profileData.description) {
-                                data.about = profileData.description;
-                            }
-                            if (Array.isArray(profileData.tags)) {
-                                data.tags = profileData.tags.flatMap(tagObj =>
-                                    Object.keys(tagObj)
-                                );
-                            }
-
-                            if (profileData.linktree) {
-                                const linkTree: Partial<ProfileType['linkTree']> = {};
-
-                                if (profileData.linktree.telegram) {
-                                    linkTree.telegram = profileData.linktree.telegram;
-                                }
-                                if (profileData.linktree.twitter) {
-                                    linkTree.twitter = profileData.linktree.twitter;
-                                }
-                                if (profileData.linktree.github) {
-                                    linkTree.github = profileData.linktree.github;
-                                }
-                                if (profileData.linktree.website) {
-                                    linkTree.website = profileData.linktree.website;
-                                }
-
-                                if (Object.keys(linkTree).length > 0) {
-                                    data.linkTree = linkTree;
-                                }
-                            }
-
-                            await saveDBProfile(data);
-                        }
+                        setImages(images);
                     }
                 } catch (err) {
                     console.log("Error >> ", err)
                 }
             }
 
-            const fetchDbProfile = async () => {
-                const profile = await fetchDBProfile(accountId);
-                setDbProfile(profile);
-            }
             fetchProfile();
-            fetchDbProfile();
         }
-    }, [activeAccountId, accountId, edit]);
+    }, [signedAccountId, accountId, edit]);
 
     useEffect(() => {
         if (mode === "dark") {
@@ -186,14 +237,6 @@ export const ProfilePage = () => {
         }
     }, [profile?.services]);
 
-    // const preprocessHTMLContent = (html: string) => {
-    //     const result = html.replace(/<h3>/g, '<h3 class="font-bold text-md">')
-    //         .replace(/<li>/g, '<li class="list-disc ml-5">')
-    //         .replace(/<a /g, '<a class="text-blue-500 underline" target="_blank" rel="noopener noreferrer" ');
-    //         console.log(result)
-    //     return result;
-    // };
-
     const preprocessHTMLContent = (html: string) => {
         const result = html
             .replace(/### (.+)/g, '<h3 class="font-bold text-md">$1</h3>')
@@ -203,18 +246,6 @@ export const ProfilePage = () => {
 
         return result;
     };
-
-
-    // let desContent = "";
-
-    // useEffect(()=>{
-    //     if(dbProfile?.about){
-    //         desContent = preprocessHTMLContent(dbProfile?.about);
-    //     }
-    //     if(profile?.description){
-    //         desContent = preprocessHTMLContent(profile?.description);
-    //     }
-    // },[dbProfile?.about, profile?.description])
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search);
@@ -234,32 +265,128 @@ export const ProfilePage = () => {
     };
     console.log(images)
 
+    useEffect(() => {
+        if (toast) {
+            setTimeout(() => {
+                setToast(false);
+                setToastText("");
+            }, 5000)
+        }
+    }, [toast]);
+
+    const setHandleToast = (message: string, open: boolean) => {
+        setToast(open);
+        setToastText(message);
+    }
+
+    const handleFileClick = (inputId: string) => {
+        const fileInput = document.getElementById(inputId);
+        if (fileInput) {
+            (fileInput as HTMLInputElement).click();
+        }
+    };
+
+    const handleBackgroundFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setBackgroundFileName(file.name);
+            try {
+                const bgPicCid = await uploadIPFS(file);
+                console.log("Background Cid >> ", bgPicCid);
+                setBackgroundImageCid(bgPicCid);
+            } catch (error) {
+                console.error('Error converting file to Base64:', error);
+            }
+        } else {
+            setBackgroundFileName('');
+            setBackgroundImageCid("");
+        }
+    };
+
+    const calculateCredit = (amount: number) => {
+        const creditValue = amount / constants.creditAmount;
+        return Math.floor(creditValue);
+    };
+
+    
+
+    const { transfer } = useNEARTransfer();
+    const { saveHashes } = useSaveHashes();
+    const { saveCredits } = useSaveCredits();
+    const { fetchCredits } = useFetchCredits();
+    const [creditAdded, setCreditAdded] = useState(false);
+
+    const buyCredit = async (amount: number) => {
+        setCreditAdded(false);
+        if(balance >= amount) {
+            const result = await transfer(amount.toString());
+            if (result?.success) {
+                if (result?.signerId && result.depositAmount) {
+                    const amt = nearAPI.utils.format.formatNearAmount(result.depositAmount);
+                    const resCredit = calculateCredit(parseFloat(amt));
+                    const data: CreditsTypeReq = {
+                        accountId: result.signerId,
+                        credit: resCredit,
+                        detuct: false
+                    };
+                    await saveCredits(data);
+
+                    let credit = await fetchCredits(result.signerId);
+                    // setCredits(credit?.credit);
+                    const hashData: HashesType = {
+                        accountId: result.signerId,
+                        amount: parseFloat(amt),
+                        hash: result.hash as string
+                    }
+                    await saveHashes(hashData);
+                    setBuyCreditModel(false);
+                    setCreditAdded(true);
+                }
+            }
+        } else {
+            setHandleToast("Insufficient Balance!", true);
+        }
+    }
+
     return (
         <div className={darkMode ? "dark" : ""}>
-            <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh] h-auto scroll-smooth">
-                <div className={`banner relative space-y-2 flex flex-col items-center justify-start w-full  rounded-lg ${!edit ? 'h-[20rem]' : 'h-auto'}`} style={{ backgroundImage: `url('${(!edit && dbProfile?.backgroundImage) && dbProfile?.backgroundImage || (images && images[1] !== "no_image" && !edit) && images[1] || !edit && '/images/dark_banner.jpg'}')`, backgroundPosition: 'center', backgroundSize: 'cover' }}>
+            <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh] h-auto scroll-smooth overflow-y-scroll">
+                <div className={`banner relative space-y-2 flex flex-col items-center justify-start w-full  rounded-lg ${!edit ? 'h-[20rem]' : 'h-auto'}`} style={{ backgroundImage: `url('${(images && images[1] !== "no_image" && !edit) && images[1] || !edit && '/images/dark_banner.jpg'}')`, backgroundPosition: 'center', backgroundSize: 'cover' }}>
                     <div className="page-title mt-20">
                         <h2 className={`title-font text-3xl ${!edit ? 'text-white' : 'dark:text-white'} underline underline-offset-4`}>{edit ? 'Edit Profile' : 'Profile'}</h2>
                     </div>
                     {!edit ?
-                        <div className="max-w-md flex gap-3 iems-center flex ml-auto mr-5 justify-center">
-                            {accountId === activeAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={() => setEdit(true)}>
-                                <InlineSVG
-                                    src="/images/pencil.svg"
-                                    className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
-                                    color="#222f3e"
-                                />
-                            </div>}
-                            <div className="md:hidden flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={toggleGrid}>
-                                <InlineSVG
-                                    src="/images/grid.svg"
-                                    className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
-                                    color="#222f3e"
-                                />
+                        <>
+                            <div className="max-w-md flex gap-3 iems-center flex ml-auto mr-5 justify-center">
+                                {accountId === signedAccountId && <div className=" flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={handleEdit}>
+                                    <InlineSVG
+                                        src="/images/pencil.svg"
+                                        className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
+                                        color="#222f3e"
+                                    />
+                                </div>}
+                                <div className="md:hidden flex items-center justify-center dark:bg-white bg-slate-800 p-2 rounded-full" onClick={toggleGrid}>
+                                    <InlineSVG
+                                        src="/images/grid.svg"
+                                        className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
+                                        color="#222f3e"
+                                    />
+                                </div>
                             </div>
-                        </div> :
+                            {accountId === signedAccountId && <div className="set-banner">
+                                <div className="set-banner-pic bg-white flex items-center px-2 py-1 gap-2 rounded-md cursor-pointer" onClick={() => handleFileClick('backgroundInput')}>
+                                    <InlineSVG
+                                        src="/images/camera_fill.svg"
+                                        className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
+                                        color="#222f3e"
+                                    />
+                                    <h2>{profile?.backgroundImage ? "Change cover photo" : "Add cover photo"}</h2>
+                                </div>
+                                <input type="file" name="picture" id="backgroundInput" onChange={handleBackgroundFileChange} className={`hidden w-full p-2 text-lg rounded-md outline-none ${darkMode ? "image-holder-dark" : "image-holder"}`} />
+                            </div>}
+                        </> :
                         <EditProfile setEdit={setEdit} accountId={activeAccountIdNew} />}
-                    {!edit && <ProfileCard profile={profile} dbProfile={dbProfile} images={images} accountId={accountId} />}
+                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} handleBuyCredit={handleBuyCredit} creditAdded={creditAdded} />}
                 </div>
 
                 {/* {!dataItems && !itemsLoading && 
@@ -272,8 +399,8 @@ export const ProfilePage = () => {
                     </div>
                 }
                 */}
-                <div className={`profile-content w-full md:px-[20rem] ${ 'md:mt-[15%] mt-[55%]' }`}>
-                    {profile && followers !== null && followers !== undefined && following !== null && following !== undefined && !edit &&
+                <div className={`profile-content w-full md:px-[20rem] ${!edit && 'md:mt-[20%] mt-[77%]'}`}>
+                    {/* {profile && followers !== null && followers !== undefined && following !== null && following !== undefined && !edit &&
                         <div className="flex justify-center">
                             <div className="flex items-center w-[70%] md:w-[20rem] justify-center gap-3 m-2 py-2 rounded-lg border-1 border border-sky-500">
                                 <div className="following">
@@ -288,15 +415,15 @@ export const ProfilePage = () => {
                                     <h4 className="dark:text-white text-center">{followers}</h4>
                                 </div>
                             </div>
-                        </div>}
-                    {(dbProfile?.about || profile?.description) && !edit && <div>
+                        </div>} */}
+                    {profile?.description && !edit && <div>
                         <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Description</h2>
                         {/* <p className={`text-justify content dark:text-white ${!desMore ? "line-clamp-2" : ""}`} dangerouslySetInnerHTML={{ __html: preprocessHTMLContent(description) || dbProfile?.about as string }}></p> */}
                         <p
                             ref={descriptionRef}
                             className={`text-justify content dark:text-white ${!desMore ? "line-clamp-2" : ""}`}
                             dangerouslySetInnerHTML={{
-                                __html: preprocessHTMLContent(dbProfile?.about ?? profile?.description ?? ""),
+                                __html: preprocessHTMLContent(profile?.description ?? ""),
                             }}
                         ></p>
                         {isOverflowing && (
@@ -322,7 +449,20 @@ export const ProfilePage = () => {
                         )}
                     </div>}
 
-                    {(dbProfile?.tags && dbProfile?.tags?.length > 0 && !edit) && <div>
+                    {(profile?.tags && Object.keys(profile.tags).length > 0 && !edit) && (
+                        <div>
+                            <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Tags</h2>
+                            <div className="tags flex items-center gap-2">
+                                {Object.entries(profile.tags).map(([key, value], i) => (
+                                    <div className="tag rounded-lg" key={i}>
+                                        <p>#{key}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* {(dbProfile?.tags && dbProfile?.tags?.length > 0 && !edit) && <div>
                         <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Tags</h2>
                         <div className="tags flex items-center gap-2">
                             {dbProfile?.tags &&
@@ -333,7 +473,7 @@ export const ProfilePage = () => {
                                 ))
                             }
                         </div>
-                    </div>}
+                    </div>} */}
                     {profile?.services && !edit && <div>
                         <h2 className="title-font dark:text-white text-xl py-2 underline underline-offset-4">Services</h2>
                         <p className={`text-justify content dark:text-white ${!serviceMore ? "line-clamp-1" : ""}`} dangerouslySetInnerHTML={{ __html: preprocessHTMLContent(services) }}></p>
@@ -364,12 +504,71 @@ export const ProfilePage = () => {
                 {!edit && <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid ? grid : "1")}>
                     <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} grid={parseInt(grid ? grid : "1")} search={accountId} dark={darkMode} hidepostids={[]} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setResult={setResult} hiddenPage={false} activeId={accountId} profilePage={true} />
                 </DynamicGrid>}
-                {
+                {/* {
                     result && !edit &&
                     <div className="pb-5">
                         <h2 className="dark:text-white">{result}</h2>
                     </div>
-                }
+                } */}
+                {toast &&
+                    <div id="toast-default" className="toast-container mt-6 md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed z-50">
+                        <div className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
+                            <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                                </svg>
+                                <span className="sr-only">Check icon</span>
+                            </div>
+                            <div className="ms-1 text-sm font-normal">{toastText}</div>
+                        </div>
+                        <div className="border-bottom-animation"></div>
+                    </div>}
+                {uploadModel && <div className="upload-model fixed bg-sky-50 dark:bg-slate-800 top-0 bottom-0 right-0 left-0 flex justify-center items-center">
+                    <div className={`upload-box w-[20rem] bg-white mx-3 px-3 py-2 flex flex-col items-center gap-2 rounded-md ${darkMode ? "box-shadow-dark" : "box-shadow"}`}>
+                        <h2 className="title-font">Upload your {uploadText}</h2>
+                        <div className="image w-[5rem] h-[5rem] relative rounded-full">
+                            <img
+                                src={`https://ipfs.near.social/ipfs/${cid}`}
+                                alt="Profile NFT"
+                                className="rounded-full object-cover w-full h-full"
+                            />
+                        </div>
+                        <div className="btns flex gap-2">
+                            <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={() => handleUpload("", "", false)}>Cancel</button>
+                            <button className="btn bg-sky-500 cursor-pointer" onClick={handleSaveProfile}>Upload</button>
+                        </div>
+                    </div>
+                </div>}
+
+                {storageModel && <div className="upload-model fixed bg-sky-50 dark:bg-slate-800 top-0 bottom-0 right-0 left-0 flex justify-center items-center">
+                    <div className={`upload-box w-[20rem] bg-white mx-3 px-3 py-2 flex flex-col items-center gap-2 rounded-md ${darkMode ? "box-shadow-dark" : "box-shadow"}`}>
+                        <h2 className="title-font">Insufficient Storage!</h2>
+                        <p className="text-justify">{`You don't have enough space to set the profile on near.social. Please buy ${availableStorage !== null ? "additional" : ""} storage on near.social by spending 0.05 NEAR.`}</p>
+                        <div className="btns flex gap-2">
+                            <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={()=>setStorageModel(false)}>Cancel</button>
+                            <button className="btn bg-sky-500 cursor-pointer" onClick={buySocialDBStorage}>Buy</button>
+                        </div>
+                    </div>
+                </div>}
+
+                {buyCreditModel && <div className="upload-model fixed bg-sky-50 dark:bg-slate-800 top-0 bottom-0 right-0 left-0 flex justify-center items-center">
+                    <div className={`upload-box w-[20rem] bg-white mx-3 px-3 py-2 flex flex-col items-center gap-2 rounded-md ${darkMode ? "box-shadow-dark" : "box-shadow"}`}>
+                        <h2 className="title-font">Buy Credits!</h2>
+                        <div className={`input-box h-11 w-full rounded-md flex items-center justify-between ${darkMode ? "box-shadow" : "box-shadow"}`}>
+                            <input type="number" min={0.05} value={amount} onChange={(e)=> setAmount(parseFloat(e.target.value))} className={`bg-white px-4 py-2 flex-grow rounded-md h-11 text-sm border-none outline-none`}/>
+                            <div className="box-near h-11 w-13 p-2 pr-4">
+                                <img src="images/near-logo.png" className="h-full w-full" alt="" />
+                            </div>
+                        </div>
+                        <div className="credit-value">
+                            <h2>{!isNaN(amount) ? amount : 0} NEAR = {calculateCredit(!isNaN(amount) ? amount : 0)} Credits</h2>
+                        </div>
+                        <div className="btns flex gap-2">
+                            <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={()=>setBuyCreditModel(false)}>Cancel</button>
+                            <button className="btn bg-sky-500 cursor-pointer" onClick={()=>buyCredit(amount)}>Buy</button>
+                        </div>
+                    </div>
+                </div>}
             </main>
         </div>
     )

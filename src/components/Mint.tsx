@@ -1,11 +1,16 @@
 import { useApp } from "@/providers/app";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { convertBase64ToFile } from "@/utils/base64ToFile";
 import { Cloudinary } from '@cloudinary/url-gen';
 import { Resize } from '@cloudinary/url-gen/actions/resize';
 import { Effect } from '@cloudinary/url-gen/actions/effect';
+import InlineSVG from "react-inlinesvg";
+import { CreditsType, CreditsTypeReq } from "@/data/types";
+import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
+import { NearContext } from "@/wallet/WalletSelector";
+import { useRouter } from "next/navigation";
 
 
 const cloudinary = new Cloudinary({
@@ -28,6 +33,7 @@ export function Mint({
 }) {
   const { isLoading, mintImage, reduceImageSize, getTitleAndDescription } = useApp();
   const [title, setTitle] = useState("");
+  const { wallet, signedAccountId } = useContext(NearContext);
   const [description, setDescription] = useState("");
   const [tag, setTag] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -38,6 +44,16 @@ export function Mint({
   const [cldData, setCldData] = useState<any>();
   const [filter, setFilter] = useState<string | null>(null)
   const [toggleFilter, setToggleFilter] = useState(false);
+  const [active, setActive] = useState(false);
+  const [loadingEffect, setLoadingEffect] = useState(false);
+  const [toast, setToast] = useState(false);
+  const [toastText, setToastText] = useState("");
+  const { fetchCredits } = useFetchCredits();
+  const { saveCredits } = useSaveCredits();
+  const [credits, setCredits] = useState<number | null>();
+  const [buyCredit, setBuyCredit] = useState(false);
+  const { push } = useRouter();
+  const [txhash, setTxhash] = useState("");
 
   const cloudImage = cldData?.public_id && cloudinary.image(cldData?.public_id);
 
@@ -46,8 +62,6 @@ export function Mint({
   }
 
   const src = cloudImage?.toURL() || currentPhoto;
-
-  console.log("SRC", src)
 
   useEffect(() => {
     if (mode === "dark") {
@@ -58,18 +72,36 @@ export function Mint({
   }, [mode])
 
   useEffect(() => {
-    const generate = async (currentPhoto: string) => {
-      setGenerating(true);
-      const replicatePhoto = await reduceImageSize(currentPhoto, 10);
-      const titleAndDescription = await getTitleAndDescription(replicatePhoto);
-      setTitle(titleAndDescription?.title)
-      setDescription(titleAndDescription?.description)
-      setGenerating(false);
+    if (signedAccountId) {
+      const fetchDbCredit = async () => {
+        try {
+          let credit = await fetchCredits(signedAccountId);
+
+          if (credit === null) {
+            const data: CreditsTypeReq = {
+              accountId: signedAccountId,
+              credit: 3,
+              detuct: false
+            };
+            await saveCredits(data);
+
+            credit = await fetchCredits(signedAccountId);
+          }
+
+          setCredits(credit ? credit.credit : 0);
+        } catch (error) {
+          console.error("Error fetching or saving credits:", error);
+          setCredits(0);
+        }
+      };
+
+      fetchDbCredit();
     }
-    if (currentPhoto) {
-      generate(currentPhoto);
-    }
-  }, [currentPhoto])
+  }, [signedAccountId, title, description]);
+
+  const handleSignIn = async () => {
+    return wallet?.signIn();
+  };
 
   useEffect(() => {
     if (!currentPhoto) return;
@@ -81,7 +113,6 @@ export function Mint({
         })
       }).then(r => r.json())
       setCldData(response);
-      console.log("res >>> ", response)
     })();
   }, [])
 
@@ -98,8 +129,6 @@ export function Mint({
   const removeTag = (tagText: string) => {
     setTags(tags.filter(tag => tag !== tagText));
   };
-
-  console.log("Current Photo >> ", currentPhoto)
 
   function isBase64(str: string) {
     try {
@@ -124,7 +153,16 @@ export function Mint({
       } else {
         photoFile = await urlToFile(src, 'image/jpeg', 'image/jpeg');
       }
-      mintImage(photoFile, title, description, tags);
+      const res = await mintImage(photoFile, title, description, tags);
+      // if(res){
+      //   // setUploading(false);
+      //   setHandleToast("Minted Successfully!", true);
+      //   setTimeout(()=>push("/"), 5000)
+      // } else if(!res) {
+      //   // setUploading(false);
+      //   setHandleToast("Minting Failed!", true);
+      //   setTimeout(()=>push("/"), 5000)
+      // }
       setTitle("");
       setDescription("");
       setTags([])
@@ -132,12 +170,44 @@ export function Mint({
   }
 
   const handleFilterClick = (selectedFilter: string) => {
+    setLoadingEffect(true);
     if (filter === selectedFilter && toggleFilter) {
       setToggleFilter(false);
       setFilter(null);
+      setActive(false)
     } else {
       setToggleFilter(true);
       setFilter(selectedFilter);
+      setActive(true)
+    }
+    setTimeout(() => setLoadingEffect(false), 1600)
+  };
+
+  const generation = async () => {
+    if (!currentPhoto) {
+      setHandleToast("No file chosen!", true);
+      return;
+    }
+    if (credits === null || credits === undefined || credits <= 0) {
+      setBuyCredit(true);
+      return;
+    }
+    if (!signedAccountId) {
+      handleSignIn();
+      return;
+    }
+    try {
+      await generate();
+      const data: CreditsTypeReq = {
+        accountId: signedAccountId,
+        credit: credits - 1,
+        detuct: true
+      };
+      await saveCredits(data);
+      setCredits(credits - 1);
+    } catch (error) {
+      console.error("Error generating title and description:", error);
+      setHandleToast("Failed to generate title and description. Please try again.", true);
     }
   };
 
@@ -159,6 +229,32 @@ export function Mint({
     }
   };
 
+  const openPreview = () => {
+    if (!title && !description) {
+      setHandleToast("Title & Description is required!", true)
+    } else if (!title) {
+      setHandleToast("Title is required!", true)
+    } else if (!description) {
+      setHandleToast("Description is required!", true)
+    } else {
+      setPreview(true)
+    }
+  }
+
+  useEffect(() => {
+    if (toast) {
+      setTimeout(() => {
+        setToast(false);
+        setToastText("");
+      }, 5000)
+    }
+  }, [toast]);
+
+  const setHandleToast = (message: string, open: boolean) => {
+    setToast(open);
+    setToastText(message);
+  }
+
   return (
     <div className={darkMode ? "dark" : ""}>
       <main className="h-[100Vh] relative w-[100%] px-4 flex flex-col items-center scroll photo-main dark:bg-slate-800">
@@ -176,15 +272,28 @@ export function Mint({
             </div>
           </>
         ) : (<>
-          {!preview && <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 mb-2`}>
+          {!preview && !buyCredit && <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 mb-2`}>
             <div className="scroll-div h-auto">
-              <Image src={src} alt="image" width={468} height={468} className="photo-img" />
+              <div className="relative">
+                <Image src={src} alt="image" width={468} height={468} className="photo-img" />
+                {/* <div className="applying absolute top-0 left-0 bottom-0 right-0 bg-red-500 rounded-md">
+                  
+                </div> */}
+              </div>
               <h2 className="title-font text-lg text-center dark:text-white mt-2 mb-1">Effects</h2>
               <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} flex gap-2 overflow-x-scroll w-full h-[9.5rem] mb-2 p-2 mx-1`}>
                 {ART_FILTERS.map((art: any, i: any) => (
-                  <div key={i} className={`art-box ${darkMode ? "box-shadow-dark" : "box-shadow"} w-24 h-full flex flex-col p-2 items-center rounded-md`} onClick={() => handleFilterClick(art)}>
+                  <div key={i} className={`art-box ${darkMode ? "box-shadow-dark" : "box-shadow"} cursor-pointer w-24 h-full flex flex-col p-2 items-center rounded-md`} onClick={() => handleFilterClick(art)}>
                     <div className="im relative flex justify-center w-24 h-[80%]">
                       <img src={cloudinary.image('minsta thumb/ibshxb1i1c6qte2boxey').resize(Resize.fill().width(200).height(200)).effect(Effect.artisticFilter(art)).toURL()} alt="" className="w-[80%] h-full rounded-md object-cover" />
+                      {active && filter === art && <div className="layout absolute top-0 bottom-0 left-2 right-2 bg-slate-900 opacity-50 flex items-center justify-center rounded-md">
+                        <div className="active-layout bg-slate-600 p-3 rounded-full">
+                          <InlineSVG
+                            src="/images/check.svg"
+                            className="fill-current text-mainText w-9 h-9 dark:text-white"
+                          />
+                        </div>
+                      </div>}
                     </div>
                     <div className="text w-24 h-[20%] flex justify-center items-center">
                       <h4 className="dark:text-white text-center">{art}</h4>
@@ -194,10 +303,21 @@ export function Mint({
               </div>
 
               <div className="tags pb-2 pt-2 px-2">
-                {!generating ? <>
-                  <div className="generate-btn w-full flex pb-4 justify-center">
-                    <button className="btn success-btn" onClick={generate}>Generate New</button>
+                <div className="generate-btn w-full flex pb-4 justify-between">
+                  <button className="btn success-btn flex items-center gap-2" onClick={generation} disabled={generating}>
+                    <InlineSVG
+                      src="/images/robot.svg"
+                      className="fill-current dark:text-white"
+                    /> <h2 className="title-font text-white">Generate using AI</h2>
+                  </button>
+                  <div className="credits border-2 border-green-700 rounded-md pl-3 pr-4 py-2 flex justify-center items-center gap-2">
+                    <InlineSVG
+                      src="/images/fire.svg"
+                      className="fill-current text-red-500 dark:text-yellow-500"
+                    /> <h2 className="title-font dark:text-white">{credits}</h2>
                   </div>
+                </div>
+                {!generating ? <>
                   <div className="input-field">
                     <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e) => { setTitle(e.target.value) }} />
                   </div>
@@ -212,7 +332,7 @@ export function Mint({
                   <button className="btn success-btn" onClick={addTag}>Add</button>
                 </div>
                 {tags.length > 0 && (
-                  <div className="added-tags flex gap-2 px-2 py-1 ">
+                  <div className="added-tags flex flex-wrap gap-2 px-2 py-1 ">
                     {tags.map((tag, index) => (
                       <div
                         key={index}
@@ -236,11 +356,31 @@ export function Mint({
               </button>
               <button
                 className="gradientButton w-full text-primaryBtnText rounded px-4 py-2"
-                onClick={() => setPreview(true)}
-              // disabled={inputOpen ? true : false}
+                onClick={openPreview}
+              // disabled={!title && !description}
               >
                 Preview
               </button>
+            </div>
+          </div>}
+          {buyCredit && <div className=" bg-slate-800 dark:bg-white md:w-[40%] p-3 flex justify-center items-center rounded-md">
+            <div className="buy-alert-box w-full flex flex-col gap-3 h-auto bg-white dark:bg-slate-800 rounded-md py-2 px-3">
+              <div className="head flex flex-col gap-2">
+                <h2 className="title-font text-center dark:text-white">Insufficient Credits!</h2>
+                <p className="dark:text-white text-justify">
+                  You don&apos;t have enough credits for the mind-blowing AI title and description generation.
+                </p>
+                <p className="dark:text-white text-justify">
+                  Go to the &quot;Profile&quot; page to buy &quot;AI Credits&quot;.
+                </p>
+                <p className="dark:text-white text-center">
+                  1 credit = 0.05 NEAR.
+                </p>
+              </div>
+              <div className="btns-credit flex items-center justify-center gap-2">
+                <button className="btn cancel-btn dark:text-white dark:border-white" onClick={() => setBuyCredit(false)}>Cancel</button>
+                <button className="btn success-btn border-green-600" onClick={() => push(`/profile/?accountId=${signedAccountId}`)}>Go to Profile</button>
+              </div>
             </div>
           </div>}
         </>
@@ -258,7 +398,7 @@ export function Mint({
               <h2 className="text-justify line-clamp-3"><span className="title-font">Description :</span> {description}</h2>
             </div>}
             {tags.length > 0 && (
-              <div className="added-tags flex gap-2 p-2 my-2">
+              <div className="added-tags flex flex-wrap gap-2 p-2 my-2">
                 {tags.map((tag, index) => (
                   <div
                     key={index}
@@ -276,6 +416,19 @@ export function Mint({
             </div>
           </div>
         </div>}
+        {toast &&
+          <div id="toast-default" className="toast-container mt-6 md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed ">
+            <div className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
+              <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                </svg>
+                <span className="sr-only">Check icon</span>
+              </div>
+              <div className="ms-1 text-sm font-normal">{toastText}</div>
+            </div>
+            <div className="border-bottom-animation"></div>
+          </div>}
       </main>
     </div>
   );

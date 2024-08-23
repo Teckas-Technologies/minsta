@@ -1,19 +1,19 @@
 "use client";
 import { useApp } from "@/providers/app";
-import { useMbWallet } from "@mintbase-js/react";
 import { usePathname, useRouter } from "next/navigation";
-import { ReactEventHandler, useState, useEffect, useRef } from "react";
+import { ReactEventHandler, useState, useEffect, useRef, useContext } from "react";
 import InlineSVG from "react-inlinesvg";
 import '../app/style.css'
 import { constants } from "@/constants";
 import Link from "next/link";
 import { useDarkMode } from "@/context/DarkModeContext";
-import { useAppContext, useBack } from "@/context/BackContext";
+import { useBackContext } from "@/context/BackContext";
+import { NearContext } from "@/wallet/WalletSelector";
+import { useFetchProfile, useSaveProfile } from "@/hooks/db/ProfileHook";
 
 const Header = () => {
   const pathname = usePathname();
-  const { activeAccountId, isConnected, selector, connect } = useMbWallet();
-  // const { darkMode, toggleDarkMode } = useDarkMode();
+  const { wallet, signedAccountId } = useContext(NearContext);
   const { mode, toggleMode } = useDarkMode();
   const { push } = useRouter();
   const { openModal } = useApp();
@@ -25,9 +25,9 @@ const Header = () => {
   const popRef = useRef<HTMLDivElement | null>(null);
   const headerAccountRef = useRef<HTMLDivElement | null>(null);
   const [subMenu, setSubmenu] = useState(false);
-  const [search, setSearch] = useState("");
-  // const [back, setBack] = useState(false);
-  const { back, toggleBack } = useBack();
+  const { back, toggleBack, onBackButtonClick } = useBackContext();
+  const { fetchDBProfile } = useFetchProfile();
+  const { saveDBProfile } = useSaveProfile()
 
   const router = useRouter();
 
@@ -46,7 +46,17 @@ const Header = () => {
     setIsOpen(false)
   }, [pathname])
 
-
+  useEffect(()=>{
+    if(signedAccountId) {
+      const fetchId = async () => {
+        const fetchedId = await fetchDBProfile(signedAccountId);
+        if(fetchedId === null) {
+          await saveDBProfile({accountId: signedAccountId});
+        }
+      }
+      fetchId();
+    }
+  },[signedAccountId])
 
   useEffect(() => {
     handleNet();
@@ -82,12 +92,11 @@ const Header = () => {
 
 
   const handleSignout = async () => {
-    const wallet = await selector.wallet();
-    return wallet.signOut();
+    return wallet?.signOut();
   };
 
   const handleSignIn = async () => {
-    return connect();
+    return wallet?.signIn();
   };
 
   const handlePopUp = () => {
@@ -114,8 +123,8 @@ const Header = () => {
 
   useEffect(() => {
     const handleIsAdmin = () => {
-      if (activeAccountId) {
-        if (constants.adminId.includes(activeAccountId)) {
+      if (signedAccountId) {
+        if (constants.adminId.includes(signedAccountId)) {
           setIsAdmin(true);
         } else {
           setIsAdmin(false);
@@ -123,7 +132,7 @@ const Header = () => {
       }
     }
     handleIsAdmin();
-  }, [isAdmin, isConnected, activeAccountId]);
+  }, [isAdmin, signedAccountId]);
 
   const updateQueryParam = (key: string, value: string) => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -136,7 +145,6 @@ const Header = () => {
     router.push(newRelativePathQuery);
   };
 
-  const { onBackButtonClick } : any = useAppContext();
   const handleBackClick = () => {
     onBackButtonClick();
   };
@@ -148,7 +156,7 @@ const Header = () => {
   };
 
   const headerButtonsNotHome = (onClick: ReactEventHandler) => (
-    <div className="minsta-header flex gap-5 w-full justify-between px-4 lg:px-12 items-center">
+    <div className="minsta-header flex gap-2 w-full justify-between px-2 lg:px-12 items-center">
 
       <div className="dashboard-menu">
         <button className="h-8 w-auto text-headerText font-bold text-xl flex items-center gap-3" onClick={onClick}>
@@ -179,7 +187,7 @@ const Header = () => {
         </div>
 
 
-        {!isConnected ? (
+        {!signedAccountId ? (
           <div className="menu">
             <button onClick={() => openModal("default")}>About</button>
           </div>
@@ -187,6 +195,10 @@ const Header = () => {
 
         <div className="menu">
           <button onClick={() => push("/leaderboard")}>Leaderboard</button>
+        </div>
+
+        <div className="menu">
+          <button onClick={() => push("/stats")}>Stats</button>
         </div>
 
         <div className="menu">
@@ -209,7 +221,7 @@ const Header = () => {
           <div className={`h-5 w-5 ${color == 'green' ? `bg-green-600` : `bg-yellow-400`} rounded-full`}></div>
         </button>
 
-        {isConnected ? (
+        {signedAccountId ? (
           // <div className="login-btn">
           //   <button className="gradientButton" onClick={handleSignout}> Logout I</button>
           // </div>
@@ -222,7 +234,7 @@ const Header = () => {
                 />
               </div>
               <div className="owner-name max-w-[4.5rem] overflow-hidden md:max-w-[8rem] md:overflow-hidden">
-                <h2 className="text-white overflow-hidden text-ellipsis whitespace-nowrap">{activeAccountId}</h2>
+                <h2 className="text-white overflow-hidden text-ellipsis whitespace-nowrap">{signedAccountId}</h2>
               </div>
               <div className="profile-dropdown">
                 {!subMenu ?
@@ -240,10 +252,10 @@ const Header = () => {
             {subMenu &&
               <div className="absolute bg-slate-700 rounded-md top-[110%] md:left-0 left-[-5rem] md:w-full w-[15rem]">
                 <ul className="sub-menu-list flex flex-col gap-2 px-3 py-2">
-                  {isAdmin && isConnected ?
+                  {isAdmin && signedAccountId ?
                     (
                       <>
-                        <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={() => { push(`/profile/?accountId=${activeAccountId}`); setSubmenu(false); }}>
+                        <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={() => { push(`/profile/?accountId=${signedAccountId}`); setSubmenu(false); }}>
                           <div className="sub-menu-icon">
                             <InlineSVG
                               src="/images/edit_profile.svg"
@@ -266,8 +278,8 @@ const Header = () => {
                           </div>
                         </li>
                       </>
-                    ) : activeAccountId && !isAdmin ? (
-                      <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={() => { push(`/profile/?accountId=${activeAccountId}`); setSubmenu(false); }}>
+                    ) : signedAccountId && !isAdmin ? (
+                      <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={() => { push(`/profile/?accountId=${signedAccountId}`); setSubmenu(false); }}>
                         <div className="sub-menu-icon">
                           <InlineSVG
                             src="/images/edit_profile.svg"
@@ -360,7 +372,7 @@ const Header = () => {
     switch (pathname) {
       case "/":
         return (
-          <div className="minsta-header flex w-full gap-5 justify-between px-4 lg:px-12  items-center">
+          <div className="minsta-header flex w-full gap-2 justify-between px-2 lg:px-12  items-center">
             <div>
               <div className="dashboard-menu">
                 {!back && <div className="hamburger" onClick={() => setIsOpen(!isOpen)}>
@@ -395,7 +407,7 @@ const Header = () => {
                     />}
                 </button>
               </div>
-              {!isConnected ? (
+              {!signedAccountId ? (
                 <div className="menu">
                   <button onClick={() => openModal("default")}>About</button>
                 </div>
@@ -403,6 +415,9 @@ const Header = () => {
 
               <div className="menu">
                 <button onClick={() => push("/leaderboard")}>Leaderboard</button>
+              </div>
+              <div className="menu">
+                <button onClick={() => push("/stats")}>Stats</button>
               </div>
               <div className="menu">
                 <Link href="https://github.com/Teckas-Technologies/minsta" target="_blank" rel="noopener noreferrer">
@@ -422,7 +437,7 @@ const Header = () => {
               >
                 <div className={`h-5 w-5 ${color == 'green' ? `bg-green-600` : `bg-yellow-400`} rounded-full`}></div>
               </button>
-              {isConnected ? (
+              {signedAccountId ? (
                 // <div className="login-btn">
                 //   <button onClick={handleSignout} > Logout I</button>
                 // </div>
@@ -435,7 +450,7 @@ const Header = () => {
                       />
                     </div>
                     <div className="owner-name max-w-[5rem] overflow-hidden md:max-w-[8rem] md:overflow-hidden">
-                      <h2 className="text-white overflow-hidden text-ellipsis whitespace-nowrap">{activeAccountId}</h2>
+                      <h2 className="text-white overflow-hidden text-ellipsis whitespace-nowrap">{signedAccountId}</h2>
                     </div>
                     <div className="profile-dropdown">
                       {!subMenu ?
@@ -451,12 +466,12 @@ const Header = () => {
                     </div>
                   </div>
                   {subMenu &&
-                    <div className="absolute bg-slate-700 rounded-md top-[110%] md:left-0 left-[-5rem] md:w-full w-[15rem]">
+                    <div className="absolute z-50 bg-slate-700 rounded-md top-[110%] md:left-0 left-[-5rem] md:w-full w-[15rem]">
                       <ul className="sub-menu-list flex flex-col gap-2 px-3 py-2">
-                        {isAdmin && isConnected ?
+                        {isAdmin && signedAccountId ?
                           (
                             <>
-                              <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={() => { push(`/profile/?accountId=${activeAccountId}`); setSubmenu(false); }}>
+                              <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={() => { push(`/profile/?accountId=${signedAccountId}`); setSubmenu(false); }}>
                                 <div className="sub-menu-icon">
                                   <InlineSVG
                                     src="/images/edit_profile.svg"
@@ -479,8 +494,8 @@ const Header = () => {
                                 </div>
                               </li>
                             </>
-                          ) : activeAccountId && !isAdmin ? (
-                            <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={() => { push(`/profile/?accountId=${activeAccountId}`); setSubmenu(false); }}>
+                          ) : signedAccountId && !isAdmin ? (
+                            <li className="group flex items-center gap-3 rounded-md px-2 py-2 cursor-pointer transition-all hover:bg-slate-800" onClick={() => { push(`/profile/?accountId=${signedAccountId}`); setSubmenu(false); }}>
                               <div className="sub-menu-icon">
                                 <InlineSVG
                                   src="/images/edit_profile.svg"
@@ -581,7 +596,7 @@ const Header = () => {
         {renderHeaderButtons()}
       </header>
       <div className={isOpen ? "side-bar-open" : "side-bar-close"}>
-        <div className="side-mobile-nav side-bar">
+        <div className="side-mobile-nav side-bar z-10">
           <div className="close" onClick={() => setIsOpen(!isOpen)}>
             <div className="close-icon">
               <InlineSVG
@@ -592,7 +607,7 @@ const Header = () => {
             </div>
           </div>
           <ul className="side-menu-list">
-            {!isConnected ? (
+            {!signedAccountId ? (
               <li className="side-menu" onClick={() => openModal("default")}>
                 <h4>About</h4>
                 <InlineSVG
@@ -606,6 +621,14 @@ const Header = () => {
 
             {/* {pathname === "/admin" ? <AdminSideMenu setAdminPage={setAdminPage}/> : "User"} */}
 
+            <li className="side-menu" onClick={() => push("/stats")}>
+              <h4>Stats</h4>
+              <InlineSVG
+                src="/images/arrow_right.svg"
+                className="icon fill-current text-headerText"
+                style={{ color: "#ff3572" }}
+              />
+            </li>
             <li className="side-menu" onClick={() => push("/leaderboard")}>
               <h4>Leaderboard</h4>
               <InlineSVG
@@ -614,7 +637,7 @@ const Header = () => {
                 style={{ color: "#ff3572" }}
               />
             </li>
-            {isAdmin && isConnected ? (
+            {isAdmin && signedAccountId ? (
               <>
                 <li className="side-menu" onClick={() => push("/admin")}>
                   <h4>Admin</h4>
@@ -624,7 +647,7 @@ const Header = () => {
                     style={{ color: "#ff3572" }}
                   />
                 </li>
-                <li className="side-menu" onClick={() => push(`/profile/?accountId=${activeAccountId}`)}>
+                <li className="side-menu" onClick={() => push(`/profile/?accountId=${signedAccountId}`)}>
                   <h4>Profile</h4>
                   <InlineSVG
                     src="/images/arrow_right.svg"
@@ -633,8 +656,8 @@ const Header = () => {
                   />
                 </li>
               </>
-            ) : activeAccountId && !isAdmin ? (
-              <li className="side-menu" onClick={() => push(`/profile/?accountId=${activeAccountId}`)}>
+            ) : signedAccountId && !isAdmin ? (
+              <li className="side-menu" onClick={() => push(`/profile/?accountId=${signedAccountId}`)}>
                 <h4>Profile</h4>
                 <InlineSVG
                   src="/images/arrow_right.svg"
