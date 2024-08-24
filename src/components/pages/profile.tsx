@@ -305,7 +305,7 @@ export const ProfilePage = () => {
     };
 
     const calculateCredit = (amount: number) => {
-        const creditValue = amount / constants.creditAmount;
+        const creditValue = Math.round((amount / constants.creditAmount) * 100) / 100;
         return Math.floor(creditValue);
     };
 
