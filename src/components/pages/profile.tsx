@@ -62,6 +62,7 @@ export const ProfilePage = () => {
     const [backgroundImageCid, setBackgroundImageCid] = useState('');
     const [buyCreditModel, setBuyCreditModel] = useState(false);
     const [amount, setAmount] = useState<number>(1);
+    const [storeAmt, setStoreAmt] = useState("0.05");
 
     const handleUpload = (text: string, cid: string, open: boolean) => {
         setUploadText(text);
@@ -159,16 +160,16 @@ export const ProfilePage = () => {
     }, [signedAccountId, edit]);
 
     const handleEdit = () => {
-        if(availableStorage === null || (typeof availableStorage === 'bigint' && BigInt(availableStorage) <= BigInt(512))){
+        if(availableStorage === null || (typeof availableStorage === 'bigint' && BigInt(availableStorage) <= BigInt(256))){
             setStorageModel(true);
         } else {
             setEdit(true)
         }
     }
 
-    const buySocialDBStorage = async () => {
+    const buySocialDBStorage = async (amount: string) => {
         if(balance > 0.05){
-            return await buyStorage();
+            return await buyStorage(amount);
         } else {
             setHandleToast("Insufficient Balance!", true);
             return;
@@ -544,9 +545,20 @@ export const ProfilePage = () => {
                     <div className={`upload-box w-[20rem] bg-white mx-3 px-3 py-2 flex flex-col items-center gap-2 rounded-md ${darkMode ? "box-shadow-dark" : "box-shadow"}`}>
                         <h2 className="title-font">Insufficient Storage!</h2>
                         <p className="text-justify">{`You don't have enough space to set the profile on near.social. Please buy ${availableStorage !== null ? "additional" : ""} storage on near.social by spending 0.05 NEAR.`}</p>
+                        <div className="storage-amount flex gap-2">
+                            <div className={`amt px-2 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "0.05" ? "bg-sky-500" : ""}`} onClick={()=>setStoreAmt("0.05")}>
+                                <h2 className={`${storeAmt === "0.05" ? "text-white" : ""}`}>0.05 NEAR (5kb) </h2>
+                            </div>
+                            <div className={`amt px-3 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "0.2" ? "bg-sky-500" : ""}`} onClick={()=>setStoreAmt("0.2")}>
+                                <h2 className={`${storeAmt === "0.2" ? "text-white" : ""}`}>0.2 NEAR (20kb)</h2>
+                            </div>
+                            <div className={`amt px-4 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "1" ? "bg-sky-500" : ""}`} onClick={()=>setStoreAmt("1")}>
+                                <h2 className={`${storeAmt === "1" ? "text-white" : ""}`}>1 NEAR (100kb)</h2>
+                            </div>
+                        </div>
                         <div className="btns flex gap-2">
                             <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={()=>setStorageModel(false)}>Cancel</button>
-                            <button className="btn bg-sky-500 cursor-pointer" onClick={buySocialDBStorage}>Buy</button>
+                            <button className="btn bg-sky-500 cursor-pointer" onClick={()=>buySocialDBStorage(storeAmt)}>Buy</button>
                         </div>
                     </div>
                 </div>}
