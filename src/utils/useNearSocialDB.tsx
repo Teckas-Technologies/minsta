@@ -162,7 +162,7 @@ const useNearSocialDB = () => {
         }
     }
 
-    const buyStorage = async () => {
+    const buyStorage = async (amt: string) => {
         setLoading(true);
 
         try {
@@ -173,7 +173,7 @@ const useNearSocialDB = () => {
             const method = 'storage_deposit';
             const args = { account_id: signedAccountId };
             const gas = '30000000000000';
-            const amount = nearAPI.utils.format.parseNearAmount("0.05")?.toString();
+            const amount = nearAPI.utils.format.parseNearAmount(amt)?.toString();
             const deposit = amount;
 
             const result = await wallet?.callMethod({ contractId, method, args, gas, deposit });
