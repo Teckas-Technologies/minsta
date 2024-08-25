@@ -7,10 +7,12 @@ import { Cloudinary } from '@cloudinary/url-gen';
 import { Resize } from '@cloudinary/url-gen/actions/resize';
 import { Effect } from '@cloudinary/url-gen/actions/effect';
 import InlineSVG from "react-inlinesvg";
-import { CreditsType, CreditsTypeReq } from "@/data/types";
+import { CreditsTypeReq } from "@/data/types";
 import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
 import { NearContext } from "@/wallet/WalletSelector";
 import { useRouter } from "next/navigation";
+import BuyCreditButton from "./buttons/buy-credit-button";
+import { calculateCredit } from "@/utils/calculateCredit";
 
 
 const cloudinary = new Cloudinary({
@@ -27,9 +29,13 @@ const ART_FILTERS = ["al_dente", "athena", "audrey", "aurora", "daguerre", "euca
 export function Mint({
   backStep,
   currentPhoto,
+  setPicture,
+  txhash
 }: {
   backStep: () => void;
   currentPhoto: string;
+  setPicture: (e: any) => void;
+  txhash: string
 }) {
   const { isLoading, mintImage, reduceImageSize, getTitleAndDescription } = useApp();
   const [title, setTitle] = useState("");
@@ -53,7 +59,11 @@ export function Mint({
   const [credits, setCredits] = useState<number | null>();
   const [buyCredit, setBuyCredit] = useState(false);
   const { push } = useRouter();
-  const [txhash, setTxhash] = useState("");
+  const [titleLock, setTitleLock] = useState(false);
+  const [desLock, setDesLock] = useState(false);
+  const [balance, setBalance] = useState<any>();
+  const [buyCreditModel, setBuyCreditModel] = useState(false);
+  const [amount, setAmount] = useState<number>(1);
 
   const cloudImage = cldData?.public_id && cloudinary.image(cldData?.public_id);
 
@@ -196,6 +206,10 @@ export function Mint({
       handleSignIn();
       return;
     }
+    if (titleLock && desLock) {
+      setHandleToast("Locked title & description!", true);
+      return;
+    }
     try {
       await generate();
       const data: CreditsTypeReq = {
@@ -216,8 +230,14 @@ export function Mint({
       setGenerating(true);
       const replicatePhoto = await reduceImageSize(currentPhoto, 10);
       const titleAndDescription = await getTitleAndDescription(replicatePhoto);
-      setTitle(titleAndDescription?.title);
-      setDescription(titleAndDescription?.description);
+      const trimmedTitle = titleAndDescription?.title?.slice(0, 30);
+      const trimmedDescription = titleAndDescription?.description?.slice(0, 80);
+      if (!titleLock) {
+        setTitle(trimmedTitle);
+      }
+      if (!desLock) {
+        setDescription(trimmedDescription);
+      }
       setGenerating(false);
     }
   }
@@ -255,6 +275,27 @@ export function Mint({
     setToastText(message);
   }
 
+  const eraseAll = () => {
+    // setTitle("");
+    // setDescription("");
+    // setPicture(null);
+    setPreview(false);
+  }
+
+  const handleTransfer = () => {
+    try {
+      if (!signedAccountId) {
+        handleSignIn();
+      } else if (balance < 0.05) {
+        setHandleToast("Insufficient Balance!", true);
+      } else {
+        setBuyCreditModel(true);
+      }
+    } catch (error) {
+      console.error("Failed to sign and send transaction:", error);
+    }
+  }
+
   return (
     <div className={darkMode ? "dark" : ""}>
       <main className="h-[100Vh] relative w-[100%] px-4 flex flex-col items-center scroll photo-main dark:bg-slate-800">
@@ -272,13 +313,10 @@ export function Mint({
             </div>
           </>
         ) : (<>
-          {!preview && !buyCredit && <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 mb-2`}>
+          {!preview && !buyCredit && !buyCreditModel && <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 mb-2`}>
             <div className="scroll-div h-auto">
               <div className="relative">
                 <Image src={src} alt="image" width={468} height={468} className="photo-img" />
-                {/* <div className="applying absolute top-0 left-0 bottom-0 right-0 bg-red-500 rounded-md">
-                  
-                </div> */}
               </div>
               <h2 className="title-font text-lg text-center dark:text-white mt-2 mb-1">Effects</h2>
               <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} flex gap-2 overflow-x-scroll w-full h-[9.5rem] mb-2 p-2 mx-1`}>
@@ -303,26 +341,51 @@ export function Mint({
               </div>
 
               <div className="tags pb-2 pt-2 px-2">
-                <div className="generate-btn w-full flex pb-4 justify-between">
+                <div className="generate-btn w-full flex pb-4 justify-between gap-2">
                   <button className="btn success-btn flex items-center gap-2" onClick={generation} disabled={generating}>
                     <InlineSVG
                       src="/images/robot.svg"
                       className="fill-current dark:text-white"
                     /> <h2 className="title-font text-white">Generate using AI</h2>
                   </button>
-                  <div className="credits border-2 border-green-700 rounded-md pl-3 pr-4 py-2 flex justify-center items-center gap-2">
-                    <InlineSVG
-                      src="/images/fire.svg"
-                      className="fill-current text-red-500 dark:text-yellow-500"
-                    /> <h2 className="title-font dark:text-white">{credits}</h2>
+                  <div className="flex items-center gap-2">
+                    <div className="credits border-2 border-green-700 rounded-md pl-2 pr-3 py-2 flex justify-center items-center gap-2">
+                      <InlineSVG
+                        src="/images/fire.svg"
+                        className="fill-current text-red-500 dark:text-yellow-500"
+                      /> <h2 className="title-font dark:text-white">{credits}</h2>
+                    </div>
+                    <div className="buy-credit bg-green-700 flex justify-center items-center rounded-md gap-2 px-2 py-2 cursor-pointer" onClick={handleTransfer}>
+                      <h2 className="text-white">{"Buy"}</h2>
+                    </div>
                   </div>
                 </div>
                 {!generating ? <>
-                  <div className="input-field">
-                    <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} onChange={(e) => { setTitle(e.target.value) }} />
+                  <div className="input-field flex items-center">
+                    <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} maxLength={30} onChange={(e) => {
+                      if (e.target.value.length <= 30) {
+                        setTitle(e.target.value);
+                      }
+                    }} />
+                    <div className="lock flex items-center justify-center cursor-pointer" onClick={() => setTitleLock(!titleLock)}>
+                      <InlineSVG
+                        src={`${titleLock ? "/images/lock.svg" : "/images/unlock.svg"}`}
+                        className="fill-current h-6 w-6 text-red-500 dark:text-white text-slate-800"
+                      />
+                    </div>
                   </div>
-                  <div className="input-field">
-                    <input type="text" placeholder="Enter the description of the NFT..." className="border-none outline-none w-full" value={description} onChange={(e) => { setDescription(e.target.value) }} />
+                  <div className="input-field flex items-center">
+                    <input type="text" placeholder="Enter the description of the NFT..." className="border-none outline-none w-full" value={description} maxLength={80} onChange={(e) => {
+                      if (e.target.value.length <= 80) {
+                        setDescription(e.target.value);
+                      }
+                    }} />
+                    <div className="lock flex items-center justify-center cursor-pointer" onClick={() => setDesLock(!desLock)}>
+                      <InlineSVG
+                        src={`${desLock ? "/images/lock.svg" : "/images/unlock.svg"}`}
+                        className="fill-current h-6 w-6 text-red-500 dark:text-white text-slate-800"
+                      />
+                    </div>
                   </div></> : <div className="flex flex-col items-center">
                   <div className="loader"></div>
                   <h2 className="dark:text-white py-2">Generating Title & Description...</h2>
@@ -368,18 +431,34 @@ export function Mint({
               <div className="head flex flex-col gap-2">
                 <h2 className="title-font text-center dark:text-white">Insufficient Credits!</h2>
                 <p className="dark:text-white text-justify">
-                  You don&apos;t have enough credits for the mind-blowing AI title and description generation.
-                </p>
-                <p className="dark:text-white text-justify">
-                  Go to the &quot;Profile&quot; page to buy &quot;AI Credits&quot;.
+                  You don&apos;t have enough credits for the mind-blowing AI title and description generation. Buy your AI credits.
                 </p>
                 <p className="dark:text-white text-center">
                   1 credit = 0.05 NEAR.
                 </p>
               </div>
               <div className="btns-credit flex items-center justify-center gap-2">
-                <button className="btn cancel-btn dark:text-white dark:border-white" onClick={() => setBuyCredit(false)}>Cancel</button>
-                <button className="btn success-btn border-green-600" onClick={() => push(`/profile/?accountId=${signedAccountId}`)}>Go to Profile</button>
+                <button className="btn cancel-btn dark:text-white dark:border-white" onClick={() => setBuyCredit(false)}>Close</button>
+              </div>
+            </div>
+          </div>}
+          {<div className={`${buyCreditModel ? "": "hidden"} bg-slate-800 dark:bg-white md:w-[40%] p-3 flex justify-center items-center rounded-md`}>
+            <div className="buy-alert-box w-full flex flex-col gap-3 h-auto bg-white box-shadow text-center rounded-md py-2 px-3">
+              <div className="head flex flex-col gap-2">
+                <h2 className="title-font">Buy Credits!</h2>
+                <div className={`input-box h-11 w-full rounded-md flex items-center justify-between ${darkMode ? "box-shadow" : "box-shadow"}`}>
+                  <input type="number" min={0.05} value={amount} onChange={(e) => setAmount(parseFloat(e.target.value))} className={`bg-white px-4 py-2 flex-grow rounded-md h-11 text-sm border-none outline-none`} />
+                  <div className="box-near h-11 w-13 p-2 pr-4">
+                    <img src="images/near-logo.png" className="h-full w-full" alt="" />
+                  </div>
+                </div>
+                <div className="credit-value">
+                  <h2>{!isNaN(amount) ? amount : 0} NEAR = {calculateCredit(!isNaN(amount) ? amount : 0)} Credits</h2>
+                </div>
+                <div className="btns flex gap-2 justify-center">
+                  <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={() => setBuyCreditModel(false)}>Cancel</button>
+                  <BuyCreditButton amount={amount} setHandleToast={setHandleToast} setCredits={setCredits} txhash={txhash} />
+                </div>
               </div>
             </div>
           </div>}
@@ -411,7 +490,7 @@ export function Mint({
               </div>
             )}
             <div className="btn-groups flex gap-3 py-2">
-              <button className="text-secondaryBtnText w-full border border-secondaryBtnText rounded px-4 py-2 dark:text-slate-900 dark:border-slate-800" onClick={() => setPreview(false)}>Cancel</button>
+              <button className="text-secondaryBtnText w-full border border-secondaryBtnText rounded px-4 py-2 dark:text-slate-900 dark:border-slate-800" onClick={eraseAll}>Cancel</button>
               <button className={`${!title || !description || !currentPhoto ? 'cursor-not-allowed' : 'cursor-pointer'} gradientButton w-full text-primaryBtnText rounded px-4 py-2`} onClick={handleUpload} disabled={!title || !description || !currentPhoto}>Upload</button>
             </div>
           </div>

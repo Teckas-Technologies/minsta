@@ -6,6 +6,11 @@ import InlineSVG from "react-inlinesvg";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { useContext, useEffect, useState } from "react";
 import { NearContext } from "@/wallet/WalletSelector";
+import { CreditsTypeReq, HashesType } from "@/data/types";
+import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
+import { useFetchHashes, useSaveHashes } from "@/hooks/db/HashHook";
+import * as nearAPI from "near-api-js";
+import { calculateCredit } from "@/utils/calculateCredit";
 
 export default function CameraPage() {
   const {
@@ -17,22 +22,71 @@ export default function CameraPage() {
     webcamRef,
     facingMode,
     setCameraLoaded,
+    setPicture,
     capture,
   } = useCamera();
   const [darkMode, setDarkMode] = useState<boolean>();
-  const {mode} = useDarkMode();
+  const { mode } = useDarkMode();
   const { wallet, signedAccountId } = useContext(NearContext);
+  const [txhash, setTxhash] = useState("");
+  const { fetchCredits } = useFetchCredits();
+  const { saveCredits } = useSaveCredits();
+  const { fetchHashes } = useFetchHashes();
+  const { saveHashes } = useSaveHashes();
 
-  useEffect(()=> {
-    if(mode === "dark") {
+  useEffect(() => {
+    if (mode === "dark") {
       setDarkMode(true);
-    } else{
+    } else {
       setDarkMode(false);
     }
   }, [mode])
 
+  useEffect(() => {
+    const getresult = async () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams) {
+        const hash = searchParams.get('transactionHashes');
+        if (hash) {
+          // setTxhash(hash)
+          const res = await fetchHashes(hash as string);
+          if (res?.exist) {
+            return;
+          }
+          try {
+            const result = await wallet?.getTransactionResult(hash);
+            if (result?.success) {
+              if (result.signerId) {
+                const amt = nearAPI.utils.format.formatNearAmount(result.amount);
+                const resCredit = calculateCredit(parseFloat(amt));
+                const data: CreditsTypeReq = {
+                  accountId: result.signerId,
+                  credit: resCredit,
+                  detuct: false
+                };
+                await saveCredits(data);
+
+                let credit = await fetchCredits(result.signerId);
+                // setCredits(credit?.credit as number);
+                const hashData: HashesType = {
+                  accountId: result.signerId,
+                  amount: parseFloat(amt),
+                  hash: hash
+                }
+                await saveHashes(hashData)
+              }
+            }
+          } catch (err) {
+            console.log("error >> ", err)
+          }
+        }
+      }
+    }
+    getresult();
+  }, [txhash, signedAccountId])
+
   if (picture) {
-    return <Mint currentPhoto={picture} backStep={tryAgain} />;
+    return <Mint currentPhoto={picture} backStep={tryAgain} setPicture={setPicture} txhash={txhash} />;
   }
 
   return (
@@ -73,8 +127,6 @@ export default function CameraPage() {
               }}
             />
           )}
-
-          {/* <h1>Hi</h1> */}
         </div>
       </main>
       {!picture && (
