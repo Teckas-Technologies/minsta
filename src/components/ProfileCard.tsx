@@ -3,25 +3,21 @@ import InlineSVG from "react-inlinesvg"
 import { CoptText } from "./CopyText"
 import Link from "next/link"
 import { useContext, useEffect, useState } from "react"
-import { CreditsType, CreditsTypeReq, HashesType, NEARSocialUserProfile, ProfileType } from "@/data/types"
-import { useDarkMode } from "@/context/DarkModeContext"
-import { NearContext } from "@/wallet/WalletSelector"
-import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook"
-import * as nearAPI from "near-api-js";
-import { useFetchHashes, useSaveHashes } from "@/hooks/db/HashHook"
+import { CreditsTypeReq, NEARSocialUserProfile } from "@/data/types"
+import { useDarkMode } from "@/context/DarkModeContext";
+import { NearContext } from "@/wallet/WalletSelector";
+import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook";
 import FollowButton from "./buttons/follow-button"
-import useNearSocialDB from "@/utils/useNearSocialDB"
-import { constants } from "@/constants"
+import useNearSocialDB from "@/utils/useNearSocialDB";
 
 interface props {
     profile: NEARSocialUserProfile | undefined;
-    // dbProfile: ProfileType | undefined;
     images: string[] | undefined,
     accountId: string;
     setHandleToast: (s: string, e: boolean) => void
     handleUpload: (text: string, cid: string, open: boolean) => void
     handleBuyCredit: (open: boolean)=> void;
-    creditAdded: boolean
+    creditAdded: number | null | undefined
 }
 
 export const ProfileCard = ({ profile, images, accountId, setHandleToast, handleUpload, handleBuyCredit, creditAdded }: props) => {
@@ -32,8 +28,6 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
     const { fetchCredits } = useFetchCredits();
     const { saveCredits } = useSaveCredits();
     const [credits, setCredits] = useState<number | null>();
-    const [buyCredit, setBuyCredit] = useState(false);
-    const [txhash, setTxhash] = useState("");
     const [balance, setBalance] = useState<number>(0);
     const [profileFileName, setProfileFileName] = useState('');
     const [profileImageCid, setProfileImageCid] = useState('');
@@ -76,57 +70,6 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
             fetchDbCredit();
         }
     }, [signedAccountId, profile, creditAdded]);
-
-    const { fetchHashes } = useFetchHashes();
-    const { saveHashes } = useSaveHashes();
-
-    const calculateCredit = (amount: number) => {
-        const creditValue = Math.round((amount / constants.creditAmount) * 100) / 100;
-        return Math.floor(creditValue);
-    };
-
-    useEffect(() => {
-        const getresult = async () => {
-            const searchParams = new URLSearchParams(window.location.search);
-            if (searchParams) {
-                const hash = searchParams.get('transactionHashes');
-                if (hash) {
-                    setTxhash(hash);
-                    const res = await fetchHashes(hash as string);
-                    if (res?.exist) {
-                        return;
-                    }
-                    try {
-                        const result = await wallet?.getTransactionResult(hash);
-                        if (result?.success) {
-                            if (result.signerId) {
-                                const amt = nearAPI.utils.format.formatNearAmount(result.amount);
-                                const resCredit = calculateCredit(parseFloat(amt));
-                                const data: CreditsTypeReq = {
-                                    accountId: result.signerId,
-                                    credit: resCredit,
-                                    detuct: false
-                                };
-                                await saveCredits(data);
-
-                                let credit = await fetchCredits(result.signerId);
-                                setCredits(credit?.credit);
-                                const hashData: HashesType = {
-                                    accountId: result.signerId,
-                                    amount: parseFloat(amt),
-                                    hash: hash
-                                }
-                                await saveHashes(hashData)
-                            }
-                        }
-                    } catch (err) {
-                        console.log("error >> ", err)
-                    }
-                }
-            }
-        }
-        getresult();
-    }, [txhash])
 
     const handleSignIn = async () => {
         return wallet?.signIn();
