@@ -11,16 +11,12 @@ import { ProfileCard } from "../ProfileCard";
 import { marked } from 'marked';
 import { EditProfile } from "../EditProfile"
 import { useRouter } from "next/navigation"
-import { useFetchProfile, useSaveProfile } from "@/hooks/db/ProfileHook"
+import { useFetchProfile } from "@/hooks/db/ProfileHook"
 import { NearContext } from "@/wallet/WalletSelector"
 import useNearSocialDB from "@/utils/useNearSocialDB"
 import { useImage } from "@/utils/socialImage";
-import Image from "next/image"
-import useNEARTransfer from "@/utils/useTransfer"
-import { constants } from "@/constants"
-import { useFetchHashes, useSaveHashes } from "@/hooks/db/HashHook"
-import { useFetchCredits, useSaveCredits } from "@/hooks/db/CreditHook"
-import * as nearAPI from "near-api-js";
+import BuyCreditButton from "../buttons/buy-credit-button"
+import { calculateCredit } from "@/utils/calculateCredit"
 
 export const ProfilePage = () => {
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
@@ -62,6 +58,22 @@ export const ProfilePage = () => {
     const [backgroundImageCid, setBackgroundImageCid] = useState('');
     const [buyCreditModel, setBuyCreditModel] = useState(false);
     const [amount, setAmount] = useState<number>(1);
+    const [storeAmt, setStoreAmt] = useState("0.05");
+    const [credits, setCredits] = useState<number | null>();
+    const [txhash, setTxhash] = useState("");
+
+    useEffect(() => {
+        const getresult = async () => {
+          const searchParams = new URLSearchParams(window.location.search);
+          if (searchParams) {
+            const hash = searchParams.get('transactionHashes');
+            if (hash) {
+              setTxhash(hash);
+            }
+          }
+        }
+        getresult();
+    }, [txhash, signedAccountId])
 
     const handleUpload = (text: string, cid: string, open: boolean) => {
         setUploadText(text);
@@ -159,16 +171,16 @@ export const ProfilePage = () => {
     }, [signedAccountId, edit]);
 
     const handleEdit = () => {
-        if(availableStorage === null || (typeof availableStorage === 'bigint' && BigInt(availableStorage) <= BigInt(512))){
+        if(availableStorage === null || (typeof availableStorage === 'bigint' && BigInt(availableStorage) <= BigInt(256))){
             setStorageModel(true);
         } else {
             setEdit(true)
         }
     }
 
-    const buySocialDBStorage = async () => {
+    const buySocialDBStorage = async (amount: string) => {
         if(balance > 0.05){
-            return await buyStorage();
+            return await buyStorage(amount);
         } else {
             setHandleToast("Insufficient Balance!", true);
             return;
@@ -303,51 +315,6 @@ export const ProfilePage = () => {
         }
     };
 
-    const calculateCredit = (amount: number) => {
-        const creditValue = amount / constants.creditAmount;
-        return Math.floor(creditValue);
-    };
-
-    
-
-    const { transfer } = useNEARTransfer();
-    const { saveHashes } = useSaveHashes();
-    const { saveCredits } = useSaveCredits();
-    const { fetchCredits } = useFetchCredits();
-    const [creditAdded, setCreditAdded] = useState(false);
-
-    const buyCredit = async (amount: number) => {
-        setCreditAdded(false);
-        if(balance >= amount) {
-            const result = await transfer(amount.toString());
-            if (result?.success) {
-                if (result?.signerId && result.depositAmount) {
-                    const amt = nearAPI.utils.format.formatNearAmount(result.depositAmount);
-                    const resCredit = calculateCredit(parseFloat(amt));
-                    const data: CreditsTypeReq = {
-                        accountId: result.signerId,
-                        credit: resCredit,
-                        detuct: false
-                    };
-                    await saveCredits(data);
-
-                    let credit = await fetchCredits(result.signerId);
-                    // setCredits(credit?.credit);
-                    const hashData: HashesType = {
-                        accountId: result.signerId,
-                        amount: parseFloat(amt),
-                        hash: result.hash as string
-                    }
-                    await saveHashes(hashData);
-                    setBuyCreditModel(false);
-                    setCreditAdded(true);
-                }
-            }
-        } else {
-            setHandleToast("Insufficient Balance!", true);
-        }
-    }
-
     return (
         <div className={darkMode ? "dark" : ""}>
             <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh] h-auto scroll-smooth overflow-y-scroll">
@@ -386,7 +353,7 @@ export const ProfilePage = () => {
                             </div>}
                         </> :
                         <EditProfile setEdit={setEdit} accountId={activeAccountIdNew} />}
-                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} handleBuyCredit={handleBuyCredit} creditAdded={creditAdded} />}
+                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} handleBuyCredit={handleBuyCredit} creditAdded={credits} />}
                 </div>
 
                 {/* {!dataItems && !itemsLoading && 
@@ -544,14 +511,25 @@ export const ProfilePage = () => {
                     <div className={`upload-box w-[20rem] bg-white mx-3 px-3 py-2 flex flex-col items-center gap-2 rounded-md ${darkMode ? "box-shadow-dark" : "box-shadow"}`}>
                         <h2 className="title-font">Insufficient Storage!</h2>
                         <p className="text-justify">{`You don't have enough space to set the profile on near.social. Please buy ${availableStorage !== null ? "additional" : ""} storage on near.social by spending 0.05 NEAR.`}</p>
+                        <div className="storage-amount flex gap-2">
+                            <div className={`amt px-2 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "0.05" ? "bg-sky-500" : ""}`} onClick={()=>setStoreAmt("0.05")}>
+                                <h2 className={`${storeAmt === "0.05" ? "text-white" : ""}`}>0.05 NEAR (5kb) </h2>
+                            </div>
+                            <div className={`amt px-3 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "0.2" ? "bg-sky-500" : ""}`} onClick={()=>setStoreAmt("0.2")}>
+                                <h2 className={`${storeAmt === "0.2" ? "text-white" : ""}`}>0.2 NEAR (20kb)</h2>
+                            </div>
+                            <div className={`amt px-4 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "1" ? "bg-sky-500" : ""}`} onClick={()=>setStoreAmt("1")}>
+                                <h2 className={`${storeAmt === "1" ? "text-white" : ""}`}>1 NEAR (100kb)</h2>
+                            </div>
+                        </div>
                         <div className="btns flex gap-2">
                             <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={()=>setStorageModel(false)}>Cancel</button>
-                            <button className="btn bg-sky-500 cursor-pointer" onClick={buySocialDBStorage}>Buy</button>
+                            <button className="btn bg-sky-500 cursor-pointer" onClick={()=>buySocialDBStorage(storeAmt)}>Buy</button>
                         </div>
                     </div>
                 </div>}
 
-                {buyCreditModel && <div className="upload-model fixed bg-sky-50 dark:bg-slate-800 top-0 bottom-0 right-0 left-0 flex justify-center items-center">
+                { <div className={`upload-model fixed bg-sky-50 dark:bg-slate-800 top-0 bottom-0 right-0 left-0 flex justify-center items-center ${buyCreditModel ? "" : "hidden"}`}>
                     <div className={`upload-box w-[20rem] bg-white mx-3 px-3 py-2 flex flex-col items-center gap-2 rounded-md ${darkMode ? "box-shadow-dark" : "box-shadow"}`}>
                         <h2 className="title-font">Buy Credits!</h2>
                         <div className={`input-box h-11 w-full rounded-md flex items-center justify-between ${darkMode ? "box-shadow" : "box-shadow"}`}>
@@ -565,7 +543,7 @@ export const ProfilePage = () => {
                         </div>
                         <div className="btns flex gap-2">
                             <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={()=>setBuyCreditModel(false)}>Cancel</button>
-                            <button className="btn bg-sky-500 cursor-pointer" onClick={()=>buyCredit(amount)}>Buy</button>
+                            <BuyCreditButton amount={amount} setHandleToast={setHandleToast} setCredits={setCredits} txhash={txhash} />
                         </div>
                     </div>
                 </div>}
