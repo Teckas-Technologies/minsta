@@ -39,17 +39,17 @@ export const HomePage = () => {
   const [dataItems, setDataItems] = useState(false);
   const [itemsLoading, setItemsLoading] = useState(false);
   const [darkMode, setDarkMode] = useState<boolean>();
-  const {mode} = useDarkMode();
-  const { grid, toggleGrid} = useGrid();
+  const { mode } = useDarkMode();
+  const { grid, toggleGrid } = useGrid();
   const [result, setResult] = useState("");
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const router = useRouter();
   const { back, toggleBack, triggerBackAction, onNewButtonClickHandled } = useBackContext();
 
-  useEffect(()=> {
-    if(mode === "dark") {
+  useEffect(() => {
+    if (mode === "dark") {
       setDarkMode(true);
-    } else{
+    } else {
       setDarkMode(false);
     }
   }, [mode])
@@ -59,13 +59,13 @@ export const HomePage = () => {
     window.location.reload();
   }
 
-  useEffect(()=> {
-    if(toast) {
-        setTimeout(()=> {
-            setToast(false);
-            setToastText("");
-            window.location.reload();
-        }, 5000)
+  useEffect(() => {
+    if (toast) {
+      setTimeout(() => {
+        setToast(false);
+        setToastText("");
+        window.location.reload();
+      }, 5000)
     }
   }, [toast]);
 
@@ -75,18 +75,18 @@ export const HomePage = () => {
   }
 
   useEffect(() => {
-    if(signedAccountId) {
-        setAccountId(signedAccountId);
-        fetchHidedPosts(signedAccountId);
+    if (signedAccountId) {
+      setAccountId(signedAccountId);
+      fetchHidedPosts(signedAccountId);
     }
   }, [signedAccountId]);
 
-  const fetchHidedPosts = async (accountId: string)=> {
-      const hiddenPosts = await fetchHiddenPost(accountId);
-      if (hiddenPosts?.hiddedTokenIds) {
-          const ids = hiddenPosts.hiddedTokenIds.map(token => token.id);
-          setHidePostIds(ids);
-      }
+  const fetchHidedPosts = async (accountId: string) => {
+    const hiddenPosts = await fetchHiddenPost(accountId);
+    if (hiddenPosts?.hiddedTokenIds) {
+      const ids = hiddenPosts.hiddedTokenIds.map(token => token.id);
+      setHidePostIds(ids);
+    }
   }
 
   const handleSignIn = async () => {
@@ -107,12 +107,12 @@ export const HomePage = () => {
     }
   }, [data]);
 
-  useEffect(()=>{
-    if(!searchText){
+  useEffect(() => {
+    if (!searchText) {
       setSearch("");
       toggleBack(false)
     }
-  },[searchText])
+  }, [searchText])
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -133,7 +133,7 @@ export const HomePage = () => {
   const handleNewButtonClick = () => {
     handleClearSearch();
   };
-  
+
 
   const updateQueryParam = (key: string, value: string) => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -153,7 +153,7 @@ export const HomePage = () => {
   };
 
   const handleClearSearch = () => {
-    setSearch(""); 
+    setSearch("");
     setSearchText("");
     updateQueryParam("search", "");
   };
@@ -167,11 +167,11 @@ export const HomePage = () => {
     setIsDropdownOpen(false);
   };
 
-  useEffect(()=>{
-    if(selectedOption) {
+  useEffect(() => {
+    if (selectedOption) {
       setSelectedOption(selectedOption)
     }
-  },[selectedOption, handleOptionClick])
+  }, [selectedOption, handleOptionClick])
 
   return !totalLoading && !totalNfts ? (
     <div className={darkMode ? "dark" : ""}>
@@ -185,19 +185,19 @@ export const HomePage = () => {
   ) : (
     <div className={darkMode ? "dark" : ""}>
       <div className="max-w-md px-2 flex flex-col ml-auto mt-20 justify-center mb-5 fixed top-2 right-0 lg:right-14 z-1">
-          <div className="flex space-x-2 items-center">
-            <div className="md:hidden bg-white p-1 rounded-full" onClick={toggleGrid}>
-              <InlineSVG
-                src="/images/grid.svg"
-                className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
-                />
-            </div>
-            <div className="relative">
-              <div className="absolute inset-y-0 start-0 flex items-center ps-3 cursor-pointer justify-center">
-                <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                </svg>
-                {/* {!searchText ? <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+        <div className="flex space-x-2 items-center">
+          <div className="md:hidden bg-white p-1 rounded-full" onClick={toggleGrid}>
+            <InlineSVG
+              src="/images/grid.svg"
+              className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
+            />
+          </div>
+          <div className="relative">
+            <div className="absolute inset-y-0 start-0 flex items-center ps-3 cursor-pointer justify-center">
+              <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+              </svg>
+              {/* {!searchText ? <svg className="w-4 h-4 text-sky-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                   <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
                 </svg> : 
                 <div onClick={handleClearSearch}>
@@ -206,46 +206,46 @@ export const HomePage = () => {
                     className="fill-current w-4 h-4 text-sky-500 font-xl cursor-pointer"
                     />
                 </div>} */}
-              </div>
-              <input type="search" value={searchText} id="default-search" className={`block w-full p-1.5 ps-10 search-box border focus:border-sky-500 rounded-3xl outline-none`} placeholder="Search..." required onChange={(e) => setSearchText(e.target.value)} />
-              <button className="text-white transition-all absolute end-1 bottom-0.5 bg-sky-400 hover:bg-white hover:border-solid border border-sky-400  hover:text-black focus:ring-1 focus:outline-none focus:ring-slate-300 font-medium rounded-3xl text-sm px-3 py-1.5" onClick={handleSearch}>
-                Search
-              </button>
             </div>
-            <div>
-              <div className="relative">
-                <button type="button" className="relative w-full cursor-pointer rounded-3xl dd-box bg-white py-1.5 pl-1 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset  focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm sm:leading-6" aria-haspopup="listbox" aria-expanded={isDropdownOpen} onClick={handleDropdownClick}>
-                  <span className="flex items-center">
-                    <span className="ml-3 block truncate">{selectedOption}</span>
-                  </span>
-                  <span className="pointer-events-none absolute inset-y-0 right-0 ml-2 flex items-center pr-2">
-                    <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                </button>
+            <input type="search" value={searchText} id="default-search" className={`block w-full p-1.5 ps-10 search-box border focus:border-sky-500 rounded-3xl outline-none`} placeholder="Search..." required onChange={(e) => setSearchText(e.target.value)} />
+            <button className="text-white transition-all absolute end-1 bottom-0.5 bg-sky-400 hover:bg-white hover:border-solid border border-sky-400  hover:text-black focus:ring-1 focus:outline-none focus:ring-slate-300 font-medium rounded-3xl text-sm px-3 py-1.5" onClick={handleSearch}>
+              Search
+            </button>
+          </div>
+          <div>
+            <div className="relative">
+              <button type="button" className="relative w-full cursor-pointer rounded-3xl dd-box bg-white py-1.5 pl-1 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset  focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm sm:leading-6" aria-haspopup="listbox" aria-expanded={isDropdownOpen} onClick={handleDropdownClick}>
+                <span className="flex items-center">
+                  <span className="ml-3 block truncate">{selectedOption}</span>
+                </span>
+                <span className="pointer-events-none absolute inset-y-0 right-0 ml-2 flex items-center pr-2">
+                  <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fillRule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clipRule="evenodd" />
+                  </svg>
+                </span>
+              </button>
 
-                {isDropdownOpen && (
-                  <ul className="absolute sort-item-holder z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" role="listbox">
-                    <li className="relative sort-item cursor-default select-none py-2 pl-3 pr-3 text-gray-900" id="listbox-option-1" role="option" onClick={() => handleOptionClick("Old to New")}>
-                      <div className="flex items-center">
-                        <span className="ml-3 block truncate font-normal">Old to New</span>
-                      </div>
-                    </li>
-                    <li className="relative sort-item cursor-default select-none py-2 pl-3 pr-3 text-gray-900" id="listbox-option-0" role="option" onClick={() => handleOptionClick("New to Old")}>
-                      <div className="flex items-center">
-                        <span className="ml-3 block truncate font-normal">New to Old</span>
-                      </div>
-                    </li>
-                  </ul>
-                )}
-              </div>
+              {isDropdownOpen && (
+                <ul className="absolute sort-item-holder z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" role="listbox">
+                  <li className="relative sort-item cursor-default select-none py-2 pl-3 pr-3 text-gray-900" id="listbox-option-1" role="option" onClick={() => handleOptionClick("Old to New")}>
+                    <div className="flex items-center">
+                      <span className="ml-3 block truncate font-normal">Old to New</span>
+                    </div>
+                  </li>
+                  <li className="relative sort-item cursor-default select-none py-2 pl-3 pr-3 text-gray-900" id="listbox-option-0" role="option" onClick={() => handleOptionClick("New to Old")}>
+                    <div className="flex items-center">
+                      <span className="ml-3 block truncate font-normal">New to Old</span>
+                    </div>
+                  </li>
+                </ul>
+              )}
             </div>
           </div>
         </div>
+      </div>
       <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start space-y-4 mt-5 pt-5 bg-slate-50 dark:bg-slate-800 min-h-[100vh] relative">
-        
-         {/* {!dataItems && !itemsLoading && 
+
+        {/* {!dataItems && !itemsLoading && 
                 <div className="not-data flex items-center gap-3">
                     <InlineSVG
                         src="/images/no_data.svg"
@@ -254,37 +254,42 @@ export const HomePage = () => {
                     <h2 className="dark:text-white">No Moments!</h2>
                 </div>
           }  */}
-          {/* {
-            itemsLoading && 
-            <div>
-              <div className="loader">
-              </div>
+        {
+          !dataItems && !result &&
+          <div className="mt-20 h-[50px]">
+            <div className="loader">
             </div>
-          } */}
-        <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid? grid : "1")}>
+          </div>
+        }
+        <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid ? grid : "1")}>
 
-          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} grid={parseInt(grid && !isDesktop ? grid : "1")} sort={selectedOption} search={search} dark={darkMode} hidepostids={hidePostIds} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setToast={setHandleToast} setResult={setResult} hiddenPage={false} profilePage={false} activeId={accountId}/>
+          <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} grid={parseInt(grid && !isDesktop ? grid : "1")} sort={selectedOption} search={search} dark={darkMode} hidepostids={hidePostIds} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setToast={setHandleToast} setResult={setResult} hiddenPage={false} profilePage={false} activeId={accountId} />
 
         </DynamicGrid>
         {
-          result && 
-          <div className="">
+          result &&
+          <div className="pb-10 flex items-center gap-2">
+            <InlineSVG
+              src="/images/no_data.svg"
+              className="fill-current w-6 h-5 dark:text-white font-xl cursor-pointer"
+              color="#222f3e"
+            />
             <h2 className="dark:text-white">{result}</h2>
           </div>
         }
-        {toast && 
-         <div id="toast-default" className="toast-container md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed ">
+        {toast &&
+          <div id="toast-default" className="toast-container md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed z-50">
             <div className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
-                <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
-                    <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                    </svg>
-                    <span className="sr-only">Check icon</span>
-                </div>
-                <div className="ms-1 text-sm font-normal">{toastText}</div>
+              <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                </svg>
+                <span className="sr-only">Check icon</span>
+              </div>
+              <div className="ms-1 text-sm font-normal">{toastText}</div>
             </div>
             <div className="border-bottom-animation"></div>
-        </div>}
+          </div>}
       </main>
     </div>
   );
