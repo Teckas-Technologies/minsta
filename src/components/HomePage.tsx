@@ -254,13 +254,13 @@ export const HomePage = () => {
                     <h2 className="dark:text-white">No Moments!</h2>
                 </div>
           }  */}
-        {/* {
-            itemsLoading && 
-            <div>
-              <div className="loader">
-              </div>
+        {
+          !dataItems && !result &&
+          <div className="mt-20 h-[50px]">
+            <div className="loader">
             </div>
-          } */}
+          </div>
+        }
         <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid ? grid : "1")}>
 
           <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} grid={parseInt(grid && !isDesktop ? grid : "1")} sort={selectedOption} search={search} dark={darkMode} hidepostids={hidePostIds} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setToast={setHandleToast} setResult={setResult} hiddenPage={false} profilePage={false} activeId={accountId} />

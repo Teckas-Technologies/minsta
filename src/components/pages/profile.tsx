@@ -461,13 +461,13 @@ export const ProfilePage = () => {
                     </div>}
                 </div>
                 {!edit && <h4 className={`title-font dark:text-white text-2xl font-lg ${profile ? 'mt-11' : 'mt-1'}  underline underline-offset-4`}>Moments</h4>}
-                {/* {
-                    itemsLoading && !result && !edit &&
+                {
+                    !dataItems && !result && !edit &&
                     <div className="mt-5 h-[50px]">
                         <div className="loader">
                         </div>
                     </div>
-                } */}
+                }
                 {!edit && <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid ? grid : "1")} noMargin={5}>
                     <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} grid={parseInt(grid ? grid : "1")} search={accountId} dark={darkMode} hidepostids={[]} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setResult={setResult} hiddenPage={false} activeId={accountId} profilePage={true} />
                 </DynamicGrid>}

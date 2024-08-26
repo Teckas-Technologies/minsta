@@ -91,7 +91,7 @@ export const HiddenPostPage = () => {
                         />
                     </div>
                 </div>
-                {!dataItems  &&
+                {!dataItems && result  &&
                     <div className="not-data flex items-center gap-3">
                         <InlineSVG
                             src="/images/no_data.svg"
@@ -100,13 +100,13 @@ export const HiddenPostPage = () => {
                         <h2 className="dark:text-white">No Hidden Moments!</h2>
                     </div>
                 }
-                {/* {
-                itemsLoading && 
-                <div>
-                <div className="loader">
-                </div>
-                </div>
-            } */}
+                {
+                    !dataItems && !result &&
+                    <div className="mt-5 h-[50px]">
+                        <div className="loader">
+                        </div>
+                    </div>
+                }
                 <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid ? grid : "1")}>
                     {/* {!newData?.token && <FirstToken {...firstTokenProps} />} */}
 
