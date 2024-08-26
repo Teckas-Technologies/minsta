@@ -70,8 +70,8 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
     e.preventDefault();
     const url = `${window.location.origin}/meta/${decodeURIComponent(token?.metadata_id)}`;
     let shareUrl = '';
-  
-    switch(name) {
+
+    switch (name) {
       case 'twitter':
         shareUrl = `https://twitter.com/intent/tweet?url=%20${url}%2F&via=mintbase&text=${message}`;
         break;
@@ -87,7 +87,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
       default:
         return;
     }
-  
+
     window.open(shareUrl, "_blank");
   }
 
@@ -120,13 +120,13 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
       accountId: signedAccountId?.toString() || "",
       hiddedTokenIds: [
         {
-            id: tokenId
+          id: tokenId
         }
       ],
       unhide
     }
-    await saveHidePost(data).then(()=>{
-      if(unhide){
+    await saveHidePost(data).then(() => {
+      if (unhide) {
         setToast("Moment Unhidden Successfully!", true);
       } else {
         setToast("Moment Hidden Successfully!", true);
@@ -134,8 +134,8 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
     })
   }
 
-  const handleDeleteUser = async (token: any,e:any) => {
-    const data : BlockUserType = {
+  const handleDeleteUser = async (token: any, e: any) => {
+    const data: BlockUserType = {
       accountId: signedAccountId?.toString() || "",
       blockedUsers: [
         {
@@ -143,10 +143,10 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
         }
       ]
     }
-    await saveBlockUser(data).then((res)=>{
-      if(res?.status == 200){
+    await saveBlockUser(data).then((res) => {
+      if (res?.status == 200) {
         setDeleteModal(false);
-        setToast("User Blocked Successfully!",true);
+        setToast("User Blocked Successfully!", true);
       }
     });
   }
@@ -170,8 +170,8 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
 
     return (
       <>
-      <div className={`${dark ? "image-holder-dark" : "image-holder"} p-2 rounded-md aspect-square sm:w-[18rem] md:w-[18rem] md:h-[18rem] xl:w-[18rem] xl:h-[18rem] relative`}>
-        {/* <Link
+        <div className={`${dark ? "image-holder-dark" : "image-holder"} p-2 rounded-md aspect-square sm:w-[18rem] md:w-[18rem] md:h-[18rem] xl:w-[18rem] xl:h-[18rem] relative`}>
+          {/* <Link
           key={`${token?.metadata_id}-${index}`}
           href={`meta/${token?.metadata_id}`}
           rel="noopener noreferrer"
@@ -196,175 +196,175 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
               <div className={`${profilePage ? "flex" : "flex-col flex"} actions gap-2`}>
                 <div className="action-row1 flex gap-2">
                   <button
-                    className={`top-4 right-4 bg-sky-500 text-white rounded p-1 text-xs ${grid === 2 ? "px-2 py-2" : "px-1 py-1" }`}
+                    className={`top-4 right-4 bg-sky-500 text-white rounded p-1 text-xs ${grid === 2 ? "px-2 py-2" : "px-1 py-1"}`}
                     onMouseEnter={() => toggleTooltip('share', true)}
                     onMouseLeave={() => toggleTooltip('share', false)}
                     onClick={toggleShare}
                   >
                     <InlineSVG
-                    src="/images/share.svg"
-                    className="fill-current"
-                    color="#fff"
+                      src="/images/share.svg"
+                      className="fill-current"
+                      color="#fff"
                     />
                   </button>
                   <button
-                    className={`${profilePage ? "hidden" : ""} top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs ${grid === 2 ? "px-2 py-2" : "px-1 py-1" }`}
+                    className={`${profilePage ? "hidden" : ""} top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs ${grid === 2 ? "px-2 py-2" : "px-1 py-1"}`}
                     onMouseEnter={() => toggleTooltip('hide', true)}
                     onMouseLeave={() => toggleTooltip('hide', false)}
-                    onClick={(e) => {handleHidePost(token?.id, hiddenPage, e)}}
+                    onClick={(e) => { handleHidePost(token?.id, hiddenPage, e) }}
                   >
-                    {!hiddenPage ? 
-                    <InlineSVG
-                    src="/images/eye_hide.svg"
-                    className="fill-current"
-                    color="#fff"
-                    /> : 
-                    <InlineSVG
-                    src="/images/eye.svg"
-                    className="fill-current"
-                    color="#fff"
-                    />}
+                    {!hiddenPage ?
+                      <InlineSVG
+                        src="/images/eye_hide.svg"
+                        className="fill-current"
+                        color="#fff"
+                      /> :
+                      <InlineSVG
+                        src="/images/eye.svg"
+                        className="fill-current"
+                        color="#fff"
+                      />}
                   </button>
                 </div>
                 <div className={`action-row2 flex gap-2`}>
                   <button
-                    className={`${hiddenPage || profilePage ? "hidden" : ""} top-4 left-14 bg-red-500 text-white rounded p-1 text-xs ${grid === 2 ? "px-2 py-2" : "px-1 py-1" } `}
+                    className={`${hiddenPage || profilePage ? "hidden" : ""} top-4 left-14 bg-red-500 text-white rounded p-1 text-xs ${grid === 2 ? "px-2 py-2" : "px-1 py-1"} `}
                     onMouseEnter={() => toggleTooltip('delete', true)}
                     onMouseLeave={() => toggleTooltip('delete', false)}
-                    onClick={() => { setMobDeleteModal(true)}}
+                    onClick={() => { setMobDeleteModal(true) }}
                   >
                     <InlineSVG
-                    src="/images/trash.svg"
-                    className="fill-current"
-                    color="#fff"
+                      src="/images/trash.svg"
+                      className="fill-current"
+                      color="#fff"
                     />
                   </button>
                   <button
-                    className={`${hiddenPage ? "hidden" : ""} top-4 left-14 bg-slate-700 text-white rounded p-1 text-xs ${grid === 2 ? "px-2 py-2" : "px-1 py-1" }`}
+                    className={`${hiddenPage ? "hidden" : ""} top-4 left-14 bg-slate-700 text-white rounded p-1 text-xs ${grid === 2 ? "px-2 py-2" : "px-1 py-1"}`}
                     onClick={handleImageClick}
                   >
                     <InlineSVG
-                    src="/images/eye.svg"
-                    className="fill-current"
-                    color="#fff"
+                      src="/images/eye.svg"
+                      className="fill-current"
+                      color="#fff"
                     />
                   </button>
                 </div>
               </div>
               <div className="close-actions">
                 <button
-                  className={`top-4 left-14 bg-neutral-500 text-white rounded-full p-1 text-xs ${grid === 2 ? "px-2 py-2" : "px-1 py-1" }`}
+                  className={`top-4 left-14 bg-neutral-500 text-white rounded-full p-1 text-xs ${grid === 2 ? "px-2 py-2" : "px-1 py-1"}`}
                   onClick={() => setActionModel(false)}
                 >
                   <InlineSVG
-                  src="/images/close.svg"
-                  className="fill-current"
-                  color="#fff"
+                    src="/images/close.svg"
+                    className="fill-current"
+                    color="#fff"
                   />
                 </button>
               </div>
             </div>
           }
-          { grid === 1 && 
+          {grid === 1 &&
             <button
               className="absolute top-4 right-4 bg-sky-500 text-white rounded p-1 text-xs px-2 py-1.5"
               onMouseEnter={() => toggleTooltip('share', true)}
               onMouseLeave={() => toggleTooltip('share', false)}
               onClick={toggleShare}
-              // ref={toggleShareRef}
+            // ref={toggleShareRef}
             >
               <InlineSVG
-              src="/images/share.svg"
-              className="fill-current"
-              color="#fff"
+                src="/images/share.svg"
+                className="fill-current"
+                color="#fff"
               />
             </button>
           }
-          
+
           {showTooltip.share && !shareModal && <div className="tooltip absolute top-[-1.8rem] right-1 bg-white px-2 py-1 rounded-md box-shadow">Share</div>}
-          {shareModal && 
-            <div className={`absolute top-[-2rem] w-full flex justify-end ${grid === 3 ? 'pr-0': 'pr-4'}`} ref={toggleShareRef}>
+          {shareModal &&
+            <div className={`absolute top-[-2rem] w-full flex justify-end ${grid === 3 ? 'pr-0' : 'pr-4'}`} ref={toggleShareRef}>
               {enabledMedia ?
-              <div className="share-apps flex items-center">
-                {enabledMedia?.map((media, i) => (
-                  <div key={i} className={`share-app cursor-pointer ${grid === 3 ? "px-1" : "px-2"} py-1 mx-1`} onClick={(e)=>openMedia(media.name, media.message, e)}>
-                    <InlineSVG
-                      src={media.path}
-                      className="fill-current"
-                      color="#222f3e"
+                <div className="share-apps flex items-center">
+                  {enabledMedia?.map((media, i) => (
+                    <div key={i} className={`share-app cursor-pointer ${grid === 3 ? "px-1" : "px-2"} py-1 mx-1`} onClick={(e) => openMedia(media.name, media.message, e)}>
+                      <InlineSVG
+                        src={media.path}
+                        className="fill-current"
+                        color="#222f3e"
                       />
-                  </div>
-                ))}
-              </div> : 
-              <div className="no-share">
-                <h2>Can&apos;t Share</h2>
-              </div>
+                    </div>
+                  ))}
+                </div> :
+                <div className="no-share">
+                  <h2>Can&apos;t Share</h2>
+                </div>
               }
             </div>
           }
           {
-            signedAccountId && !profilePage && grid === 1 && 
+            signedAccountId && !profilePage && grid === 1 &&
             <button
               className="absolute top-4 left-4 bg-slate-500 text-white rounded p-1 text-xs px-2 py-2"
               onMouseEnter={() => toggleTooltip('hide', true)}
               onMouseLeave={() => toggleTooltip('hide', false)}
-              onClick={(e) => {handleHidePost(token?.id, hiddenPage, e)}}
+              onClick={(e) => { handleHidePost(token?.id, hiddenPage, e) }}
             >
-              {!hiddenPage ? 
-              <InlineSVG
-              src="/images/eye_hide.svg"
-              className="fill-current"
-              color="#fff"
-              /> : 
-              <InlineSVG
-              src="/images/eye.svg"
-              className="fill-current"
-              color="#fff"
-              />}
+              {!hiddenPage ?
+                <InlineSVG
+                  src="/images/eye_hide.svg"
+                  className="fill-current"
+                  color="#fff"
+                /> :
+                <InlineSVG
+                  src="/images/eye.svg"
+                  className="fill-current"
+                  color="#fff"
+                />}
             </button>
           }
           {showTooltip.hide && <div className="tooltip absolute top-[-1.8rem] left-2 bg-white px-2 py-1 rounded-md box-shadow">{hiddenPage ? "Unhide" : "Hide"}</div>}
-          {!hiddenPage && !profilePage && signedAccountId && grid === 1 && 
-          <div>
-            <button
+          {!hiddenPage && !profilePage && signedAccountId && grid === 1 &&
+            <div>
+              <button
                 className="absolute top-4 left-14 bg-red-500 text-white rounded p-1 text-xs px-2 py-2"
                 onMouseEnter={() => toggleTooltip('delete', true)}
                 onMouseLeave={() => toggleTooltip('delete', false)}
                 onClick={() => setDeleteModal(!deleteModal)}
               >
                 <InlineSVG
-                src="/images/trash.svg"
-                className="fill-current"
-                color="#fff"
+                  src="/images/trash.svg"
+                  className="fill-current"
+                  color="#fff"
                 />
               </button>
               {showTooltip.delete && <div className="tooltip absolute top-[-1.8rem] left-10 bg-white px-2 py-1 rounded-md box-shadow">Delete</div>}
-              {deleteModal && 
+              {deleteModal &&
                 <div className="absolute top-0 left-0 bottom-0 right-0 rounded-md bg-sky-50 w-full flex justify-center items-center px-2">
                   <div className="delete-content flex flex-col items-center gap-3 rounded-md px-2 py-2 bg-white box-shadow">
                     <h3 className="text-center">Are you sure want to delete the all moments from this user?</h3>
                     <div className="delete-btns flex items-center justify-center gap-2">
-                      <button className="btn cancel-btn" onClick={()=>setDeleteModal(false)}>Cancel</button>
+                      <button className="btn cancel-btn" onClick={() => setDeleteModal(false)}>Cancel</button>
                       <button className="btn delete-btn" onClick={(e) => handleDeleteUser(token, e)}>Delete</button>
                     </div>
                   </div>
                 </div>
               }
             </div>}
-        {/* </Link> */}
-        {mobDeleteModal && <div>
-        <div className="fixed top-0 left-0 bottom-0 right-0 rounded-md bg-opacity-0 z-50 bg-sky-50 w-full flex justify-center items-center px-2 mt-[5rem]">
-          <div className="delete-content flex flex-col items-center block opacity-100 gap-3 rounded-md px-3 py-4 mx-5 bg-white box-shadow">
-            <h3 className="text-center">Are you sure want to delete the all moments from this user?</h3>
-            <div className="delete-btns flex items-center justify-center gap-2">
-              <button className="btn cancel-btn" onClick={()=>{setMobDeleteModal(false); setActionModel(false) }}>Cancel</button>
-              <button className="btn delete-btn" onClick={(e) => handleDeleteUser(token, e)}>Delete</button>
+          {/* </Link> */}
+          {mobDeleteModal && <div>
+            <div className="fixed top-0 left-0 bottom-0 right-0 rounded-md bg-opacity-0 z-50 bg-sky-50 w-full flex justify-center items-center px-2 mt-[5rem]">
+              <div className="delete-content flex flex-col items-center block opacity-100 gap-3 rounded-md px-3 py-4 mx-5 bg-white box-shadow">
+                <h3 className="text-center">Are you sure want to delete the all moments from this user?</h3>
+                <div className="delete-btns flex items-center justify-center gap-2">
+                  <button className="btn cancel-btn" onClick={() => { setMobDeleteModal(false); setActionModel(false) }}>Cancel</button>
+                  <button className="btn delete-btn" onClick={(e) => handleDeleteUser(token, e)}>Delete</button>
+                </div>
+              </div>
             </div>
-          </div>
+          </div>}
         </div>
-      </div>}
-      </div>
-      
+
       </>
     );
   } else {
