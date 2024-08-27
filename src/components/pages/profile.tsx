@@ -159,7 +159,6 @@ export const ProfilePage = () => {
         if (signedAccountId) {
             const getDBAvailableStorage = async () => {
                 const storage = await getAvailableStorage()
-                console.log("Storage >> ", storage)
                 if (typeof storage === 'bigint') {
                     setAvailableStorage(storage);
                 } else if (storage === undefined) {
@@ -175,6 +174,14 @@ export const ProfilePage = () => {
             setStorageModel(true);
         } else {
             setEdit(true)
+        }
+    }
+
+    const handleBgUpdate = () => {
+        if (availableStorage === null || (typeof availableStorage === 'bigint' && BigInt(availableStorage) <= BigInt(128))) {
+            setStorageModel(true);
+        } else {
+            handleFileClick('backgroundInput')
         }
     }
 
@@ -197,7 +204,6 @@ export const ProfilePage = () => {
                     setProfile(profileData);
                     // setFollowing(followingData.total);
                     // setFollowers(followersData.total);
-                    console.log("Profile data >> ", profileData)
                     if (profileData) {
                         const image = getImage({
                             image: profileData?.image,
@@ -275,7 +281,6 @@ export const ProfilePage = () => {
         const newRelativePathQuery = `${window.location.pathname}?${searchParams.toString()}`;
         router.push(newRelativePathQuery);
     };
-    console.log(images)
 
     useEffect(() => {
         if (toast) {
@@ -304,7 +309,6 @@ export const ProfilePage = () => {
             setBackgroundFileName(file.name);
             try {
                 const bgPicCid = await uploadIPFS(file);
-                console.log("Background Cid >> ", bgPicCid);
                 setBackgroundImageCid(bgPicCid);
             } catch (error) {
                 console.error('Error converting file to Base64:', error);
@@ -341,7 +345,7 @@ export const ProfilePage = () => {
                                 </div>
                             </div>
                             {accountId === signedAccountId && <div className="set-banner">
-                                <div className="set-banner-pic bg-white flex items-center px-2 py-1 gap-2 rounded-md cursor-pointer" onClick={() => handleFileClick('backgroundInput')}>
+                                <div className="set-banner-pic bg-white flex items-center px-2 py-1 gap-2 rounded-md cursor-pointer" onClick={handleBgUpdate}>
                                     <InlineSVG
                                         src="/images/camera_fill.svg"
                                         className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
@@ -353,7 +357,7 @@ export const ProfilePage = () => {
                             </div>}
                         </> :
                         <EditProfile setEdit={setEdit} accountId={activeAccountIdNew} />}
-                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} handleBuyCredit={handleBuyCredit} creditAdded={credits} />}
+                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} handleBuyCredit={handleBuyCredit} setStorageModel={setStorageModel} creditAdded={credits} />}
                 </div>
 
                 {/* {!dataItems && !itemsLoading && 
