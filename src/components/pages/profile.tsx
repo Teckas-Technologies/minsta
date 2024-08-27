@@ -64,13 +64,13 @@ export const ProfilePage = () => {
 
     useEffect(() => {
         const getresult = async () => {
-          const searchParams = new URLSearchParams(window.location.search);
-          if (searchParams) {
-            const hash = searchParams.get('transactionHashes');
-            if (hash) {
-              setTxhash(hash);
+            const searchParams = new URLSearchParams(window.location.search);
+            if (searchParams) {
+                const hash = searchParams.get('transactionHashes');
+                if (hash) {
+                    setTxhash(hash);
+                }
             }
-          }
         }
         getresult();
     }, [txhash, signedAccountId])
@@ -146,7 +146,7 @@ export const ProfilePage = () => {
     useEffect(() => {
         const fetchBalance = async () => {
             const res = await getBalance();
-            if(res !== undefined){
+            if (res !== undefined) {
                 setBalance(res);
             }
         }
@@ -159,7 +159,6 @@ export const ProfilePage = () => {
         if (signedAccountId) {
             const getDBAvailableStorage = async () => {
                 const storage = await getAvailableStorage()
-                console.log("Storage >> ", storage)
                 if (typeof storage === 'bigint') {
                     setAvailableStorage(storage);
                 } else if (storage === undefined) {
@@ -171,15 +170,23 @@ export const ProfilePage = () => {
     }, [signedAccountId, edit]);
 
     const handleEdit = () => {
-        if(availableStorage === null || (typeof availableStorage === 'bigint' && BigInt(availableStorage) <= BigInt(256))){
+        if (availableStorage === null || (typeof availableStorage === 'bigint' && BigInt(availableStorage) <= BigInt(256))) {
             setStorageModel(true);
         } else {
             setEdit(true)
         }
     }
 
+    const handleBgUpdate = () => {
+        if (availableStorage === null || (typeof availableStorage === 'bigint' && BigInt(availableStorage) <= BigInt(128))) {
+            setStorageModel(true);
+        } else {
+            handleFileClick('backgroundInput')
+        }
+    }
+
     const buySocialDBStorage = async (amount: string) => {
-        if(balance > 0.05){
+        if (balance > 0.05) {
             return await buyStorage(amount);
         } else {
             setHandleToast("Insufficient Balance!", true);
@@ -197,7 +204,6 @@ export const ProfilePage = () => {
                     setProfile(profileData);
                     // setFollowing(followingData.total);
                     // setFollowers(followersData.total);
-                    console.log("Profile data >> ", profileData)
                     if (profileData) {
                         const image = getImage({
                             image: profileData?.image,
@@ -275,7 +281,6 @@ export const ProfilePage = () => {
         const newRelativePathQuery = `${window.location.pathname}?${searchParams.toString()}`;
         router.push(newRelativePathQuery);
     };
-    console.log(images)
 
     useEffect(() => {
         if (toast) {
@@ -304,7 +309,6 @@ export const ProfilePage = () => {
             setBackgroundFileName(file.name);
             try {
                 const bgPicCid = await uploadIPFS(file);
-                console.log("Background Cid >> ", bgPicCid);
                 setBackgroundImageCid(bgPicCid);
             } catch (error) {
                 console.error('Error converting file to Base64:', error);
@@ -341,7 +345,7 @@ export const ProfilePage = () => {
                                 </div>
                             </div>
                             {accountId === signedAccountId && <div className="set-banner">
-                                <div className="set-banner-pic bg-white flex items-center px-2 py-1 gap-2 rounded-md cursor-pointer" onClick={() => handleFileClick('backgroundInput')}>
+                                <div className="set-banner-pic bg-white flex items-center px-2 py-1 gap-2 rounded-md cursor-pointer" onClick={handleBgUpdate}>
                                     <InlineSVG
                                         src="/images/camera_fill.svg"
                                         className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
@@ -353,7 +357,7 @@ export const ProfilePage = () => {
                             </div>}
                         </> :
                         <EditProfile setEdit={setEdit} accountId={activeAccountIdNew} />}
-                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} handleBuyCredit={handleBuyCredit} creditAdded={credits} />}
+                    {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} handleBuyCredit={handleBuyCredit} setStorageModel={setStorageModel} creditAdded={credits} />}
                 </div>
 
                 {/* {!dataItems && !itemsLoading && 
@@ -462,21 +466,26 @@ export const ProfilePage = () => {
                 </div>
                 {!edit && <h4 className={`title-font dark:text-white text-2xl font-lg ${profile ? 'mt-11' : 'mt-1'}  underline underline-offset-4`}>Moments</h4>}
                 {
-                    itemsLoading && !result && !edit &&
+                    !dataItems && !result && !edit &&
                     <div className="mt-5 h-[50px]">
                         <div className="loader">
                         </div>
                     </div>
                 }
-                {!edit && <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid ? grid : "1")}>
+                {!edit && <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid ? grid : "1")} noMargin={5}>
                     <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} grid={parseInt(grid ? grid : "1")} search={accountId} dark={darkMode} hidepostids={[]} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setResult={setResult} hiddenPage={false} activeId={accountId} profilePage={true} />
                 </DynamicGrid>}
-                {/* {
+                {
                     result && !edit &&
-                    <div className="pb-5">
+                    <div className="pb-10 flex items-center gap-2">
+                        <InlineSVG
+                            src="/images/no_data.svg"
+                            className="fill-current w-6 h-5 dark:text-white font-xl cursor-pointer"
+                            color="#222f3e"
+                        />
                         <h2 className="dark:text-white">{result}</h2>
                     </div>
-                } */}
+                }
                 {toast &&
                     <div id="toast-default" className="toast-container mt-6 md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed z-50">
                         <div className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
@@ -512,28 +521,28 @@ export const ProfilePage = () => {
                         <h2 className="title-font">Insufficient Storage!</h2>
                         <p className="text-justify">{`You don't have enough space to set the profile on near.social. Please buy ${availableStorage !== null ? "additional" : ""} storage on near.social by spending 0.05 NEAR.`}</p>
                         <div className="storage-amount flex gap-2">
-                            <div className={`amt px-2 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "0.05" ? "bg-sky-500" : ""}`} onClick={()=>setStoreAmt("0.05")}>
+                            <div className={`amt px-2 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "0.05" ? "bg-sky-500" : ""}`} onClick={() => setStoreAmt("0.05")}>
                                 <h2 className={`${storeAmt === "0.05" ? "text-white" : ""}`}>0.05 NEAR (5kb) </h2>
                             </div>
-                            <div className={`amt px-3 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "0.2" ? "bg-sky-500" : ""}`} onClick={()=>setStoreAmt("0.2")}>
+                            <div className={`amt px-3 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "0.2" ? "bg-sky-500" : ""}`} onClick={() => setStoreAmt("0.2")}>
                                 <h2 className={`${storeAmt === "0.2" ? "text-white" : ""}`}>0.2 NEAR (20kb)</h2>
                             </div>
-                            <div className={`amt px-4 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "1" ? "bg-sky-500" : ""}`} onClick={()=>setStoreAmt("1")}>
+                            <div className={`amt px-4 py-1 border border-sky-500 text-center rounded-md cursor-pointer ${storeAmt === "1" ? "bg-sky-500" : ""}`} onClick={() => setStoreAmt("1")}>
                                 <h2 className={`${storeAmt === "1" ? "text-white" : ""}`}>1 NEAR (100kb)</h2>
                             </div>
                         </div>
                         <div className="btns flex gap-2">
-                            <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={()=>setStorageModel(false)}>Cancel</button>
-                            <button className="btn bg-sky-500 cursor-pointer" onClick={()=>buySocialDBStorage(storeAmt)}>Buy</button>
+                            <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={() => setStorageModel(false)}>Cancel</button>
+                            <button className="btn bg-sky-500 cursor-pointer" onClick={() => buySocialDBStorage(storeAmt)}>Buy</button>
                         </div>
                     </div>
                 </div>}
 
-                { <div className={`upload-model fixed bg-sky-50 dark:bg-slate-800 top-0 bottom-0 right-0 left-0 flex justify-center items-center ${buyCreditModel ? "" : "hidden"}`}>
+                {<div className={`upload-model fixed bg-sky-50 dark:bg-slate-800 top-0 bottom-0 right-0 left-0 flex justify-center items-center ${buyCreditModel ? "" : "hidden"}`}>
                     <div className={`upload-box w-[20rem] bg-white mx-3 px-3 py-2 flex flex-col items-center gap-2 rounded-md ${darkMode ? "box-shadow-dark" : "box-shadow"}`}>
                         <h2 className="title-font">Buy Credits!</h2>
                         <div className={`input-box h-11 w-full rounded-md flex items-center justify-between ${darkMode ? "box-shadow" : "box-shadow"}`}>
-                            <input type="number" min={0.05} value={amount} onChange={(e)=> setAmount(parseFloat(e.target.value))} className={`bg-white px-4 py-2 flex-grow rounded-md h-11 text-sm border-none outline-none`}/>
+                            <input type="number" min={0.05} value={amount} onChange={(e) => setAmount(parseFloat(e.target.value))} className={`bg-white px-4 py-2 flex-grow rounded-md h-11 text-sm border-none outline-none`} />
                             <div className="box-near h-11 w-13 p-2 pr-4">
                                 <img src="images/near-logo.png" className="h-full w-full" alt="" />
                             </div>
@@ -542,7 +551,7 @@ export const ProfilePage = () => {
                             <h2>{!isNaN(amount) ? amount : 0} NEAR = {calculateCredit(!isNaN(amount) ? amount : 0)} Credits</h2>
                         </div>
                         <div className="btns flex gap-2">
-                            <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={()=>setBuyCreditModel(false)}>Cancel</button>
+                            <button className="px-4 py-2 border border-slate-800 cursor-pointer rounded-md" onClick={() => setBuyCreditModel(false)}>Cancel</button>
                             <BuyCreditButton amount={amount} setHandleToast={setHandleToast} setCredits={setCredits} txhash={txhash} />
                         </div>
                     </div>

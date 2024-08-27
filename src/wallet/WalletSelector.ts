@@ -131,7 +131,6 @@ export class Wallet {
     try {
       // Retrieve transaction result from the network
       const transaction = await provider.txStatus(txhash, 'unused') as providers.FinalExecutionOutcome;
-      console.log("Res 1  >>", transaction);
 
       if (this.isFinalExecutionStatusWithSuccessValue(transaction.status)) {
         const signerId = transaction.transaction.signer_id;

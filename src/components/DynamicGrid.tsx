@@ -36,7 +36,7 @@ export const DynamicGrid = ({
   const cols = nCols ? `grid-cols-${nCols}` : `grid-cols-1`;
   const cols2 = nCols ? `grid-cols-${nCols}` : `grid-cols-2`;
   const cols3 = nCols ? `grid-cols-${nCols}` : `grid-cols-3`;
-  const margin = noMargin ? `mb-24` : `my-24`;
+  const margin = noMargin ? `mb-24 mt-5` : `my-24`;
 
   const colsXXXL = nColsXXXl
     ? `xxxl:grid-cols-${nColsXXXl}`
