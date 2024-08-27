@@ -277,7 +277,6 @@ const useInfiniteScrollGQL = (
       type: "SET_TOTAL",
       payload: data?.mb_views_nft_tokens_aggregate?.aggregate?.count,
     });
-    console.log("data?.mb_views_nft_tokens_aggregate?.aggregate?.count ", data?.mb_views_nft_tokens_aggregate?.aggregate?.count);
     if(parseInt(data?.mb_views_nft_tokens_aggregate?.aggregate?.count) === 0){
       setResult("No Results Found!")
       return;

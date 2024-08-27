@@ -6,6 +6,8 @@ import { useContext, useEffect, useRef, useState } from "react";
 import InlineSVG from "react-inlinesvg";
 import useNearSocialDB from "@/utils/useNearSocialDB";
 import { NEARSocialUserProfile } from "@/data/types";
+import Image from "next/image";
+import { EditProfilePreview } from "./EditProfilePreview";
 
 interface props {
     setEdit: (e: boolean) => void;
@@ -77,8 +79,8 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
 
                         setName(profileData?.name || '');
                         setAbout(profileData?.description || '');
-                        setProfileImage(profileData?.image?.ipfs_cid || '');
-                        setBackgroundImage(profileData?.backgroundImage?.ipfs_cid || '');
+                        // setProfileImage(profileData?.image?.ipfs_cid || '');
+                        // setBackgroundImage(profileData?.backgroundImage?.ipfs_cid || '');
                         setTwitter(profileData?.linktree?.twitter || '');
                         setGithub(profileData?.linktree?.github || '');
                         setTelegram(profileData?.linktree?.telegram || '');
@@ -205,30 +207,48 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
 
     const handleSaveProfile = async () => {
         try {
+            const hasProfileChanged =
+                profile?.name !== name ||
+                profile?.description !== about ||
+                profileImage ||
+                backgroundImage ||
+                profile?.linktree?.twitter !== twitter ||
+                profile?.linktree?.telegram !== telegram ||
+                profile?.linktree?.github !== github ||
+                profile?.linktree?.website !== website ||
+                tags.length !== Object.keys(profile?.tags || {}).length;
+
+            if (!hasProfileChanged) {
+                setToast(true);
+                setToastText("No changes found!")
+                return; 
+            }
             const formattedTags = tags.reduce((acc, tag) => {
                 acc[tag] = "";
                 return acc;
             }, {} as Record<string, string>);
 
+            setLoading(true)
+
+            const profileData: Record<string, any> = {};
+
+            if (name) profileData.name = name;
+            if (about) profileData.description = about;
+            if (profileImage) profileData.image = { ipfs_cid: profileImage };
+            if (backgroundImage) profileData.backgroundImage = { ipfs_cid: backgroundImage };
+
+            const linktree: Record<string, string> = {};
+            if (twitter) linktree.twitter = twitter;
+            if (github) linktree.github = github;
+            if (telegram) linktree.telegram = telegram;
+            if (website) linktree.website = website;
+
+            if (Object.keys(linktree).length > 0) profileData.linktree = linktree;
+            if (tags.length > 0) profileData.tags = formattedTags;
+
             const data = {
                 [signedAccountId]: {
-                    profile: {
-                        name: name,
-                        description: about,
-                        image: {
-                            ipfs_cid: profileImage
-                        },
-                        backgroundImage: {
-                            ipfs_cid: backgroundImage
-                        },
-                        linktree: {
-                            twitter: twitter,
-                            github: github,
-                            telegram: telegram,
-                            website: website
-                        },
-                        tags: formattedTags
-                    }
+                    profile: profileData
                 }
             };
 
@@ -247,7 +267,7 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
                     <div className="loader"></div>
                     <h1 className="dark:text-white">Saving Profile Details...</h1>
                 </div> :
-                <div className={`${darkMode ? 'dark' : ''} edit-profile w-full flex flex-col justify-center items-center pb-5 dark:bg-slate-800`}>
+                <div className={`${darkMode ? 'dark' : ''} edit-profile w-full flex flex-col md:flex-row gap-5 justify-center pb-5 dark:bg-slate-800`}>
                     <div className={`${darkMode ? "image-holder-dark" : "image-holder"} profile-form-holder w-full md:w-[40%] rounded-md p-3`}>
                         <div className="input-field w-full">
                             <label htmlFor="name" className="text-lg font-bold pl-1 dark:text-white">Name</label>
@@ -366,6 +386,7 @@ export const EditProfile = ({ setEdit, accountId }: props) => {
                         </div>
 
                     </div>
+                    <EditProfilePreview name={name} about={about} images={images} profile_cid={profileImage} bg_cid={backgroundImage} twitter={twitter} github={github} telegram={telegram} website={website} tags={tags} />
                 </div>}
             {toast && <div id="toast-default" className="toast-container mt-6 md:top-14 top-14 left-1/2 transform -translate-x-1/2 fixed ">
                 <div className="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">

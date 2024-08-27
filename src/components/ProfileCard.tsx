@@ -17,10 +17,11 @@ interface props {
     setHandleToast: (s: string, e: boolean) => void
     handleUpload: (text: string, cid: string, open: boolean) => void
     handleBuyCredit: (open: boolean)=> void;
-    creditAdded: number | null | undefined
+    setStorageModel: (e: boolean) => void;
+    creditAdded: number | null | undefined;
 }
 
-export const ProfileCard = ({ profile, images, accountId, setHandleToast, handleUpload, handleBuyCredit, creditAdded }: props) => {
+export const ProfileCard = ({ profile, images, accountId, setHandleToast, handleUpload, handleBuyCredit, setStorageModel, creditAdded }: props) => {
     const [animation, setAnimation] = useState(false);
     const [darkMode, setDarkMode] = useState<boolean>();
     const { mode } = useDarkMode();
@@ -31,7 +32,8 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
     const [balance, setBalance] = useState<number>(0);
     const [profileFileName, setProfileFileName] = useState('');
     const [profileImageCid, setProfileImageCid] = useState('');
-    const { getBalance, uploadIPFS } = useNearSocialDB();
+    const [availableStorage, setAvailableStorage] = useState<bigint | null>();
+    const { getBalance, uploadIPFS, getAvailableStorage } = useNearSocialDB();
 
     useEffect(() => {
         if (profileImageCid) {
@@ -125,6 +127,28 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
         }
     };
 
+    const handleBgUpdate = () => {
+        if (availableStorage === null || (typeof availableStorage === 'bigint' && BigInt(availableStorage) <= BigInt(128))) {
+            setStorageModel(true);
+        } else {
+            handleFileClick('profileInput');
+        }
+    }
+
+    useEffect(() => {
+        if (signedAccountId) {
+            const getDBAvailableStorage = async () => {
+                const storage = await getAvailableStorage()
+                if (typeof storage === 'bigint') {
+                    setAvailableStorage(storage);
+                } else if (storage === undefined) {
+                    setAvailableStorage(null);
+                }
+            }
+            getDBAvailableStorage();
+        }
+    }, [signedAccountId]);
+
     return (
         <div className="container_profile absolute bottom-[-70%]">
             <div className="card_profile relative bg-slate-800 dark:bg-white">
@@ -148,7 +172,7 @@ export const ProfileCard = ({ profile, images, accountId, setHandleToast, handle
                 <div className="card__border w-[7rem] h-[7rem] p-1">
                     <div className={`${!darkMode && 'bg-white rounded-full'} relative w-full h-full`}>
                         <Image src={(images && images.length > 0 && images[0] !== "no_image" ? images[0] : "/images/contact2.png")} alt="Profile NFt" layout="fill" sizes="(max-width: 100%) 100%, (max-width: 100%) 100%, 100%" objectFit="cover" className="rounded-full object-cover" />
-                        {accountId === signedAccountId && <div className="set-profile-pic absolute bottom-0 right-0 dark:bg-slate-800 rounded-full bg-white cursor-pointer" onClick={() => handleFileClick('profileInput')}>
+                        {accountId === signedAccountId && <div className="set-profile-pic absolute bottom-0 right-0 dark:bg-slate-800 rounded-full bg-white cursor-pointer" onClick={handleBgUpdate}>
                             <div className="cam relative p-2">
                                 <InlineSVG
                                     src="/images/camera_fill.svg"
