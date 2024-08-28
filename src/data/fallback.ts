@@ -1,7 +1,7 @@
 
 export const MINSTA_META = {
   description: "Share your best moments with Mintbase and Minsta!",
-  title: "Mint Moments on Mintbase",
+  title: "Minsta. Offer Moments",
   twitter:
     "Explore%20unforgettable%20moments%20at%20%2Mintbase%20%40Mintbase%20%40NEARProtocol%20%23BOS%20%23NEAR",
   image: "./images/thumbnail.png",
