@@ -211,25 +211,25 @@ export const MetaPage = ({ meta, slug, tokenId }: any) => {
           {
             tagsArray[0] && 
             <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 cursor-pointer bg-slate-800 rounded-md`} onClick={()=>push(`/?search=${tagsArray[0]}`)}>
-              <h3 className="text-white">#{tagsArray[0]}</h3>
+              <h3 className="text-white">#{tagsArray[0]?.startsWith('#') ? tagsArray[0].slice(1) : tagsArray[0]}</h3>
             </div>
           }
           {
             tagsArray[1] && 
             <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 cursor-pointer bg-slate-800 rounded-md`} onClick={()=>push(`/?search=${tagsArray[1]}`)}>
-              <h3 className="text-white">#{tagsArray[1]}</h3>
+              <h3 className="text-white">#{tagsArray[1]?.startsWith('#') ? tagsArray[1].slice(1) : tagsArray[1]}</h3>
             </div>
           }
           {
             tagsArray[2] && 
             <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 cursor-pointer bg-slate-800 rounded-md`} onClick={()=>push(`/?search=${tagsArray[2]}`)}>
-              <h3 className="text-white">#{tagsArray[2]}</h3>
+              <h3 className="text-white">#{tagsArray[2]?.startsWith('#') ? tagsArray[2].slice(1) : tagsArray[2]}</h3>
             </div>
           }
           {
             tagsArray[3] && 
             <div className={`meta-tag ${darkMode ? "box-shadow-dark" : "box-shadow"} px-2 py-1 cursor-pointer bg-slate-800 rounded-md`} onClick={()=>push(`/?search=${tagsArray[3]}`)}>
-              <h3 className="text-white">#{tagsArray[3]}</h3>
+              <h3 className="text-white">#{tagsArray[3]?.startsWith('#') ? tagsArray[3].slice(1) : tagsArray[3]}</h3>
             </div>
           }
         </div>
