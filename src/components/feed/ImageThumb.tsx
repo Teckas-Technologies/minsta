@@ -49,10 +49,16 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
 
   const handleImageClick = () => {
     window.location.href = `meta/${token?.metadata_id}`;
+    // window.open(`meta/${token?.metadata_id}`, '_blank', 'noopener noreferrer');
   };
 
   const handleActionModel = () => {
     setActionModel(true);
+  };
+
+  const handleRightClick = (e: any) => {
+    e.preventDefault();
+    window.open(`meta/${token?.metadata_id}`, '_blank', 'noopener noreferrer');
   };
 
   // const openMedia = (name: string, message:string, e:any) => {
@@ -227,6 +233,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
             onError={handleError}
             placeholder="empty"
             unoptimized
+            onContextMenu={handleRightClick}
             // onClick={grid !== 1 ? handleActionModel : handleImageClick}
             {...handlers}
           />
