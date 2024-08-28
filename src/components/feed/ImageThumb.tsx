@@ -12,6 +12,9 @@ import { useSaveHidePost } from "@/hooks/db/HidePostHook";
 import { BlockUserType, HidePost } from "@/data/types";
 import { useSaveBlockUser } from "@/hooks/db/BlockUserHook";
 import { NearContext } from "@/wallet/WalletSelector";
+import useLongPress from "@/hooks/useLongPress";
+import { graphQLService } from "@/data/graphqlService";
+import { FETCH_META } from "@/data/queries/meta.graphql";
 
 const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePage }: any) => {
   const imageUrl = token?.media;
@@ -46,10 +49,16 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
 
   const handleImageClick = () => {
     window.location.href = `meta/${token?.metadata_id}`;
+    // window.open(`meta/${token?.metadata_id}`, '_blank', 'noopener noreferrer');
   };
 
   const handleActionModel = () => {
     setActionModel(true);
+  };
+
+  const handleRightClick = (e: any) => {
+    e.preventDefault();
+    window.open(`meta/${token?.metadata_id}`, '_blank', 'noopener noreferrer');
   };
 
   // const openMedia = (name: string, message:string, e:any) => {
@@ -151,7 +160,42 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
     });
   }
 
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [accountId, setAccountId] = useState("");
 
+  const getData = async () => {
+    const posts = await graphQLService({
+      query: FETCH_META,
+      variables: { metadataId: token?.metadata_id },
+      network: constants.network as "testnet" | "mainnet",
+    });
+    const title = posts?.data?.nft_metadata?.[0]?.title
+    const description = posts?.data?.nft_metadata?.[0]?.description
+    const account = posts?.data?.owners?.[0]?.owner;
+    setTitle(title);
+    setDescription(description);
+    setAccountId(account);
+    return;
+  }
+
+  const handleOnClick = () => {
+    if (grid !== 1) {
+      handleActionModel();
+    } else {
+      handleImageClick();
+    }
+  }
+
+  const [model, setModel] = useState(false);
+  const { action, handlers } = useLongPress({ onClick: handleOnClick });
+
+  useEffect(() => {
+    if (action === "longpress") {
+      getData();
+      setModel(true);
+    }
+  }, [action]);
 
   if (error)
     return (
@@ -189,7 +233,9 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
             onError={handleError}
             placeholder="empty"
             unoptimized
-            onClick={grid !== 1 ? handleActionModel : handleImageClick}
+            onContextMenu={handleRightClick}
+            // onClick={grid !== 1 ? handleActionModel : handleImageClick}
+            {...handlers}
           />
           {
             actionModel && <div className="absolute top-2 left-2 bottom-2 right-2 bg-sky-100 rounded-md flex flex-col gap-2 items-center justify-center" ref={toggleActionModelRef}>
@@ -364,6 +410,47 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
             </div>
           </div>}
         </div>
+
+        {model && <div className="fixed model-moment top-0 bottom-0 right-0 left-0 bg-sky-50 dark:bg-slate-800 flex items-center justify-center z-5">
+          <div className="model-box bg-white w-[22rem] box-shadow rounded-md mx-4 p-3">
+            <div className="image rounded-md mb-3">
+              <Image
+                key={token?.metadata_id}
+                src={`https://image-cache-service-z3w7d7dnea-ew.a.run.app/thumbnail?url=${finalUrl}`}
+                alt={`Token ${index}`}
+                className="object-cover cursor-pointer h-[20rem] w-[20rem] md:max-w-[20rem] image rounded-md"
+                width={320}
+                height={320}
+                quality={70}
+                priority={index < 5}
+                onError={handleError}
+                placeholder="empty"
+                unoptimized
+              />
+            </div>
+            {accountId && <div className="account-modal mb-3">
+              <div className="acc-model bg-slate-800 p-3 flex rounded-full items-center justify-center gap-2">
+                <InlineSVG
+                  src="/images/profile.svg"
+                  className="fill-current h-5 w-5 text-white"
+                />
+                <div className="owner-name max-w-[15rem] overflow-hidden md:max-w-[15rem] md:overflow-hidden">
+                  <h2 className="text-white overflow-hidden text-ellipsis whitespace-nowrap">{accountId}</h2>
+                </div>
+              </div>
+            </div>}
+            {title && <h2><span className="title-font">Title : </span>{title}</h2>}
+            {description && <h2><span className="title-font">Description : </span>{description}</h2>}
+            <div className="close w-full flex justify-center mt-4">
+              <div className="close-icon bg-red-500 p-2 rounded-full cursor-pointer" onClick={() => setModel(false)}>
+                <InlineSVG
+                  src="/images/close.svg"
+                  className="fill-current text-white"
+                />
+              </div>
+            </div>
+          </div>
+        </div>}
 
       </>
     );
