@@ -355,6 +355,17 @@ export const ProfilePage = () => {
                                 </div>
                                 <input type="file" name="picture" id="backgroundInput" onChange={handleBackgroundFileChange} className={`hidden w-full p-2 text-lg rounded-md outline-none ${darkMode ? "image-holder-dark" : "image-holder"}`} />
                             </div>}
+                            {accountId === signedAccountId && <div className="absolute buy-storage-btn bottom-[50%] left-5">
+                                <div className="set-banner-pic bg-white flex items-center px-2 py-1 gap-2 rounded-md cursor-pointer" onClick={()=>setStorageModel(true)}>
+                                    <InlineSVG
+                                        src="/images/database.svg"
+                                        className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
+                                        color="#222f3e"
+                                    />
+                                    <h2>Buy Storage</h2>
+                                </div>
+                                <input type="file" name="picture" id="backgroundInput" onChange={handleBackgroundFileChange} className={`hidden w-full p-2 text-lg rounded-md outline-none ${darkMode ? "image-holder-dark" : "image-holder"}`} />
+                            </div>}
                         </> :
                         <EditProfile setEdit={setEdit} accountId={activeAccountIdNew} />}
                     {!edit && <ProfileCard profile={profile} images={images} accountId={accountId} setHandleToast={setHandleToast} handleUpload={handleUpload} handleBuyCredit={handleBuyCredit} setStorageModel={setStorageModel} creditAdded={credits} />}
@@ -542,7 +553,20 @@ export const ProfilePage = () => {
                     <div className={`upload-box w-[20rem] bg-white mx-3 px-3 py-2 flex flex-col items-center gap-2 rounded-md ${darkMode ? "box-shadow-dark" : "box-shadow"}`}>
                         <h2 className="title-font">Buy Credits!</h2>
                         <div className={`input-box h-11 w-full rounded-md flex items-center justify-between ${darkMode ? "box-shadow" : "box-shadow"}`}>
-                            <input type="number" min={0.05} value={amount} onChange={(e) => setAmount(parseFloat(e.target.value))} className={`bg-white px-4 py-2 flex-grow rounded-md h-11 text-sm border-none outline-none`} />
+                            {/* <input type="number" min={0.05} value={amount} onChange={(e) => setAmount(parseFloat(e.target.value))} className={`bg-white px-4 py-2 flex-grow rounded-md h-11 text-sm border-none outline-none`} /> */}
+                            <button
+                                className="px-4 py-2 bg-slate-300 dark:bg-slate-600 dark:text-white rounded-l-md"
+                                onClick={() => setAmount(prev => Math.max(0.05, parseFloat((prev - 0.05).toFixed(2))))}
+                            >
+                                -
+                            </button>
+                            <span className="bg-white px-4 py-2 flex-grow text-center text-sm">{amount.toFixed(2)}</span>
+                            <button
+                                className="px-4 py-2 bg-slate-300 dark:bg-slate-600 dark:text-white rounded-r-md"
+                                onClick={() => setAmount(prev => parseFloat((prev + 0.05).toFixed(2)))}
+                            >
+                                +
+                            </button>
                             <div className="box-near h-11 w-13 p-2 pr-4">
                                 <img src="images/near-logo.png" className="h-full w-full" alt="" />
                             </div>

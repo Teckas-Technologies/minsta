@@ -15,10 +15,12 @@ import { NearContext } from "@/wallet/WalletSelector";
 import useLongPress from "@/hooks/useLongPress";
 import { graphQLService } from "@/data/graphqlService";
 import { FETCH_META } from "@/data/queries/meta.graphql";
+import { useRouter } from "next/navigation";
 
 const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePage }: any) => {
   const imageUrl = token?.media;
   const [error, setError] = useState(false);
+  const {push} = useRouter();
   const { wallet, signedAccountId } = useContext(NearContext);
   const [shareModal, setShareModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
@@ -429,7 +431,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
               />
             </div>
             {accountId && <div className="account-modal mb-3">
-              <div className="acc-model bg-slate-800 p-3 flex rounded-full items-center justify-center gap-2">
+              <div className="acc-model bg-slate-800 p-3 flex rounded-full items-center justify-center gap-2 cursor-pointer" onClick={()=> push(`/profile/?accountId=${accountId}`)}>
                 <InlineSVG
                   src="/images/profile.svg"
                   className="fill-current h-5 w-5 text-white"
