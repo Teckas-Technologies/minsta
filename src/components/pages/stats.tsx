@@ -5,13 +5,28 @@ import { CoptText } from "../CopyText";
 import FollowButton from "../buttons/follow-button";
 import { useStats } from "@/hooks/useStats";
 import { useFetchTotalProfiles } from "@/hooks/db/ProfileHook";
+import { useFetchTotalAmount } from "@/hooks/db/HashHook";
+import { calculateCredit } from "@/utils/calculateCredit";
 
 export const StatsPage = () => {
     const [darkMode, setDarkMode] = useState<boolean>();
     const { mode } = useDarkMode();
     const [modalOpen, setModelOpen] = useState(false);
+    const { fetchTotalAmount } = useFetchTotalAmount();
+    const [totalAmount, setTotalAmount] = useState({ totalAmtLastMonth: 0, totalAmtLifeTime: 0 });
 
     useEffect(() => {
+        const fetchCreditAmt = async () => {
+            const res = await fetchTotalAmount();
+            if (res) {
+                setTotalAmount({
+                    totalAmtLastMonth: res.totalAmount.totalLast30Days,
+                    totalAmtLifeTime: res.totalAmount.totalLifetime
+                })
+            }
+        }
+        fetchCreditAmt();
+
         if (mode === "dark") {
             setDarkMode(true);
         } else {
@@ -65,14 +80,14 @@ export const StatsPage = () => {
                                 <InlineSVG
                                     src="/images/dot.svg"
                                     className="fill-current w-2 h-2 text-green-500"
-                                /></div> Total Rewards</h2>
+                                /></div> Total Credits</h2>
                         </div>
                         <div className="analytics-count flex items-end gap-3">
-                            <h2 className="text-3xl">$260</h2>
+                            <h2 className="text-3xl">{totalAmount.totalAmtLifeTime !== 0 ? calculateCredit(totalAmount.totalAmtLifeTime) : totalAmount.totalAmtLifeTime}</h2>
                             <div className="flex items-center"><InlineSVG
                                 src="/images/arrow_up.svg"
                                 className="fill-current text-green-500"
-                            /> <p><span className="text-green-500">$20</span> last month</p></div>
+                            /> <p><span className="text-green-500">{totalAmount.totalAmtLastMonth !== 0 ? calculateCredit(totalAmount.totalAmtLastMonth) : totalAmount.totalAmtLastMonth}</span> last month</p></div>
                         </div>
                     </div>
                     <div className={`analytic-box bg-white group ${darkMode && "box-shadow-dark"} rounded-md flex flex-col justify-between px-5 pb-5 pt-3`}>

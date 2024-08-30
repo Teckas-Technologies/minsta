@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { HashesType } from "@/data/types";
-import { findHashByhash, saveHash } from "../../utils/HashUtils";
+import { findHashByhash, getTotalAmountCollected, saveHash } from "../../utils/HashUtils";
 
 const hashes = () => {
   return {
@@ -8,11 +8,13 @@ const hashes = () => {
       GET: async (request: Request, data: any) => {
         const url = new URL(request.url);
         const hash = url.searchParams.get("hash");
-        if (!hash) {
-          return NextResponse.json({ error: "Hash is required" }, { status: 400 });
+        if (hash) {
+          const hashes = await findHashByhash(hash.toString());
+          return NextResponse.json(hashes, { status: 200 });
         }
-        const hashes = await findHashByhash(hash.toString());
-        return NextResponse.json(hashes, { status: 200 });
+
+        const totalAmount = await getTotalAmountCollected();
+        return NextResponse.json({ totalAmount }, { status: 200 });
       },
       POST: async (request: Request) => {
         const body = await request.json();

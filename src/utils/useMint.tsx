@@ -29,12 +29,18 @@ const useMintImage = () => {
 
   const getTitleAndDescription = async (photo: string) => {
     try {
+      // const requestPayload = {
+      //   image: photo,
+      //   prompt: `Describe this image, be direct and include important details. The title should be succinct and 5 words long. The description can be longer than 15 words and more descriptive.
+      
+      // Respond in JSON {"title": "<title>", "description": "<description>"}`,
+      // };
       const requestPayload = {
         image: photo,
-        prompt: `Describe this image, be direct and include important details. The title should be succinct and 5 words long. The description can be longer than 15 words and more descriptive.
+        prompt: `Describe this image. The title should be concise and no more than 10 words. The description should be clear and no more than 20 words. 
       
-      Respond in JSON {"title": "<title>", "description": "<description>"}`,
-      };
+        Respond in JSON format {"title": "<title>", "description": "<description>"}`,
+      };           
       // const requestHash =
       //   "2facb4a474a0462c15041b78b1ad70952ea46b5ec6ad29583c0b29dbd4249591";
       const requestHash =
