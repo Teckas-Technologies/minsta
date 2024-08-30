@@ -164,8 +164,8 @@ export default function FileUploadPage() {
       const photo = await fileToBase64(file);
       const replicatePhoto = await reduceImageSize(photo, 10);
       const titleAndDescription = await getTitleAndDescription(replicatePhoto);
-      const trimmedTitle = titleAndDescription?.title?.slice(0, 30);
-      const trimmedDescription = titleAndDescription?.description?.slice(0, 80);
+      const trimmedTitle = titleAndDescription?.title?.slice(0, 40);
+      const trimmedDescription = titleAndDescription?.description?.slice(0, 100);
       if (!titleLock) {
         setTitle(trimmedTitle);
       }
@@ -334,8 +334,8 @@ export default function FileUploadPage() {
                 </div>
                 {!generating ? <>
                   <div className="input-field flex items-center">
-                    <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} maxLength={30} onChange={(e) => {
-                      if (e.target.value.length <= 30) {
+                    <input type="text" placeholder="Enter the title of the NFT..." className="border-none outline-none w-full" value={title} maxLength={40} onChange={(e) => {
+                      if (e.target.value.length <= 40) {
                         setTitle(e.target.value);
                       }
                     }} />
@@ -347,8 +347,8 @@ export default function FileUploadPage() {
                     </div>
                   </div>
                   <div className="input-field flex items-center">
-                    <input type="text" placeholder="Enter the description of the NFT..." className="border-none outline-none w-full" value={description} maxLength={80} onChange={(e) => {
-                      if (e.target.value.length <= 80) {
+                    <input type="text" placeholder="Enter the description of the NFT..." className="border-none outline-none w-full" value={description} maxLength={100} onChange={(e) => {
+                      if (e.target.value.length <= 100) {
                         setDescription(e.target.value);
                       }
                     }} />
@@ -419,7 +419,20 @@ export default function FileUploadPage() {
             <div className="buy-alert-box w-[80%] flex text-center items-center flex-col gap-3 h-auto bg-white box-shadow rounded-md py-2 px-3">
               <h2 className="title-font">Buy Credits!</h2>
               <div className={`input-box h-11 w-full rounded-md flex items-center justify-between ${darkMode ? "box-shadow" : "box-shadow"}`}>
-                <input type="number" min={0.05} value={amount} onChange={(e) => setAmount(parseFloat(e.target.value))} className={`bg-white px-4 py-2 flex-grow rounded-md h-11 text-sm border-none outline-none`} />
+                {/* <input type="number" min={0.05} value={amount} onChange={(e) => setAmount(parseFloat(e.target.value))} className={`bg-white px-4 py-2 flex-grow rounded-md h-11 text-sm border-none outline-none`} /> */}
+                <button
+                  className="px-4 py-2 bg-slate-300 dark:bg-slate-600 dark:text-white rounded-l-md"
+                  onClick={() => setAmount(prev => Math.max(0.05, parseFloat((prev - 0.05).toFixed(2))))}
+                >
+                  -
+                </button>
+                <span className="bg-white px-4 py-2 flex-grow text-center text-sm">{amount.toFixed(2)}</span>
+                <button
+                  className="px-4 py-2 bg-slate-300 dark:bg-slate-600 dark:text-white rounded-r-md"
+                  onClick={() => setAmount(prev => parseFloat((prev + 0.05).toFixed(2)))}
+                >
+                  +
+                </button>
                 <div className="box-near h-11 w-13 p-2 pr-4">
                   <img src="images/near-logo.png" className="h-full w-full" alt="" />
                 </div>
