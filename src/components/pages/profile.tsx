@@ -17,6 +17,12 @@ import useNearSocialDB from "@/utils/useNearSocialDB"
 import { useImage } from "@/utils/socialImage";
 import BuyCreditButton from "../buttons/buy-credit-button"
 import { calculateCredit } from "@/utils/calculateCredit"
+import { FollowList } from "../FollowList"
+
+interface ResponseData {
+    accounts: string[];
+    total: number;
+}
 
 export const ProfilePage = () => {
     const { firstTokenProps, tokensFetched, blockedNfts, totalLoading, totalNfts } = useHomePageData();
@@ -32,8 +38,8 @@ export const ProfilePage = () => {
     const [result, setResult] = useState("");
     const [profile, setProfile] = useState<NEARSocialUserProfile>();
     const [images, setImages] = useState<string[]>();
-    const [following, setFollowing] = useState<number | null>(null);
-    const [followers, setFollowers] = useState<number | null>(null);
+    // const [following, setFollowing] = useState<number | null>(null);
+    // const [followers, setFollowers] = useState<number | null>(null);
     const [toast, setToast] = useState(false);
     const [toastText, setToastText] = useState("");
     const [description, setDescription] = useState<string>("");
@@ -61,6 +67,13 @@ export const ProfilePage = () => {
     const [storeAmt, setStoreAmt] = useState("0.05");
     const [credits, setCredits] = useState<number | null>();
     const [txhash, setTxhash] = useState("");
+    const [tabs, setTabs] = useState({
+        moments: true,
+        followers: false,
+        following: false
+    });
+    const [followers, setFollowers] = useState<ResponseData>({ accounts: [], total: 0 });
+    const [following, setFollowing] = useState<ResponseData>({ accounts: [], total: 0 });
 
     useEffect(() => {
         const getresult = async () => {
@@ -199,11 +212,11 @@ export const ProfilePage = () => {
             const fetchProfile = async () => {
                 try {
                     const profileData = await getSocialProfile(accountId);
-                    // const followingData = await getFollowing({ accountId: accountId });
-                    // const followersData = await getFollowers({ accountId: accountId });
+                    const followingData = await getFollowing({ accountId: accountId });
+                    const followersData = await getFollowers({ accountId: accountId });
                     setProfile(profileData);
-                    // setFollowing(followingData.total);
-                    // setFollowers(followersData.total);
+                    setFollowing(followingData);
+                    setFollowers(followersData);
                     if (profileData) {
                         const image = getImage({
                             image: profileData?.image,
@@ -319,6 +332,8 @@ export const ProfilePage = () => {
         }
     };
 
+    const [totalMNfts, setTotalNfts]= useState<number>(0);
+
     return (
         <div className={darkMode ? "dark" : ""}>
             <main className="px-4 lg:px-12 mx-auto flex flex-col items-center justify-start mt-5 bg-slate-50 dark:bg-slate-800 min-h-[99vh] h-auto scroll-smooth overflow-y-scroll">
@@ -356,7 +371,7 @@ export const ProfilePage = () => {
                                 <input type="file" name="picture" id="backgroundInput" onChange={handleBackgroundFileChange} className={`hidden w-full p-2 text-lg rounded-md outline-none ${darkMode ? "image-holder-dark" : "image-holder"}`} />
                             </div>}
                             {accountId === signedAccountId && <div className="absolute buy-storage-btn bottom-[50%] left-5">
-                                <div className="set-banner-pic bg-white flex items-center px-2 py-1 gap-2 rounded-md cursor-pointer" onClick={()=>setStorageModel(true)}>
+                                <div className="set-banner-pic bg-white flex items-center px-2 py-1 gap-2 rounded-md cursor-pointer" onClick={() => setStorageModel(true)}>
                                     <InlineSVG
                                         src="/images/database.svg"
                                         className="fill-current w-6 h-6 text-sky-500 font-xl cursor-pointer"
@@ -475,19 +490,32 @@ export const ProfilePage = () => {
                         </button>
                     </div>}
                 </div>
-                {!edit && <h4 className={`title-font dark:text-white text-2xl font-lg ${profile ? 'mt-11' : 'mt-1'}  underline underline-offset-4`}>Moments</h4>}
+                {/* {!edit && <h4 className={`title-font dark:text-white text-2xl font-lg ${profile ? 'mt-11' : 'mt-1'}  underline underline-offset-4`}>Moments</h4>} */}
+                {!edit && <div className={`tabs flex items-center ${profile ? 'mt-11' : 'mt-1'}`}>
+                    <div className={`moments px-3 py-2 cursor-pointer ${tabs.moments && "border-b-4 border-b-sky-500"}`} onClick={()=> setTabs({moments: true, followers: false, following: false})}>
+                        <h2 className="dark:text-white title-font text-xl font-lg">Moments</h2>
+                    </div>
+                    <div className={`followers px-3 py-2 cursor-pointer ${tabs.followers && "border-b-4 border-b-sky-500"}`} onClick={()=> setTabs({moments: false, followers: true, following: false})}>
+                        <h2 className="dark:text-white title-font text-xl font-lg">Followers</h2>
+                    </div>
+                    <div className={`followings px-3 py-2 cursor-pointer ${tabs.following && "border-b-4 border-b-sky-500"}`} onClick={()=> setTabs({moments: false, followers: false, following: true})}>
+                        <h2 className="dark:text-white title-font text-xl font-lg">Followings</h2>
+                    </div>
+                </div>}
                 {
-                    !dataItems && !result && !edit &&
+                    !dataItems && !result && !edit && tabs.moments &&
                     <div className="mt-5 h-[50px]">
                         <div className="loader">
                         </div>
                     </div>
                 }
-                {!edit && <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid ? grid : "1")} noMargin={5}>
+                {!edit && tabs.moments && <DynamicGrid mdCols={2} nGap={6} nColsXl={4} nColsXXl={6} grid={parseInt(grid ? grid : "1")} noMargin={5}>
                     <FeedScroll blockedNfts={filteredNFT ? filteredNFT.token : []} grid={parseInt(grid ? grid : "1")} search={accountId} dark={darkMode} hidepostids={[]} dataItems={dataItems} setDataItems={setDataItems} setItemsLoading={setItemsLoading} setResult={setResult} hiddenPage={false} activeId={accountId} profilePage={true} />
                 </DynamicGrid>}
+                {!edit && tabs.followers && <div className="w-full px-1 py-2 flex justify-center"><FollowList accounts={followers.accounts} /></div>}
+                {!edit && tabs.following && <div className="w-full px-1 py-2 flex justify-center"><FollowList accounts={following.accounts} /></div>}
                 {
-                    result && !edit &&
+                    result && !edit && tabs.moments &&
                     <div className="pb-10 flex items-center gap-2">
                         <InlineSVG
                             src="/images/no_data.svg"
