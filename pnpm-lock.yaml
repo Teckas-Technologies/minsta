@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@builddao/near-social-js':
+        specifier: ^1.1.0
+        version: 1.1.0(encoding@0.1.13)
       '@cloudinary/url-gen':
         specifier: ^1.19.0
         version: 1.20.0
@@ -210,6 +213,10 @@ packages:
   '@babel/highlight@7.24.7':
     resolution: {integrity: sha512-EStJpq4OuY8xYfhGVXngigBJRWxftKX9ksiGDnmlY3o7B/V7KIAc9X4oiK87uPJSc/vs5L869bem5fhZa8caZw==}
     engines: {node: '>=6.9.0'}
+
+  '@builddao/near-social-js@1.1.0':
+    resolution: {integrity: sha512-HWdzpb30hfHhGSwBwt6h//skrIL7MFcFuIviN8iL90DuH00tkrRRhDidVRkNu2mJ5WU5bOsBPdEd424omvpZkA==}
+    engines: {node: '>=18.20.2'}
 
   '@cloudinary/transformation-builder-sdk@1.14.1':
     resolution: {integrity: sha512-z49To4r3byg7zHsOGKsw/nHef5B9W3wSBdDsGoY7JOj75kbvmSlP4MCkS0JU3Bv57EvYYw5ymalPz+bvRXmPlA==}
@@ -1420,6 +1427,9 @@ packages:
 
   bech32@1.1.4:
     resolution: {integrity: sha512-s0IrSOzLlbvX7yp4WBfPITzpAU8sqQcpsmwXDiKwrG4r491vwCO/XpejasRNl0piBMe/DvP4Tz0mIS/X1DPJBQ==}
+
+  bignumber.js@9.1.2:
+    resolution: {integrity: sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==}
 
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
@@ -3589,6 +3599,13 @@ snapshots:
       js-tokens: 4.0.0
       picocolors: 1.0.1
 
+  '@builddao/near-social-js@1.1.0(encoding@0.1.13)':
+    dependencies:
+      bignumber.js: 9.1.2
+      near-api-js: 4.0.3(encoding@0.1.13)
+    transitivePeerDependencies:
+      - encoding
+
   '@cloudinary/transformation-builder-sdk@1.14.1':
     dependencies:
       '@cloudinary/url-gen': 1.20.0
@@ -5614,6 +5631,8 @@ snapshots:
       safe-buffer: 5.2.1
 
   bech32@1.1.4: {}
+
+  bignumber.js@9.1.2: {}
 
   binary-extensions@2.3.0: {}
 

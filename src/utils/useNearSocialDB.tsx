@@ -3,6 +3,22 @@ import "@near-wallet-selector/modal-ui/styles.css";
 import * as nearAPI from "near-api-js";
 import { NearContext } from "@/wallet/WalletSelector";
 import { constants } from "@/constants";
+import { Social } from "@builddao/near-social-js";
+
+const client = new Social({
+    contractId: constants.SOCIAL_DB_CONTRACT_ID,
+    network: constants.NETWORK,
+});
+
+interface GraphResponse {
+    [key: string]: {
+        graph: {
+            follow: {
+                [accountId: string]: boolean;
+            };
+        };
+    };
+}
 
 const useNearSocialDB = () => {
     const [loading, setLoading] = useState(false);
@@ -11,23 +27,23 @@ const useNearSocialDB = () => {
 
     const getSocialData = async ({ path }: { path: string }) => {
         try {
-          if (!wallet) {
-            throw new Error("Wallet is undefined");
-          }
-      
-          const response = await wallet?.viewMethod({
-            contractId: constants.SOCIAL_DB_CONTRACT_ID, 
-            method: 'keys',
-            args: { keys: [path] },
-          });
-      
-          if (!response) return;
-          console.log("Social Data >> ", response);
-      
-          return response;
+            if (!wallet) {
+                throw new Error("Wallet is undefined");
+            }
+
+            const response = await wallet?.viewMethod({
+                contractId: constants.SOCIAL_DB_CONTRACT_ID,
+                method: 'keys',
+                args: { keys: [path] },
+            });
+
+            if (!response) return;
+            console.log("Social Data >> ", response);
+
+            return response;
         } catch (error: any) {
-          console.error("getSocialData:", error);
-          throw new Error(error?.message || "An error occurred during the fetch social data process.");
+            console.error("getSocialData:", error);
+            throw new Error(error?.message || "An error occurred during the fetch social data process.");
         }
     };
 
@@ -84,24 +100,15 @@ const useNearSocialDB = () => {
 
     const getFollowing = async ({ accountId }: { accountId: string }) => {
         try {
-            const response = await wallet?.viewMethod({
-                contractId: constants.SOCIAL_DB_CONTRACT_ID,
-                method: 'keys',
-                args: {
-                    keys: [`${accountId}/graph/follow/*`],
-                    options: {
-                        return_type: 'BlockHeight',
-                        values_only: true,
-                    },
-                },
-            }) as any;
+            const response = await client.get({
+                keys: [`${accountId}/graph/follow/*`],
+            }) as GraphResponse;
 
-            if (!response || !response[accountId] || !response[accountId].graph) {
+            if (!response || !response[accountId]?.graph?.follow) {
                 return { accounts: [], total: 0 };
             }
 
             const followingAccounts = Object.keys(response[accountId].graph.follow);
-
             return { accounts: followingAccounts, total: followingAccounts.length };
         } catch (e) {
             console.error('getFollowing:', e);
@@ -111,33 +118,77 @@ const useNearSocialDB = () => {
 
     const getFollowers = async ({ accountId }: { accountId: string }) => {
         try {
-            const response = await wallet?.viewMethod({
-                contractId: constants.SOCIAL_DB_CONTRACT_ID,
-                method: 'keys',
-                args: {
-                    keys: [`*/graph/follow/${accountId}`],
-                    options: {
-                        return_type: 'BlockHeight',
-                        values_only: true,
-                    },
-                },
-            }) as Record<string, { graph: { follow: Record<string, unknown> } }>;
+            const response = await client.get({
+                keys: [`*/graph/follow/${accountId}`],
+            }) as GraphResponse;
 
             if (!response) {
                 return { accounts: [], total: 0 };
             }
 
-            // Extract the followers by iterating over the response keys
-            const followerAccounts = Object.keys(response).filter(
-                (key) => response[key]?.graph?.follow?.[accountId]
-            );
-
+            const followerAccounts = Object.keys(response).filter((key) => {
+                return response[key]?.graph?.follow?.hasOwnProperty(accountId);
+            });
             return { accounts: followerAccounts, total: followerAccounts.length };
         } catch (e) {
             console.error('getFollowers:', e);
             return { accounts: [], total: 0 };
         }
     };
+
+    // const getFollowing = async ({ accountId }: { accountId: string }) => {
+    //     try {
+    //         const response = await wallet?.viewMethod({
+    //             contractId: constants.SOCIAL_DB_CONTRACT_ID,
+    //             method: 'keys',
+    //             args: {
+    //                 keys: [`${accountId}/graph/follow/*`],
+    //                 options: {
+    //                     return_type: 'BlockHeight',
+    //                     values_only: true,
+    //                 },
+    //             },
+    //         }) as any;
+    //         if (!response || !response[accountId] || !response[accountId].graph) {
+    //             return { accounts: [], total: 0 };
+    //         }
+    //         const followingAccounts = Object.keys(response[accountId].graph.follow);
+    //         return { accounts: followingAccounts, total: followingAccounts.length };
+    //     } catch (e) {
+    //         console.error('getFollowing:', e);
+    //         return { accounts: [], total: 0 };
+    //     }
+    // };
+
+    // const getFollowers = async ({ accountId }: { accountId: string }) => {
+    //     try {
+    //         const response = await wallet?.viewMethod({
+    //             contractId: constants.SOCIAL_DB_CONTRACT_ID,
+    //             method: 'keys',
+    //             args: {
+    //                 keys: [`*/graph/follow/${accountId}`],
+    //                 options: {
+    //                     return_type: 'BlockHeight',
+    //                     values_only: true,
+    //                 },
+    //             },
+    //         }) as Record<string, { graph: { follow: Record<string, unknown> } }>;
+
+    //         if (!response) {
+    //             return { accounts: [], total: 0 };
+    //         }
+
+    //         // Extract the followers by iterating over the response keys
+    //         const followerAccounts = Object.keys(response).filter(
+    //             (key) => response[key]?.graph?.follow?.[accountId]
+    //         );
+
+    //         return { accounts: followerAccounts, total: followerAccounts.length };
+    //     } catch (e) {
+    //         console.error('getFollowers:', e);
+    //         return { accounts: [], total: 0 };
+    //     }
+    // };
 
     const getAvailableStorage = async () => {
         setLoading(true);
