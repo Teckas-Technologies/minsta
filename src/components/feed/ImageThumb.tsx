@@ -84,16 +84,16 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
 
     switch (name) {
       case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?url=%20${url}%2F&via=mintbase&text=${message}`;
+        shareUrl = `https://twitter.com/intent/tweet?url=%20%0A%0A${url}%2F&via=mintbase&text=${message}`;
         break;
       case 'telegram':
-        shareUrl = `https://telegram.me/share/url?text=${message}&url=${url}`;
+        shareUrl = `https://telegram.me/share/url?text=${message}&url=${url}%0A%0A`;
         break;
       case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&t=${message}`;
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}%0A&t=${message}%0A`;
         break;
       case 'whatsapp':
-        shareUrl = `https://api.whatsapp.com/send?text=${message}%20${url}`;
+        shareUrl = `https://api.whatsapp.com/send?text=${message}%0A%0A${url}`;
         break;
       default:
         return;
