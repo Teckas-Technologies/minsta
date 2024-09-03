@@ -16,11 +16,12 @@ import useLongPress from "@/hooks/useLongPress";
 import { graphQLService } from "@/data/graphqlService";
 import { FETCH_META } from "@/data/queries/meta.graphql";
 import { useRouter } from "next/navigation";
+import useMints from "@/utils/useNftDrops";
 
 const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePage }: any) => {
   const imageUrl = token?.media;
   const [error, setError] = useState(false);
-  const {push} = useRouter();
+  const { push } = useRouter();
   const { wallet, signedAccountId } = useContext(NearContext);
   const [shareModal, setShareModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
@@ -198,6 +199,11 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
       setModel(true);
     }
   }, [action]);
+  const { mintNFT } = useMints();
+
+  const nftDrops = async (media: string, title: string, description: string) => {
+    await mintNFT(media, title, description)
+  }
 
   if (error)
     return (
@@ -216,7 +222,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
 
     return (
       <>
-        <div className={`${dark ? "image-holder-dark" : "image-holder"} p-2 rounded-md aspect-square sm:w-[18rem] md:w-[18rem] md:h-[18rem] xl:w-[18rem] xl:h-[18rem] relative`}>
+        <div className={`${dark ? "image-holder-dark" : "image-holder"} p-2 md:pb-11 pb-2 rounded-md aspect-square sm:w-[18rem] md:w-[18rem] md:h-[18rem] xl:w-[18rem] xl:h-[18rem] relative`}>
           {/* <Link
           key={`${token?.metadata_id}-${index}`}
           href={`meta/${token?.metadata_id}`}
@@ -239,6 +245,15 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
             // onClick={grid !== 1 ? handleActionModel : handleImageClick}
             {...handlers}
           />
+          <div className="nft-card-details md:mt-2 mt-2">
+            <button className={`bg-yellow-400 active:bg-yellow-500 px-3 py-1 rounded-3xl flex items-center gap-1 ${(grid === 2 || grid === 3) && "px-1" }`} onClick={()=> nftDrops(token.media, token.title, token.description)}>
+              <InlineSVG
+                src="/images/collections.svg"
+                className={`fill-current h-4 w-4  md:text-md text-sm ${(grid === 3) && "text-xs w-3 h-3" }`}
+              />
+              <h3 className={`md:text-md text-sm ${(grid === 3) && "text-xs" }`}>Collect</h3>
+            </button>
+          </div>
           {
             actionModel && <div className="absolute top-2 left-2 bottom-2 right-2 bg-sky-100 rounded-md flex flex-col gap-2 items-center justify-center" ref={toggleActionModelRef}>
               <div className={`${profilePage ? "flex" : "flex-col flex"} actions gap-2`}>
@@ -431,7 +446,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
               />
             </div>
             {accountId && <div className="account-modal mb-3">
-              <div className="acc-model bg-slate-800 p-3 flex rounded-full items-center justify-center gap-2 cursor-pointer" onClick={()=> push(`/profile/?accountId=${accountId}`)}>
+              <div className="acc-model bg-slate-800 p-3 flex rounded-full items-center justify-center gap-2 cursor-pointer" onClick={() => push(`/profile/?accountId=${accountId}`)}>
                 <InlineSVG
                   src="/images/profile.svg"
                   className="fill-current h-5 w-5 text-white"
