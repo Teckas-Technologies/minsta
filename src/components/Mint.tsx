@@ -1,6 +1,6 @@
 import { useApp } from "@/providers/app";
 import Image from "next/image";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useDarkMode } from "@/context/DarkModeContext";
 import { convertBase64ToFile } from "@/utils/base64ToFile";
 import { Cloudinary } from '@cloudinary/url-gen';
@@ -13,6 +13,7 @@ import { NearContext } from "@/wallet/WalletSelector";
 import { useRouter } from "next/navigation";
 import BuyCreditButton from "./buttons/buy-credit-button";
 import { calculateCredit } from "@/utils/calculateCredit";
+import { ImageCrop } from "./ImageCrop";
 
 
 const cloudinary = new Cloudinary({
@@ -64,6 +65,15 @@ export function Mint({
   const [balance, setBalance] = useState<any>();
   const [buyCreditModel, setBuyCreditModel] = useState(false);
   const [amount, setAmount] = useState<number>(1);
+  const [loading, setLoading] = useState(false);
+  const imgCropRef = useRef<{ rotateRight: () => void; save: () => void }>(null);
+  const [croppedUrl, setcroppedUrl] = useState("");
+  const [tools, setTools] = useState({
+    crop: false,
+    rotate: false,
+    effects: false
+  })
+  const [src, setSrc] = useState<string>(currentPhoto);
 
   const cloudImage = cldData?.public_id && cloudinary.image(cldData?.public_id);
 
@@ -71,7 +81,13 @@ export function Mint({
     cloudImage.effect(`e_art:${filter}`)
   }
 
-  const src = cloudImage?.toURL() || currentPhoto;
+  // const src = cloudImage?.toURL() || currentPhoto;
+  useEffect(() => {
+    if (cloudImage) {
+      const newSrc = cloudImage?.toURL();
+      setSrc(newSrc);
+    }
+  }, [cloudImage]);
 
   useEffect(() => {
     if (mode === "dark") {
@@ -153,6 +169,33 @@ export function Mint({
     const blob = await response.blob();
     return new File([blob], filename, { type: mimeType });
   }
+
+  useEffect(() => {
+    const addCroppedImgToEffects = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('/api/cloudinary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: croppedUrl }),
+        });
+        const data = await response.json();
+        setCldData(data);
+        setTools({
+          crop: false,
+          rotate: false,
+          effects: false
+        })
+        setLoading(false)
+      } catch (error) {
+        console.error("Error uploading cropped photo:", error);
+      }
+    };
+
+    if (croppedUrl) {
+      addCroppedImgToEffects();
+    }
+  }, [croppedUrl]);
 
   const handleUpload = async () => {
     setPreview(false);
@@ -315,30 +358,60 @@ export function Mint({
         ) : (<>
           {!preview && !buyCredit && !buyCreditModel && <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} h-auto w-full md:h-auto md:w-96 flex flex-col gap-4 mb-2`}>
             <div className="scroll-div h-auto">
-              <div className="relative">
-                <Image src={src} alt="image" width={468} height={468} className="photo-img" />
+              <div className={`relative`}>
+                <ImageCrop src={src} setUrl={setcroppedUrl} imgCropRef={imgCropRef} tools={tools} loading={loading} />
               </div>
-              <h2 className="title-font text-lg text-center dark:text-white mt-2 mb-1">Effects</h2>
-              <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} flex gap-2 overflow-x-scroll w-full h-[9.5rem] mb-2 p-2 mx-1`}>
-                {ART_FILTERS.map((art: any, i: any) => (
-                  <div key={i} className={`art-box ${darkMode ? "box-shadow-dark" : "box-shadow"} cursor-pointer w-24 h-full flex flex-col p-2 items-center rounded-md`} onClick={() => handleFilterClick(art)}>
-                    <div className="im relative flex justify-center w-24 h-[80%]">
-                      <img src={cloudinary.image('minsta thumb/ibshxb1i1c6qte2boxey').resize(Resize.fill().width(200).height(200)).effect(Effect.artisticFilter(art)).toURL()} alt="" className="w-[80%] h-full rounded-md object-cover" />
-                      {active && filter === art && <div className="layout absolute top-0 bottom-0 left-2 right-2 bg-slate-900 opacity-50 flex items-center justify-center rounded-md">
-                        <div className="active-layout bg-slate-600 p-3 rounded-full">
-                          <InlineSVG
-                            src="/images/check.svg"
-                            className="fill-current text-mainText w-9 h-9 dark:text-white"
-                          />
-                        </div>
-                      </div>}
-                    </div>
-                    <div className="text w-24 h-[20%] flex justify-center items-center">
-                      <h4 className="dark:text-white text-center">{art}</h4>
-                    </div>
+              <div className="tools w-full flex justify-center pt-2">
+                <div className="toolbar bg-slate-400 px-2 py-2 rounded-md flex items-center gap-2">
+                  <div className={`tool bg-white rounded-md w-7 h-7 p-1 pr-1.5 flex items-center justify-center cursor-pointer ${tools.crop && "border-2 border-sky-600"}`} onClick={() => setTools({ crop: !tools.crop, rotate: false, effects: false })}>
+                    <InlineSVG
+                      src="/images/crop.svg"
+                      className="fill-current text-mainText w-4 h-4"
+                    />
                   </div>
-                ))}
+                  <div className={`tool bg-white rounded-md w-7 h-7 p-1 pr-1.5 flex items-center justify-center active:bg-sky-100 cursor-pointer ${tools.rotate && "border-2 border-sky-600"}`} onClick={() => { setTools({ crop: false, rotate: true, effects: false }); imgCropRef.current?.rotateRight(); }}>
+                    <InlineSVG
+                      src="/images/rotate.svg"
+                      className="fill-current text-mainText w-4 h-4"
+                    />
+                  </div>
+                  <div className={`tool bg-white rounded-md w-7 h-7 p-1 flex items-center justify-center cursor-pointer ${tools.effects && "border-2 border-sky-600"}`} onClick={() => setTools({ crop: false, rotate: false, effects: !tools.effects })}>
+                    <InlineSVG
+                      src="/images/stars.svg"
+                      className="fill-current text-mainText w-4 h-4"
+                    />
+                  </div>
+                  <div className={`tool bg-white border-2 border-sky-600 rounded-md w-7 h-7 p-1 flex items-center justify-center cursor-pointer`} onClick={() => imgCropRef.current?.save()}>
+                    <InlineSVG
+                      src="/images/check2.svg"
+                      className="fill-current text-mainText w-4 h-4"
+                    />
+                  </div>
+                </div>
               </div>
+              {tools.effects && <>
+                <h2 className="title-font text-lg text-center dark:text-white mt-2 mb-1">Effects</h2>
+                <div className={`photo-box ${darkMode ? "box-shadow-dark" : "box-shadow"} flex gap-2 overflow-x-scroll w-full h-[9.5rem] mb-2 p-2 mx-1`}>
+                  {ART_FILTERS.map((art: any, i: any) => (
+                    <div key={i} className={`art-box ${darkMode ? "box-shadow-dark" : "box-shadow"} cursor-pointer w-24 h-full flex flex-col p-2 items-center rounded-md`} onClick={() => handleFilterClick(art)}>
+                      <div className="im relative flex justify-center w-24 h-[80%]">
+                        <img src={cloudinary.image('minsta thumb/ibshxb1i1c6qte2boxey').resize(Resize.fill().width(200).height(200)).effect(Effect.artisticFilter(art)).toURL()} alt="" className="w-[80%] h-full rounded-md object-cover" />
+                        {active && filter === art && <div className="layout absolute top-0 bottom-0 left-2 right-2 bg-slate-900 opacity-50 flex items-center justify-center rounded-md">
+                          <div className="active-layout bg-slate-600 p-3 rounded-full">
+                            <InlineSVG
+                              src="/images/check.svg"
+                              className="fill-current text-mainText w-9 h-9 dark:text-white"
+                            />
+                          </div>
+                        </div>}
+                      </div>
+                      <div className="text w-24 h-[20%] flex justify-center items-center">
+                        <h4 className="dark:text-white text-center">{art}</h4>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>}
 
               <div className="tags pb-2 pt-2 px-2">
                 <div className="generate-btn w-full flex pb-4 justify-between gap-2">
