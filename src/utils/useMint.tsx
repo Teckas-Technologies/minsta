@@ -89,7 +89,6 @@ const useMintImage = () => {
         gas: '200000000000000',
         deposit: '10000000000000000000000'
       });
-      console.log("Ress 1 >>> ", res);
       return res;
     } catch (error) {
       console.error("Failed to sign and send transaction:", error);
