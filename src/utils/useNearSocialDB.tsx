@@ -136,60 +136,6 @@ const useNearSocialDB = () => {
         }
     };
 
-    // const getFollowing = async ({ accountId }: { accountId: string }) => {
-    //     try {
-    //         const response = await wallet?.viewMethod({
-    //             contractId: constants.SOCIAL_DB_CONTRACT_ID,
-    //             method: 'keys',
-    //             args: {
-    //                 keys: [`${accountId}/graph/follow/*`],
-    //                 options: {
-    //                     return_type: 'BlockHeight',
-    //                     values_only: true,
-    //                 },
-    //             },
-    //         }) as any;
-    //         if (!response || !response[accountId] || !response[accountId].graph) {
-    //             return { accounts: [], total: 0 };
-    //         }
-    //         const followingAccounts = Object.keys(response[accountId].graph.follow);
-    //         return { accounts: followingAccounts, total: followingAccounts.length };
-    //     } catch (e) {
-    //         console.error('getFollowing:', e);
-    //         return { accounts: [], total: 0 };
-    //     }
-    // };
-
-    // const getFollowers = async ({ accountId }: { accountId: string }) => {
-    //     try {
-    //         const response = await wallet?.viewMethod({
-    //             contractId: constants.SOCIAL_DB_CONTRACT_ID,
-    //             method: 'keys',
-    //             args: {
-    //                 keys: [`*/graph/follow/${accountId}`],
-    //                 options: {
-    //                     return_type: 'BlockHeight',
-    //                     values_only: true,
-    //                 },
-    //             },
-    //         }) as Record<string, { graph: { follow: Record<string, unknown> } }>;
-
-    //         if (!response) {
-    //             return { accounts: [], total: 0 };
-    //         }
-
-    //         // Extract the followers by iterating over the response keys
-    //         const followerAccounts = Object.keys(response).filter(
-    //             (key) => response[key]?.graph?.follow?.[accountId]
-    //         );
-
-    //         return { accounts: followerAccounts, total: followerAccounts.length };
-    //     } catch (e) {
-    //         console.error('getFollowers:', e);
-    //         return { accounts: [], total: 0 };
-    //     }
-    // };
-
     const getAvailableStorage = async () => {
         setLoading(true);
 
