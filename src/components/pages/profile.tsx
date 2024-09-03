@@ -493,13 +493,13 @@ export const ProfilePage = () => {
                 {/* {!edit && <h4 className={`title-font dark:text-white text-2xl font-lg ${profile ? 'mt-11' : 'mt-1'}  underline underline-offset-4`}>Moments</h4>} */}
                 {!edit && <div className={`tabs flex items-center ${profile ? 'mt-11' : 'mt-1'}`}>
                     <div className={`moments px-3 py-2 cursor-pointer ${tabs.moments && "border-b-4 border-b-sky-500"}`} onClick={()=> setTabs({moments: true, followers: false, following: false})}>
-                        <h2 className="dark:text-white title-font text-xl font-lg">Moments</h2>
+                        <h2 className="dark:text-white title-font text-lg font-lg">Moments</h2>
                     </div>
                     <div className={`followers px-3 py-2 cursor-pointer ${tabs.followers && "border-b-4 border-b-sky-500"}`} onClick={()=> setTabs({moments: false, followers: true, following: false})}>
-                        <h2 className="dark:text-white title-font text-xl font-lg">Followers</h2>
+                        <h2 className="dark:text-white title-font text-lg font-lg">Followers</h2>
                     </div>
                     <div className={`followings px-3 py-2 cursor-pointer ${tabs.following && "border-b-4 border-b-sky-500"}`} onClick={()=> setTabs({moments: false, followers: false, following: true})}>
-                        <h2 className="dark:text-white title-font text-xl font-lg">Followings</h2>
+                        <h2 className="dark:text-white title-font text-lg font-lg">Followings</h2>
                     </div>
                 </div>}
                 {
