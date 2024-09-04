@@ -17,6 +17,8 @@ import { graphQLService } from "@/data/graphqlService";
 import { FETCH_META } from "@/data/queries/meta.graphql";
 import { useRouter } from "next/navigation";
 import useMints from "@/utils/useNftDrops";
+import { useMediaQuery } from "usehooks-ts";
+import { CoptText } from "../CopyText";
 
 const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePage }: any) => {
   const imageUrl = token?.media;
@@ -32,6 +34,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
   const { saveHidePost } = useSaveHidePost();
   const { saveBlockUser } = useSaveBlockUser();
   const [actionModel, setActionModel] = useState(false);
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const [showTooltip, setShowTooltip] = useState({ share: false, hide: false, delete: false });
 
@@ -245,14 +248,16 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
             // onClick={grid !== 1 ? handleActionModel : handleImageClick}
             {...handlers}
           />
-          <div className="nft-card-details md:mt-2 mt-2">
-            <button className={`bg-yellow-400 active:bg-yellow-500 px-3 py-1 rounded-3xl flex items-center gap-1 ${(grid === 2 || grid === 3) && "px-1" }`} onClick={()=> nftDrops(token.media, token.title, token.description)}>
+          <div className="nft-card-details md:mt-2 mt-2 flex items-center gap-1 justify-between">
+            <button className={`bg-yellow-400 active:bg-yellow-500 px-3 py-1 rounded-3xl flex items-center gap-1 ${(grid === 2 || grid === 3) && "px-1"}`} onClick={() => nftDrops(token.media, token.title, token.description)}>
               <InlineSVG
                 src="/images/collections.svg"
-                className={`fill-current h-4 w-4  md:text-md text-sm ${(grid === 3) && "text-xs w-3 h-3" }`}
+                className={`fill-current h-4 w-4  md:text-md text-sm ${(grid === 3) && "text-xs w-3 h-3"}`}
               />
-              <h3 className={`md:text-md text-sm ${(grid === 3) && "text-xs" }`}>Collect</h3>
+              <h3 className={`md:text-md text-sm ${(grid === 3) && "text-xs"}`}>Collect</h3>
             </button>
+            {(!isDesktop && grid !== 3) && <CoptText text={`${enabledMedia && enabledMedia.length > 0 && enabledMedia[0].message}\n\n${window.location.origin}/meta/${decodeURIComponent(token?.metadata_id)}`} profilePage={false}/>}
+            {isDesktop && <CoptText text={`${enabledMedia && enabledMedia.length > 0 && enabledMedia[0].message}\n\n${window.location.origin}/meta/${decodeURIComponent(token?.metadata_id)}`} profilePage={false}/>}
           </div>
           {
             actionModel && <div className="absolute top-2 left-2 bottom-2 right-2 bg-sky-100 rounded-md flex flex-col gap-2 items-center justify-center" ref={toggleActionModelRef}>
