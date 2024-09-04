@@ -27,14 +27,14 @@ export const CoptText = ({text, profilePage}: props) => {
                 text={text}
                 onCopy={handleCopy}
             >
-                <button className={`flex items-center ${profilePage ? '' : 'gap-2 bg-slate-200 py-2 px-3'}  rounded-md relative`}>
+                <button className={`flex items-center ${profilePage ? '' : 'gap-2 bg-slate-200 py-2 px-2'}  rounded-md relative`}>
                     <InlineSVG
                         src="/images/copy.svg"
-                        className={`fill-current h-6 ${profilePage ? 'dark:text-slate-800 text-white' : 'text-slate-800 dark:text-white-500'}`}
+                        className={`fill-current h-4 w-4 ${profilePage ? 'dark:text-slate-800 text-white' : 'text-slate-800 dark:text-white-500'}`}
                     />
                     {
-                    pop && <div className={`absolute bg-white ${!profilePage ? 'top-[101%] left-[-27%]' : 'left-[102%]'} p-1 rounded-md`}>
-                        <p className='text-slate-900'>Copied!</p>
+                    pop && <div className={`absolute bg-white ${!profilePage ? 'top-[101%] left-[-27%]' : 'left-[102%] ml-1'} p-1 rounded-md`}>
+                        <p className={`text-slate-900 ${profilePage && "text-sm"}`}>Copied!</p>
                     </div>
                     }
                 </button>
