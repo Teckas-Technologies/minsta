@@ -156,3 +156,14 @@ export interface NEARSocialUserProfile {
 }
 
 export type NetworkId = "testnet" | "mainnet";
+
+export interface GiveawayType {
+  title: string;
+  description: string;
+  startDate: Date;
+  endDate: Date;
+  totalPrizePool: number;
+  token: string;
+  winnerCount: number;
+//   prizePerWinner: number; 
+}
