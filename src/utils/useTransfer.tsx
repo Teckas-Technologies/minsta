@@ -42,7 +42,7 @@ const useNEARTransfer = () => {
                 signerId = result.transaction.signer_id;
                 hash = result.transaction.hash;
                 const action = result.transaction.actions[0];
-                
+
                 if (action?.Transfer) {
                     depositAmount = action.Transfer.deposit;
                 }
@@ -67,7 +67,46 @@ const useNEARTransfer = () => {
         }
     }
 
-    return { transfer, loading, error };
+    const transferReward = async (amount: string, receiverIds: string[]) => {
+        if (!signedAccountId) {
+            setError("Active account ID is not set.");
+            return;
+        }
+        setLoading(true);
+
+        try {
+            if (!wallet) {
+                throw new Error("Wallet is undefined");
+            }
+
+            const amountInYocto = nearAPI.utils.format.parseNearAmount(amount);
+
+            const transactions = receiverIds.map((receiverId) => ({
+                receiverId,
+                actions: [
+                    {
+                        type: "Transfer",
+                        params: {
+                            deposit: amountInYocto,
+                        },
+                    },
+                ],
+            }));
+
+            return await wallet.signAndSendTransactions({ transactions });
+        } catch (error: any) {
+            setError(error?.message || "An error occurred during the transaction process.");
+            return {
+                success: false,
+                error: error?.message || "An error occurred during the transaction process."
+            };
+        } finally {
+            setLoading(false);
+        }
+    }
+
+
+    return { transfer, transferReward, loading, error };
 }
 
 export default useNEARTransfer;

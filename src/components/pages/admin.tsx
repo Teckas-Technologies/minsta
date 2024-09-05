@@ -55,7 +55,7 @@ export const AdminPage = () => {
                 </div>
               </div>
               {adminMobileNav && 
-              <div className="mobile-nav-modal absolute dark:bg-slate-800 rounded-md">
+              <div className="mobile-nav-modal absolute dark:bg-slate-800 rounded-md z-50">
                 <AdminMobileMenu setAdminPage={setAdminPage} />
               </div>}
             </div>
