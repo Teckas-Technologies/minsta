@@ -134,11 +134,13 @@ export class Wallet {
 
       if (this.isFinalExecutionStatusWithSuccessValue(transaction.status)) {
         const signerId = transaction.transaction.signer_id;
+        const receiverId = transaction.transaction.receiver_id;
         const amount = transaction.transaction.actions[0].Transfer.deposit;
 
         return {
           success: true,
           signerId,
+          receiverId,
           amount,
         };
       } else {

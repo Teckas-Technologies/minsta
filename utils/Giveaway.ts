@@ -68,7 +68,7 @@ export const findOngoingGiveaways = async (): Promise<any> => {
 
 export async function saveGiveaway(data: GiveawayType): Promise<any> {
     await connectToDatabase();
-    const { title, description, startDate, endDate, token, totalPrizePool, winnerCount } = data;
+    const { title, description, startDate, endDate, token, totalPrizePool, winnerCount, paid } = data;
 
     let existingGiveaway = await Giveaway.findOne({ title });
 
@@ -80,6 +80,9 @@ export async function saveGiveaway(data: GiveawayType): Promise<any> {
             existingGiveaway.startDate = startDate,
             existingGiveaway.endDate = endDate,
             existingGiveaway.winnerCount = winnerCount
+        if (typeof paid !== 'undefined') {
+            existingGiveaway.paid = paid;
+        }
         return existingGiveaway.save();
     } else {
         const newGiveaway = new Giveaway({
@@ -89,7 +92,8 @@ export async function saveGiveaway(data: GiveawayType): Promise<any> {
             endDate,
             totalPrizePool,
             token,
-            winnerCount
+            winnerCount,
+            paid: paid ?? false,
         });
         return newGiveaway.save();
     }
