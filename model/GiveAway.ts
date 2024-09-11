@@ -8,7 +8,8 @@ export interface Giveaway extends Document {
   totalPrizePool: number;
   token: string;
   winnerCount: number;
-//   prizePerWinner: number; 
+  //   prizePerWinner: number; 
+  paid?: boolean;
 }
 
 const giveawaySchema = new mongoose.Schema(
@@ -40,6 +41,10 @@ const giveawaySchema = new mongoose.Schema(
     winnerCount: {
       type: Number,
       required: true,
+    },
+    paid: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

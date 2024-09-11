@@ -225,7 +225,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
 
     return (
       <>
-        <div className={`${dark ? "image-holder-dark" : "image-holder"} p-2 md:pb-11 pb-2 rounded-md aspect-square sm:w-[18rem] md:w-[18rem] md:h-[18rem] xl:w-[18rem] xl:h-[18rem] relative`}>
+        <div className={`${dark ? "image-holder-dark" : "image-holder"} p-2 ${!profilePage && !hiddenPage && "md:pb-11 pb-2"} rounded-md aspect-square sm:w-[18rem] md:w-[18rem] md:h-[18rem] xl:w-[18rem] xl:h-[18rem] relative`}>
           {/* <Link
           key={`${token?.metadata_id}-${index}`}
           href={`meta/${token?.metadata_id}`}
@@ -248,7 +248,7 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
             // onClick={grid !== 1 ? handleActionModel : handleImageClick}
             {...handlers}
           />
-          <div className="nft-card-details md:mt-2 mt-2 flex items-center gap-1 justify-between">
+          {!profilePage && !hiddenPage && <div className="nft-card-details md:mt-2 mt-2 flex items-center gap-1 justify-between">
             <button className={`bg-yellow-400 active:bg-yellow-500 px-3 py-1 rounded-3xl flex items-center gap-1 ${(grid === 2 || grid === 3) && "px-1"}`} onClick={() => nftDrops(token.media, token.title, token.description)}>
               <InlineSVG
                 src="/images/collections.svg"
@@ -256,9 +256,9 @@ const ImageThumb = ({ token, index, grid, dark, setToast, hiddenPage, profilePag
               />
               <h3 className={`md:text-md text-sm ${(grid === 3) && "text-xs"}`}>Collect</h3>
             </button>
-            {(!isDesktop && grid !== 3) && <CoptText text={`${enabledMedia && enabledMedia.length > 0 && enabledMedia[0].message}\n\n${window.location.origin}/meta/${decodeURIComponent(token?.metadata_id)}`} profilePage={false}/>}
-            {isDesktop && <CoptText text={`${enabledMedia && enabledMedia.length > 0 && enabledMedia[0].message}\n\n${window.location.origin}/meta/${decodeURIComponent(token?.metadata_id)}`} profilePage={false}/>}
-          </div>
+            {(!isDesktop && grid !== 3) && <CoptText text={`${enabledMedia && enabledMedia.length > 0 && enabledMedia[0].message}\n\n${window.location.origin}/meta/${decodeURIComponent(token?.metadata_id)}`} profilePage={false} />}
+            {isDesktop && <CoptText text={`${enabledMedia && enabledMedia.length > 0 && enabledMedia[0].message}\n\n${window.location.origin}/meta/${decodeURIComponent(token?.metadata_id)}`} profilePage={false} />}
+          </div>}
           {
             actionModel && <div className="absolute top-2 left-2 bottom-2 right-2 bg-sky-100 rounded-md flex flex-col gap-2 items-center justify-center" ref={toggleActionModelRef}>
               <div className={`${profilePage ? "flex" : "flex-col flex"} actions gap-2`}>

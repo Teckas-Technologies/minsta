@@ -146,7 +146,8 @@ export const UploadGiveaway = () => {
                             <label htmlFor="token" className="text-lg font-semibold">Select the token:</label>
                             <select name="token" value={formData.token} onChange={handleChangeSelect} className="mt-1 p-2 border rounded">
                                 <option value="NEAR">NEAR</option>
-                                {/* <option value="NEAR">NEAR</option> */}
+                                {/* <option value="USDC">USDC</option>
+                                <option value="USDT">USDT</option> */}
                             </select>
                         </div>
                     </div>

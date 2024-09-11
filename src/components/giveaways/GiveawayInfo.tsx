@@ -18,7 +18,7 @@ export const GiveawayInfo = ({ giveaway, winners, setModel, timeMessage }: props
     const { getImage } = useImage();
     const { getSocialProfile } = useNearSocialDB();
     const accounts: string[] = [];
-    const { transferReward } = useNEARTransfer();
+    const { transferReward, transferToken } = useNEARTransfer();
     let amount = giveaway ? giveaway?.totalPrizePool / giveaway?.winnerCount : 0
 
     useEffect(() => {
@@ -62,6 +62,15 @@ export const GiveawayInfo = ({ giveaway, winners, setModel, timeMessage }: props
         }
     }, [winners]);
 
+    const handleDistribute = async () => {
+        if(!giveaway) return;
+        if(giveaway?.token === "NEAR"){
+            await transferReward(amount.toString(), accounts);
+        } else {
+            await transferToken("5", accounts, giveaway?.token);
+        }
+    }
+
     return (
         <div className="know-more-giveaways fixed mt-11 overflow-y-scroll top-0 min-h-[100vh] h-auto left-0 right-0 bg-sky-50 dark:bg-slate-800 flex justify-center items-center">
             <div className="giveaway-details-box relative bg-white w-[20rem] md:w-[30rem] rounded-md px-4 py-2">
@@ -102,7 +111,7 @@ export const GiveawayInfo = ({ giveaway, winners, setModel, timeMessage }: props
                     </div>
                 </div>}
                 <div className="close flex justify-center my-2">
-                    <button className="btn cancel-btn" onClick={()=> transferReward(amount.toString(), accounts)}>Distribute</button>
+                    <button className="btn cancel-btn" onClick={handleDistribute}>Distribute</button>
                 </div>
                 <div className="absolute top-3 left-3">
                     <div className="endsin px-2 py-1 border bg-green-500 rounded-3xl">

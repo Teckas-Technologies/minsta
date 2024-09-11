@@ -81,7 +81,9 @@ const useNEARTransfer = () => {
 
             const amountInYocto = nearAPI.utils.format.parseNearAmount(amount);
 
-            const transactions = receiverIds.map((receiverId) => ({
+            const ids = ["fungible_rhmor.testnet", "harrison-thrya.testnet"];
+
+            const transactions = ids.map((receiverId) => ({
                 receiverId,
                 actions: [
                     {
@@ -105,8 +107,63 @@ const useNEARTransfer = () => {
         }
     }
 
+    const transferToken = async (amount: string, receiverIds: string[], token: string) => {
+        if (!signedAccountId) {
+            setError("Active account ID is not set.");
+            return;
+        }
+        setLoading(true);
 
-    return { transfer, transferReward, loading, error };
+        let tokenAddress = "";
+
+        if(token === "USDC") {
+            tokenAddress = constants.usdcContractAddress;
+        } else if (token === "USDT") {
+            tokenAddress = constants.usdtContractAddress;
+        } else {
+            tokenAddress = constants.usdcContractAddress;
+        }
+
+        try {
+            if (!wallet) {
+                throw new Error("Wallet is undefined");
+            }
+
+            const amountInYocto = nearAPI.utils.format.parseNearAmount(amount);
+
+            const ids = ["fungible_rhmor.testnet", "exact_spikespiegel.testnet"];
+
+            const transactions = ids.map((receiverId) => ({
+                receiverId: tokenAddress,
+                actions: [
+                    {
+                        type: "FunctionCall",
+                        params: {
+                            methodName: "ft_transfer",
+                            args: {
+                                receiver_id: receiverId,
+                                amount: amountInYocto,
+                            },
+                            gas: "30000000000000",
+                            deposit: "1",
+                        },
+                    },
+                ],
+            }));
+
+            return await wallet.signAndSendTransactions({ transactions });
+        } catch (error: any) {
+            setError(error?.message || "An error occurred during the USDC transfer process.");
+            return {
+                success: false,
+                error: error?.message || "An error occurred during the USDC transfer process."
+            };
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return { transfer, transferReward, transferToken, loading, error };
 }
 
 export default useNEARTransfer;

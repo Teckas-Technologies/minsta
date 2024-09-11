@@ -166,4 +166,5 @@ export interface GiveawayType {
   token: string;
   winnerCount: number;
 //   prizePerWinner: number; 
+  paid?: boolean;
 }
